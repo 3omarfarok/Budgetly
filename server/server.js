@@ -1,19 +1,19 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import bcrypt from 'bcryptjs';
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
 
 // Import routes
-import authRoutes from './routes/auth.js';
-import userRoutes from './routes/users.js';
-import expenseRoutes from './routes/expenses.js';
-import paymentRoutes from './routes/payments.js';
-import statsRoutes from './routes/stats.js';
-import analyticsRoutes from './routes/analytics.js';
+import authRoutes from "./routes/auth.js";
+import userRoutes from "./routes/users.js";
+import expenseRoutes from "./routes/expenses.js";
+import paymentRoutes from "./routes/payments.js";
+import statsRoutes from "./routes/stats.js";
+import analyticsRoutes from "./routes/analytics.js";
 
 // Import models
-import User from './models/User.js';
+import User from "./models/User.js";
 
 dotenv.config();
 
@@ -22,9 +22,9 @@ const PORT = process.env.PORT || 5000;
 
 // CORS Configuration
 const corsOptions = {
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: [process.env.CLIENT_URL, "http://localhost:5173"],
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
 };
 
 // Middleware
@@ -32,36 +32,41 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/expense-tracker')
+mongoose
+  .connect(
+    process.env.MONGODB_URI || "mongodb://localhost:27017/expense-tracker"
+  )
   .then(async () => {
-    console.log('✅ MongoDB Connected');
-    
+    console.log("✅ MongoDB Connected");
+
     // Create default admin user if doesn't exist
-    const adminExists = await User.findOne({ username: 'gaper' });
+    const adminExists = await User.findOne({ username: "gaper" });
     if (!adminExists) {
-      const hashedPassword = await bcrypt.hash('admin123', 10);
+      const hashedPassword = await bcrypt.hash("admin123", 10);
       await User.create({
-        username: 'gaper',
+        username: "gaper",
         password: hashedPassword,
-        role: 'admin',
-        name: 'Admin'
+        role: "admin",
+        name: "Admin",
       });
-      console.log('✅ Default admin user created (username: gaper, password: admin123)');
+      console.log(
+        "✅ Default admin user created (username: gaper, password: admin123)"
+      );
     }
   })
-  .catch(err => console.error('❌ MongoDB connection error:', err));
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/expenses', expenseRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/stats', statsRoutes);
-app.use('/api/analytics', analyticsRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/expenses", expenseRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/stats", statsRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 // Health check
-app.get('/', (req, res) => {
-  res.json({ message: 'Expense Tracker API is running! 🚀' });
+app.get("/", (req, res) => {
+  res.json({ message: "Expense Tracker API is running! 🚀" });
 });
 
 // Start server
