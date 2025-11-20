@@ -10,6 +10,7 @@ import userRoutes from './routes/users.js';
 import expenseRoutes from './routes/expenses.js';
 import paymentRoutes from './routes/payments.js';
 import statsRoutes from './routes/stats.js';
+import analyticsRoutes from './routes/analytics.js';
 
 // Import models
 import User from './models/User.js';
@@ -49,6 +50,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Health check
 app.get('/', (req, res) => {

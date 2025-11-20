@@ -10,6 +10,7 @@ import Members from './pages/Members';
 import Payments from './pages/Payments';
 import AddPayment from './pages/AddPayment';
 import MyPayments from './pages/MyPayments';
+import Analytics from './pages/Analytics';
 
 // مكون الحماية للصفحات
 const ProtectedRoute = ({ children }) => {
@@ -75,6 +76,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <AddPayment />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/analytics"
+                  element={
+                    <ProtectedRoute>
+                      <Analytics />
                     </ProtectedRoute>
                   }
                 />

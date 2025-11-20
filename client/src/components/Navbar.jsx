@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { LayoutDashboard, Receipt, Users, LogOut, PlusCircle, Palette, Banknote } from 'lucide-react';
+import { LayoutDashboard, Receipt, Users, LogOut, PlusCircle, Palette, Banknote, BarChart3 } from 'lucide-react';
 import { useState } from 'react';
 
 // مكون شريط التنقل - محسّن للإتاحة
@@ -75,6 +75,15 @@ const Navbar = () => {
           >
             <Users size={18} aria-hidden="true" />
             <span>الناس</span>
+          </Link>
+          <Link 
+            to="/analytics" 
+            className={navLinkClass('/analytics')}
+            role="menuitem"
+            aria-current={isActive('/analytics') ? 'page' : undefined}
+          >
+            <BarChart3 size={18} aria-hidden="true" />
+            <span>التحليلات</span>
           </Link>
           <Link 
             to={user.role === 'admin' ? '/payments' : '/my-payments'}
