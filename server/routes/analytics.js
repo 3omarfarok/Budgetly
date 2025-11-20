@@ -12,7 +12,7 @@ router.get('/monthly/:userId', authenticate, async (req, res) => {
     const userId = req.params.userId;
     
     // Get all expenses for this user
-    const expenses = await Expense.find({
+     const expenses = await Expense.find({
       'splits.user': userId
     }).sort({ date: -1 });
 
