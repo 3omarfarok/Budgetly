@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "setup:env": "powershell -Command \"Copy-Item .env.development.example .env.development.local -Force; Copy-Item .env.production.example .env.production.local -Force; Write-Host 'Environment files created successfully!' -ForegroundColor Green\""
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",

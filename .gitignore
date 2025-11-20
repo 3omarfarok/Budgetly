@@ -1,9 +1,12 @@
 # Environment Variables
+# Ignore all .env files with sensitive data
 .env
 .env.local
-.env.development
-.env.production
-*.env
+.env.*.local
+
+# Allow .env template files (these are safe to commit)
+!.env.example
+!.env.*.example
 
 # Dependencies
 node_modules/
