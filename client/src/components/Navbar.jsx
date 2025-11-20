@@ -58,15 +58,17 @@ const Navbar = () => {
             <Receipt size={18} aria-hidden="true" />
             <span>المصاريف</span>
           </Link>
-          <Link 
-            to="/add-expense" 
-            className={navLinkClass('/add-expense')}
-            role="menuitem"
-            aria-current={isActive('/add-expense') ? 'page' : undefined}
-          >
-            <PlusCircle size={18} aria-hidden="true" />
-            <span>سجّل مصروف</span>
-          </Link>
+          {user.role === 'admin' && (
+            <Link 
+              to="/add-expense" 
+              className={navLinkClass('/add-expense')}
+              role="menuitem"
+              aria-current={isActive('/add-expense') ? 'page' : undefined}
+            >
+              <PlusCircle size={18} aria-hidden="true" />
+              <span>سجّل مصروف</span>
+            </Link>
+          )}
           <Link 
             to="/members" 
             className={navLinkClass('/members')}
@@ -76,15 +78,17 @@ const Navbar = () => {
             <Users size={18} aria-hidden="true" />
             <span>الناس</span>
           </Link>
-          <Link 
-            to="/analytics" 
-            className={navLinkClass('/analytics')}
-            role="menuitem"
-            aria-current={isActive('/analytics') ? 'page' : undefined}
-          >
-            <BarChart3 size={18} aria-hidden="true" />
-            <span>التحليلات</span>
-          </Link>
+          {user.role === 'admin' && (
+            <Link 
+              to="/analytics" 
+              className={navLinkClass('/analytics')}
+              role="menuitem"
+              aria-current={isActive('/analytics') ? 'page' : undefined}
+            >
+              <BarChart3 size={18} aria-hidden="true" />
+              <span>التحليلات</span>
+            </Link>
+          )}
           <Link 
             to={user.role === 'admin' ? '/payments' : '/my-payments'}
             className={navLinkClass(user.role === 'admin' ? '/payments' : '/my-payments')}
@@ -178,16 +182,18 @@ const Navbar = () => {
             <Receipt size={22} aria-hidden="true" />
             <span className="text-xs font-medium">المصاريف</span>
           </Link>
-          <Link 
-            to="/add-expense" 
-            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${isActive('/add-expense') ? 'text-ios-primary bg-ios-hover' : 'text-ios-secondary'}`}
-            aria-label="سجّل مصروف"
-            aria-current={isActive('/add-expense') ? 'page' : undefined}
-            role="menuitem"
-          >
-            <PlusCircle size={22} aria-hidden="true" />
-            <span className="text-xs font-medium">سجّل</span>
-          </Link>
+          {user.role === 'admin' && (
+            <Link 
+              to="/add-expense" 
+              className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${isActive('/add-expense') ? 'text-ios-primary bg-ios-hover' : 'text-ios-secondary'}`}
+              aria-label="سجّل مصروف"
+              aria-current={isActive('/add-expense') ? 'page' : undefined}
+              role="menuitem"
+            >
+              <PlusCircle size={22} aria-hidden="true" />
+              <span className="text-xs font-medium">سجّل</span>
+            </Link>
+          )}
           <Link 
             to="/members" 
             className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${isActive('/members') ? 'text-ios-primary bg-ios-hover' : 'text-ios-secondary'}`}

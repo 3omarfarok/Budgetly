@@ -37,7 +37,18 @@ router.get('/user/:userId', authenticate, async (req, res) => {
 // Create payment
 router.post('/', authenticate, async (req, res) => {
   try {
+    console.log('Received payment request body:', req.body);
+    console.log('User from token:', req.user);
+
     const { user, amount, description, date } = req.body;
+
+    // Validation
+    if (!user) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+    if (!amount) {
+      return res.status(400).json({ message: 'Amount is required' });
+    }
 
     const payment = await Payment.create({
       user,
@@ -55,7 +66,7 @@ router.post('/', authenticate, async (req, res) => {
     res.status(201).json(populatedPayment);
   } catch (error) {
     console.error('Create payment error:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: error.message || 'Server error', error: error.toString() });
   }
 });
 

@@ -87,7 +87,7 @@ const AddExpense = () => {
       </div>
       
       {error && (
-        <div className="bg-red-50 text-red-600 p-4 rounded-2xl mb-6 border border-red-200">
+        <div className="bg-[var(--color-status-rejected-bg)] text-[var(--color-error)] p-4 rounded-2xl mb-6 border border-[var(--color-status-rejected-border)]">
           {error}
         </div>
       )}

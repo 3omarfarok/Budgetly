@@ -54,7 +54,7 @@ const Members = () => {
           <div className="p-3 bg-ios-primary/10 rounded-2xl">
             <Users className="text-ios-primary" size={32} />
           </div>
-          <h1 className="text-3xl font-bold text-ios-dark">الناس</h1>
+          <h1 className="text-3xl font-bold text-[var(--color-dark)]">الناس</h1>
         </div>
         {user.role === 'admin' && (
           <button 
@@ -68,37 +68,37 @@ const Members = () => {
       </div>
 
       {showAddForm && (
-        <div className="bg-white/80 backdrop-blur-xl p-6 rounded-3xl border border-ios-light/50 mb-8 max-w-lg mx-auto shadow-lg">
-          <h3 className="text-xl font-bold mb-4 text-ios-dark">ضيف واحد جديد</h3>
+        <div className="bg-[var(--color-surface)] backdrop-blur-xl p-6 rounded-3xl border border-[var(--color-border)] mb-8 max-w-lg mx-auto shadow-lg">
+          <h3 className="text-xl font-bold mb-4 text-[var(--color-dark)]">ضيف واحد جديد</h3>
           {error && <div className="bg-red-50 text-red-600 p-3 rounded-2xl mb-4 text-sm border border-red-200">{error}</div>}
           <form onSubmit={handleAddMember} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-ios-dark mb-1">الاسم</label>
+              <label className="block text-sm font-semibold text-[var(--color-dark)] mb-1">الاسم</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={e => setFormData({...formData, name: e.target.value})}
-                className="w-full px-4 py-3 bg-ios-bg/50 border border-ios-light rounded-2xl text-ios-dark focus:outline-none focus:border-ios-primary focus:ring-2 focus:ring-ios-primary/20 transition-all"
+                className="w-full px-4 py-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl text-[var(--color-dark)] focus:outline-none focus:border-ios-primary focus:ring-2 focus:ring-ios-primary/20 transition-all"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-ios-dark mb-1">اسم المستخدم</label>
+              <label className="block text-sm font-semibold text-[var(--color-dark)] mb-1">اسم المستخدم</label>
               <input
                 type="text"
                 value={formData.username}
                 onChange={e => setFormData({...formData, username: e.target.value})}
-                className="w-full px-4 py-3 bg-ios-bg/50 border border-ios-light rounded-2xl text-ios-dark focus:outline-none focus:border-ios-primary focus:ring-2 focus:ring-ios-primary/20 transition-all"
+                className="w-full px-4 py-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl text-[var(--color-dark)] focus:outline-none focus:border-ios-primary focus:ring-2 focus:ring-ios-primary/20 transition-all"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-ios-dark mb-1">كلمة المرور</label>
+              <label className="block text-sm font-semibold text-[var(--color-dark)] mb-1">كلمة المرور</label>
               <input
                 type="password"
                 value={formData.password}
                 onChange={e => setFormData({...formData, password: e.target.value})}
-                className="w-full px-4 py-3 bg-ios-bg/50 border border-ios-light rounded-2xl text-ios-dark focus:outline-none focus:border-ios-primary focus:ring-2 focus:ring-ios-primary/20 transition-all"
+                className="w-full px-4 py-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl text-[var(--color-dark)] focus:outline-none focus:border-ios-primary focus:ring-2 focus:ring-ios-primary/20 transition-all"
                 required
               />
             </div>
@@ -114,12 +114,12 @@ const Members = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {members.map(member => (
-          <div key={member._id} className="bg-white/80 backdrop-blur-xl p-6 rounded-3xl border border-ios-light/50 flex flex-col items-center text-center hover:shadow-lg transition-all">
+          <div key={member._id} className="bg-[var(--color-surface)] backdrop-blur-xl p-6 rounded-3xl border border-[var(--color-border)] flex flex-col items-center text-center hover:shadow-lg transition-all">
             <div className="w-20 h-20 bg-gradient-to-br from-ios-primary to-ios-secondary rounded-full flex items-center justify-center text-3xl font-bold text-white mb-4 shadow-lg">
               {member.name.charAt(0).toUpperCase()}
             </div>
-            <h3 className="text-lg font-bold text-ios-dark mb-1">{member.name}</h3>
-            <p className="text-ios-secondary text-sm mb-4">@{member.username}</p>
+            <h3 className="text-lg font-bold text-[var(--color-dark)] mb-1">{member.name}</h3>
+            <p className="text-[var(--color-secondary)] text-sm mb-4">@{member.username}</p>
             
             <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide mb-4 flex items-center gap-1.5 ${
               member.role === 'admin' 

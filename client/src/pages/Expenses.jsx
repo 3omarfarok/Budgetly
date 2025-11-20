@@ -50,16 +50,16 @@ const Expenses = () => {
     return icons[category] || <Layers size={20} />;
   };
 
-  // ألوان التصنيفات
+  // ألوان التصنيفات من الثيم
   const getCategoryColor = (category) => {
     const colors = {
-      'Food': 'bg-orange-100 text-orange-600',
-      'Transport': 'bg-blue-100 text-blue-600',
-      'Utilities': 'bg-yellow-100 text-yellow-600',
-      'Housing': 'bg-purple-100 text-purple-600',
-      'Entertainment': 'bg-pink-100 text-pink-600',
+      'Food': 'bg-[var(--color-status-pending-bg)] text-[var(--color-status-pending)]',
+      'Transport': 'bg-[var(--color-category-transport-bg)] text-[var(--color-category-transport-text)]',
+      'Utilities': 'bg-[var(--color-category-utilities-bg)] text-[var(--color-category-utilities-text)]',
+      'Housing': 'bg-[var(--color-category-housing-bg)] text-[var(--color-category-housing-text)]',
+      'Entertainment': 'bg-[var(--color-category-entertainment-bg)] text-[var(--color-category-entertainment-text)]',
     };
-    return colors[category] || 'bg-gray-100 text-gray-600';
+    return colors[category] || 'bg-[var(--color-category-general-bg)] text-[var(--color-category-general-text)]';
   };
 
   // ترجمة التصنيفات بالعامية المصرية
@@ -81,17 +81,17 @@ const Expenses = () => {
       {/* الهيدر */}
       <div className="flex justify-between items-center mb-8 pt-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">المصاريف</h1>
-          <p className="text-gray-500 text-sm mt-1">تتبع فلوسك اللي صرفتها</p>
+          <h1 className="text-2xl font-bold text-[var(--color-dark)]">المصاريف</h1>
+          <p className="text-[var(--color-muted)] text-sm mt-1">تتبع فلوسك اللي صرفتها</p>
         </div>
-        <div className="p-3 bg-blue-50 rounded-full">
-          <Receipt className="text-blue-600" size={24} />
+        <div className="p-3 bg-[var(--color-primary)]/10 rounded-full">
+          <Receipt className="text-[var(--color-primary)]" size={24} />
         </div>
       </div>
 
       {/* حالة التحميل */}
       {loading && (
-        <div className="text-center py-10 text-gray-400">بنحمّل المصاريف...</div>
+        <div className="text-center py-10 text-[var(--color-muted)]">بنحمّل المصاريف...</div>
       )}
 
       {/* عرض البطاقات */}
@@ -99,7 +99,7 @@ const Expenses = () => {
         {!loading && expenses.map(expense => (
           <div 
             key={expense._id} 
-            className="group bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 relative overflow-hidden"
+            className="group bg-[var(--color-bg)] rounded-2xl p-5 shadow-sm border border-[var(--color-muted-border)] hover:shadow-md transition-all duration-200 relative overflow-hidden"
           >
             <div className="flex justify-between items-start mb-3">
               {/* أيقونة التصنيف */}
@@ -109,26 +109,26 @@ const Expenses = () => {
               
               {/* المبلغ */}
               <div className="text-right">
-                <span className="block text-xl font-bold text-gray-900">
+                <span className="block text-xl font-bold text-[var(--color-dark)]">
                   {expense.totalAmount.toFixed(2)}
-                  <span className="text-xs text-gray-400 font-normal mr-1">جنيه</span>
+                  <span className="text-xs text-[var(--color-muted)] font-normal mr-1">جنيه</span>
                 </span>
               </div>
             </div>
 
             {/* العنوان */}
-            <h3 className="font-semibold text-gray-800 mb-2 line-clamp-1" title={expense.description}>
+            <h3 className="font-semibold text-[var(--color-secondary)] mb-2 line-clamp-1" title={expense.description}>
               {expense.description}
             </h3>
             
             {/* التصنيف */}
-            <span className="inline-block px-2.5 py-1 bg-gray-50 text-gray-600 text-xs font-medium rounded-full mb-4">
+            <span className="inline-block px-2.5 py-1 bg-[var(--color-ios-surface)] text-[var(--color-muted)] text-xs font-medium rounded-full mb-4">
               {translateCategory(expense.category)}
             </span>
 
             {/* المعلومات */}
-            <div className="flex items-center justify-between pt-4 border-t border-gray-50 mt-auto">
-              <div className="flex flex-col gap-1 text-xs text-gray-500">
+            <div className="flex items-center justify-between pt-4 border-t border-[var(--color-hover)] mt-auto">
+              <div className="flex flex-col gap-1 text-xs text-[var(--color-muted)]">
                 <div className="flex items-center gap-1.5">
                   <Calendar size={12} />
                   <span>
@@ -150,7 +150,7 @@ const Expenses = () => {
               {user.role === 'admin' && (
                 <button 
                   onClick={() => handleDelete(expense._id)}
-                  className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  className="p-2 text-[var(--color-border)] hover:text-[var(--color-error)] hover:bg-[var(--color-status-rejected-bg)] rounded-lg transition-colors"
                   title="امسح"
                 >
                   <Trash2 size={18} />
@@ -163,10 +163,10 @@ const Expenses = () => {
 
       {/* لو مفيش مصاريف */}
       {!loading && expenses.length === 0 && (
-        <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-          <Receipt size={48} className="mx-auto mb-3 text-gray-300" />
-          <p className="text-gray-500 font-medium">مفيش مصاريف متسجلة لسه</p>
-          <p className="text-gray-400 text-sm mt-1">ابدأ سجّل أول مصروف</p>
+        <div className="text-center py-20 bg-[var(--color-surface)] rounded-3xl border-2 border-dashed border-[var(--color-border)]">
+          <Receipt size={48} className="mx-auto mb-3 text-[var(--color-border)]" />
+          <p className="text-[var(--color-muted)] font-medium">مفيش مصاريف متسجلة لسه</p>
+          <p className="text-[var(--color-muted)] text-sm mt-1">ابدأ سجّل أول مصروف</p>
         </div>
       )}
     </div>

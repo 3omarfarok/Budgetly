@@ -146,8 +146,8 @@ const MyPayments = () => {
       <div className="mb-8 pt-4">
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">مدفوعاتي</h1>
-            <p className="text-gray-500 text-sm mt-1">سجّل الفلوس اللي دفعتها</p>
+            <h1 className="text-2xl font-bold text-[var(--color-dark)]">مدفوعاتي</h1>
+            <p className="text-[var(--color-muted)] text-sm mt-1">سجّل الفلوس اللي دفعتها</p>
           </div>
           <button 
             onClick={() => setShowAddForm(!showAddForm)}
@@ -188,9 +188,9 @@ const MyPayments = () => {
 
       {/* فورم إضافة/تعديل دفعة */}
       {showAddForm && (
-        <div className="bg-white/80 backdrop-blur-xl p-6 rounded-3xl border border-ios-light/50 mb-8 shadow-lg">
+        <div className="bg-[var(--color-surface)] backdrop-blur-xl p-6 rounded-3xl border border-[var(--color-border)] mb-8 shadow-lg">
           <div className="flex justify-between items-start mb-4">
-            <h3 className="text-xl font-bold text-ios-dark">
+            <h3 className="text-xl font-bold text-[var(--color-dark)]">
               {editingPayment ? 'عدّل الدفعة' : 'سجّل دفعة جديدة'}
             </h3>
             {amountOwed > 0 && (
@@ -208,35 +208,35 @@ const MyPayments = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-ios-dark mb-1">المبلغ (جنيه)</label>
+                <label className="block text-sm font-semibold text-[var(--color-dark)] mb-1">المبلغ (جنيه)</label>
                 <input
                   type="number"
                   step="0.01"
                   value={formData.amount}
                   onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                  className="w-full px-4 py-3 bg-ios-bg border border-ios-border rounded-2xl text-ios-dark transition-all"
+                  className="w-full px-4 py-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl text-[var(--color-dark)] transition-all"
                   placeholder="0.00"
                   required
                   autoFocus
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-ios-dark mb-1">التاريخ</label>
+                <label className="block text-sm font-semibold text-[var(--color-dark)] mb-1">التاريخ</label>
                 <input
                   type="date"
                   value={formData.date}
                   onChange={(e) => setFormData({...formData, date: e.target.value})}
-                  className="w-full px-4 py-3 bg-ios-bg border border-ios-border rounded-2xl text-ios-dark transition-all"
+                  className="w-full px-4 py-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl text-[var(--color-dark)] transition-all"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-ios-dark mb-1">وصف (اختياري)</label>
+              <label className="block text-sm font-semibold text-[var(--color-dark)] mb-1">وصف (اختياري)</label>
               <input
                 type="text"
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
-                className="w-full px-4 py-3 bg-ios-bg border border-ios-border rounded-2xl text-ios-dark transition-all"
+                className="w-full px-4 py-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl text-ios-dark transition-all"
                 placeholder="مثال: دفعة شهر يناير"
               />
             </div>
@@ -251,7 +251,7 @@ const MyPayments = () => {
                 <button 
                   type="button"
                   onClick={handleCancelEdit}
-                  className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-2xl transition-all"
+                  className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-[var(--color-secondary)] font-bold rounded-2xl transition-all"
                 >
                   إلغاء
                 </button>
@@ -263,7 +263,7 @@ const MyPayments = () => {
 
       {/* حالة التحميل */}
       {loading && (
-        <div className="text-center py-10 text-gray-400">بنحمّل مدفوعاتك...</div>
+        <div className="text-center py-10 text-[var(--color-muted)]">بنحمّل مدفوعاتك...</div>
       )}
 
       {/* قائمة المدفوعات */}
@@ -275,7 +275,7 @@ const MyPayments = () => {
           return (
             <div 
               key={payment._id} 
-              className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all"
+              className="bg-[var(--color-surface)] rounded-2xl p-5 shadow-sm border border-[var(--color-border)] hover:shadow-md transition-all"
             >
               <div className="flex justify-between items-start mb-3">
                 <div className={`px-3 py-1.5 rounded-xl ${statusBadge.color} flex items-center gap-1.5`}>
@@ -283,18 +283,18 @@ const MyPayments = () => {
                   <span className="text-xs font-semibold">{statusBadge.text}</span>
                 </div>
                 <div className="text-right">
-                  <span className="block text-xl font-bold text-gray-900">
+                  <span className="block text-xl font-bold text-[var(--color-dark)]">
                     {payment.amount?.toFixed(2) || '0.00'}
-                    <span className="text-xs text-gray-400 font-normal mr-1">جنيه</span>
+                    <span className="text-xs text-[var(--color-muted)] font-normal mr-1">جنيه</span>
                   </span>
                 </div>
               </div>
               
               {payment.description && (
-                <p className="text-gray-700 mb-2">{payment.description}</p>
+                <p className="text-[var(--color-secondary)] mb-2">{payment.description}</p>
               )}
               
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+              <div className="flex items-center gap-2 text-xs text-[var(--color-muted)]">
                 <Calendar size={12} />
                 <span>
                   {new Date(payment.date || payment.createdAt).toLocaleDateString('ar-EG', { 
@@ -308,7 +308,7 @@ const MyPayments = () => {
 
               {/* أزرار التعديل والحذف (للمدفوعات pending فقط) */}
               {payment.status === 'pending' && (
-                <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                <div className="flex gap-2 mt-3 pt-3 border-t border-[var(--color-border)]">
                   <button 
                     onClick={() => handleEdit(payment)}
                     className="flex-1 py-2 px-3 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2"
@@ -332,9 +332,9 @@ const MyPayments = () => {
 
       {/* لو مفيش مدفوعات */}
       {!loading && payments.length === 0 && !showAddForm && (
-        <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+        <div className="text-center py-20 bg-[var(--color-surface)] rounded-3xl border-2 border-dashed border-[var(--color-border)]">
           <Banknote size={48} className="mx-auto mb-3 text-gray-300" />
-          <p className="text-gray-500 font-medium mb-3">مسجلتش أي دفعة لسه</p>
+          <p className="text-[var(--color-muted)] font-medium mb-3">مسجلتش أي دفعة لسه</p>
           <button 
             onClick={() => setShowAddForm(true)}
             className="px-6 py-3 bg-ios-primary hover:bg-ios-dark text-white font-semibold rounded-2xl transition-all shadow-lg inline-flex items-center gap-2"

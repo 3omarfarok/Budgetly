@@ -50,6 +50,39 @@
   --color-warning: #C2410C;        /* برتقالي أغمق للتباين 7:1 */
   --color-info: #0369A1;           /* أزرق معلومات أغمق */
   
+  /* ألوان الحالات (Status Colors) */
+  --color-status-pending: #C2410C;        /* برتقالي للانتظار */
+  --color-status-pending-bg: #FFF7ED;     /* خلفية فاتحة برتقالية */
+  --color-status-pending-border: #FDBA74; /* حدود برتقالية */
+  --color-status-approved: #047857;       /* أخضر للموافقة */
+  --color-status-approved-bg: #F0FDF4;    /* خلفية فاتحة خضراء */
+  --color-status-approved-border: #86EFAC;/* حدود خضراء */
+  --color-status-rejected: #B91C1C;       /* أحمر للرفض */
+  --color-status-rejected-bg: #FEF2F2;    /* خلفية فاتحة حمراء */
+  --color-status-rejected-border: #FCA5A5;/* حدود حمراء */
+  
+  /* ألوان الفئات (Category Colors) */
+  --color-category-transport: #1E40AF;    /* أزرق للنقل */
+  --color-category-transport-bg: #EFF6FF;
+  --color-category-transport-text: #1E40AF;
+  --color-category-utilities: #CA8A04;    /* أصفر للخدمات */
+  --color-category-utilities-bg: #FEFCE8;
+  --color-category-utilities-text: #CA8A04;
+  --color-category-housing: #7C3AED;      /* بنفسجي للسكن */
+  --color-category-housing-bg: #F5F3FF;
+  --color-category-housing-text: #7C3AED;
+  --color-category-entertainment: #DB2777;/* وردي للترفيه */
+  --color-category-entertainment-bg: #FDF2F8;
+  --color-category-entertainment-text: #DB2777;
+  --color-category-general: #64748B;      /* رمادي للعام */
+  --color-category-general-bg: #F8FAFC;
+  --color-category-general-text: #64748B;
+  
+  /* ألوان واجهة المستخدم (UI Colors) */
+  --color-muted: #64748B;
+  --color-muted-bg: #F1F5F9;
+  --color-muted-border: #E2E8F0;
+  
   /* حدود وفواصل */
   --color-border: #CBD5E1;
   --color-hover: #F1F5F9;
@@ -65,6 +98,8 @@
 }
 
 body {
+    font-family:'Cairo', 'Tajawal', system-ui, sans-serif;
+
   background: var(--gradient-bg);
   min-height: 100vh;
   transition: background var(--transition-slow);
