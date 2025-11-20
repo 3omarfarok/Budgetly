@@ -16,10 +16,19 @@ const paymentSchema = new mongoose.Schema({
     trim: true,
     default: 'Payment'
   },
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
+  },
   recordedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
+  },
+  approvedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   },
   date: {
     type: Date,
