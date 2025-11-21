@@ -69,7 +69,7 @@ const AddPayment = () => {
   if (user.role !== "admin") {
     return (
       <div className="text-center py-20">
-        <p className="text-ios-error">الصفحة دي للأدمن بس</p>
+        <p style={{ color: "var(--color-error)" }}>الصفحة دي للأدمن بس</p>
       </div>
     );
   }
@@ -77,30 +77,60 @@ const AddPayment = () => {
   return (
     <div className="pb-8 max-w-2xl mx-auto">
       <div className="flex items-center gap-3 mb-8">
-        <div className="p-3 bg-ios-primary/10 rounded-2xl">
-          <Banknote className="text-ios-primary" size={32} />
+        <div
+          className="p-3 rounded-2xl"
+          style={{
+            backgroundColor:
+              "color-mix(in srgb, var(--color-primary) 10%, transparent)",
+          }}
+        >
+          <Banknote style={{ color: "var(--color-primary)" }} size={32} />
         </div>
-        <h1 className="text-3xl font-bold text-ios-dark">سجّل دفعة جديدة</h1>
+        <h1
+          className="text-3xl font-bold"
+          style={{ color: "var(--color-dark)" }}
+        >
+          سجّل دفعة جديدة
+        </h1>
       </div>
 
       {error && (
-        <div className="bg-[var(--color-status-rejected-bg)] text-[var(--color-error)] p-4 rounded-2xl mb-6 text-sm border border-[var(--color-status-rejected-border)]">
+        <div
+          className="p-4 rounded-2xl mb-6 text-sm"
+          style={{
+            backgroundColor: "var(--color-status-rejected-bg)",
+            color: "var(--color-error)",
+            border: "1px solid var(--color-status-rejected-border)",
+          }}
+        >
           {error}
         </div>
       )}
 
       <form
         onSubmit={handleSubmit}
-        className="bg-white/80 backdrop-blur-xl p-8 rounded-3xl border border-ios-light/50 space-y-6 shadow-lg"
+        className="bg-white/80 backdrop-blur-xl p-8 rounded-3xl space-y-6 shadow-lg"
+        style={{
+          border:
+            "1px solid color-mix(in srgb, var(--color-light) 50%, transparent)",
+        }}
       >
         <div>
-          <label className="block text-sm font-semibold text-ios-dark mb-2">
+          <label
+            className="block text-sm font-semibold mb-2"
+            style={{ color: "var(--color-dark)" }}
+          >
             اختار العضو
           </label>
           <select
             value={formData.user}
             onChange={(e) => setFormData({ ...formData, user: e.target.value })}
-            className="w-full px-5 py-3.5 bg-ios-bg border border-ios-border rounded-2xl text-ios-dark transition-all"
+            className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2"
+            style={{
+              backgroundColor: "var(--color-bg)",
+              border: "1px solid var(--color-border)",
+              color: "var(--color-dark)",
+            }}
             required
           >
             <option value="">-- اختار عضو --</option>
@@ -114,7 +144,10 @@ const AddPayment = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-semibold text-ios-dark mb-2">
+            <label
+              className="block text-sm font-semibold mb-2"
+              style={{ color: "var(--color-dark)" }}
+            >
               المبلغ (جنيه)
             </label>
             <input
@@ -124,14 +157,22 @@ const AddPayment = () => {
               onChange={(e) =>
                 setFormData({ ...formData, amount: e.target.value })
               }
-              className="w-full px-5 py-3.5 bg-ios-bg border border-ios-border rounded-2xl text-ios-dark transition-all"
+              className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2"
+              style={{
+                backgroundColor: "var(--color-bg)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-dark)",
+              }}
               placeholder="0.00"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-ios-dark mb-2">
+            <label
+              className="block text-sm font-semibold mb-2"
+              style={{ color: "var(--color-dark)" }}
+            >
               التاريخ
             </label>
             <input
@@ -140,13 +181,21 @@ const AddPayment = () => {
               onChange={(e) =>
                 setFormData({ ...formData, date: e.target.value })
               }
-              className="w-full px-5 py-3.5 bg-ios-bg border border-ios-border rounded-2xl text-ios-dark transition-all"
+              className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2"
+              style={{
+                backgroundColor: "var(--color-bg)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-dark)",
+              }}
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-ios-dark mb-2">
+          <label
+            className="block text-sm font-semibold mb-2"
+            style={{ color: "var(--color-dark)" }}
+          >
             وصف (اختياري)
           </label>
           <textarea
@@ -154,7 +203,12 @@ const AddPayment = () => {
             onChange={(e) =>
               setFormData({ ...formData, description: e.target.value })
             }
-            className="w-full px-5 py-3.5 bg-ios-bg border border-ios-border rounded-2xl text-ios-dark transition-all resize-none"
+            className="w-full px-5 py-3.5 rounded-2xl transition-all resize-none focus:outline-none focus:ring-2"
+            style={{
+              backgroundColor: "var(--color-bg)",
+              border: "1px solid var(--color-border)",
+              color: "var(--color-dark)",
+            }}
             rows="3"
             placeholder="أي ملاحظات..."
           />
@@ -162,7 +216,14 @@ const AddPayment = () => {
 
         <button
           type="submit"
-          className="w-full py-4 px-4 bg-ios-primary hover:bg-ios-dark text-white font-bold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl mt-4 flex items-center justify-center gap-2"
+          className="w-full py-4 px-4 text-white font-bold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl mt-4 flex items-center justify-center gap-2"
+          style={{ backgroundColor: "var(--color-primary)" }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor = "var(--color-dark)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor = "var(--color-primary)")
+          }
         >
           <PlusCircle size={20} />
           سجّل الدفعة
@@ -170,8 +231,17 @@ const AddPayment = () => {
       </form>
 
       {/* قائمة الأعضاء للمرجع */}
-      <div className="mt-8 bg-white/80 backdrop-blur-xl p-6 rounded-3xl border border-ios-light/50 shadow-lg">
-        <h3 className="text-lg font-bold text-ios-dark mb-4 flex items-center gap-2">
+      <div
+        className="mt-8 bg-white/80 backdrop-blur-xl p-6 rounded-3xl shadow-lg"
+        style={{
+          border:
+            "1px solid color-mix(in srgb, var(--color-light) 50%, transparent)",
+        }}
+      >
+        <h3
+          className="text-lg font-bold mb-4 flex items-center gap-2"
+          style={{ color: "var(--color-dark)" }}
+        >
           <UserIcon size={20} />
           الأعضاء النشطين
         </h3>
@@ -179,16 +249,40 @@ const AddPayment = () => {
           {users.map((u) => (
             <div
               key={u._id}
-              className="p-3 bg-ios-bg rounded-xl border border-ios-border hover:border-ios-primary transition-colors cursor-pointer"
+              className="p-3 rounded-xl transition-colors cursor-pointer"
+              style={{
+                backgroundColor: "var(--color-bg)",
+                border: "1px solid var(--color-border)",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.borderColor = "var(--color-primary)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.borderColor = "var(--color-border)")
+              }
               onClick={() => setFormData({ ...formData, user: u._id })}
             >
-              <p className="font-semibold text-ios-dark">{u.name}</p>
-              <p className="text-xs text-ios-secondary">@{u.username}</p>
+              <p
+                className="font-semibold"
+                style={{ color: "var(--color-dark)" }}
+              >
+                {u.name}
+              </p>
+              <p
+                className="text-xs"
+                style={{ color: "var(--color-secondary)" }}
+              >
+                @{u.username}
+              </p>
               {u.balance !== 0 && (
                 <p
-                  className={`text-sm font-bold mt-1 ${
-                    u.balance < 0 ? "text-ios-error" : "text-ios-success"
-                  }`}
+                  className="text-sm font-bold mt-1"
+                  style={{
+                    color:
+                      u.balance < 0
+                        ? "var(--color-error)"
+                        : "var(--color-success)",
+                  }}
                 >
                   {u.balance < 0
                     ? `عليه ${Math.abs(u.balance).toFixed(2)} جنيه`
