@@ -1,8 +1,17 @@
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
-import { LayoutDashboard, Receipt, Users, LogOut, PlusCircle, Palette, Banknote, BarChart3 } from 'lucide-react';
-import { useState } from 'react';
+import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
+import {
+  LayoutDashboard,
+  Receipt,
+  Users,
+  LogOut,
+  PlusCircle,
+  Palette,
+  Banknote,
+  BarChart3,
+} from "lucide-react";
+import { useState } from "react";
 
 // مكون شريط التنقل - محسّن للإتاحة
 const Navbar = () => {
@@ -15,15 +24,15 @@ const Navbar = () => {
 
   const isActive = (path) => location.pathname === path;
 
-  const navLinkClass = (path) => 
+  const navLinkClass = (path) =>
     `flex items-center gap-2 px-4 py-2.5 rounded-2xl transition-all duration-200 font-medium ${
-      isActive(path) 
-        ? 'bg-ios-primary text-white shadow-md' 
-        : 'text-ios-dark hover:bg-ios-hover focus-within:bg-ios-hover'
+      isActive(path)
+        ? "bg-ios-primary text-white shadow-md"
+        : "text-ios-dark hover:bg-ios-hover focus-within:bg-ios-hover"
     }`;
 
   return (
-    <nav 
+    <nav
       className="bg-ios-surface backdrop-blur-xl border-b border-ios-border px-4 sm:px-6 py-3 sticky top-0 z-50 shadow-sm"
       role="navigation"
       aria-label="التنقل الرئيسي"
@@ -35,65 +44,75 @@ const Navbar = () => {
 
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <div className="flex items-center">
-          <h1 className="text-2xl font-bold text-ios-primary tracking-tight">بدجتلي</h1>
+          <img
+            src="/assets/logo.png"
+            alt="بدجتلي - Budgetly"
+            className="w-20 h-auto "
+          />
         </div>
-        
+
         {/* القائمة الرئيسية - سطح المكتب */}
         <div className="hidden md:flex items-center gap-2" role="menubar">
-          <Link 
-            to="/" 
-            className={navLinkClass('/')}
+          <Link
+            to="/"
+            className={navLinkClass("/")}
             role="menuitem"
-            aria-current={isActive('/') ? 'page' : undefined}
+            aria-current={isActive("/") ? "page" : undefined}
           >
             <LayoutDashboard size={18} aria-hidden="true" />
             <span>الصفحة الرئيسية</span>
           </Link>
-          <Link 
-            to="/expenses" 
-            className={navLinkClass('/expenses')}
+          <Link
+            to="/expenses"
+            className={navLinkClass("/expenses")}
             role="menuitem"
-            aria-current={isActive('/expenses') ? 'page' : undefined}
+            aria-current={isActive("/expenses") ? "page" : undefined}
           >
             <Receipt size={18} aria-hidden="true" />
             <span>المصاريف</span>
           </Link>
-          {user.role === 'admin' && (
-            <Link 
-              to="/add-expense" 
-              className={navLinkClass('/add-expense')}
+          {user.role === "admin" && (
+            <Link
+              to="/add-expense"
+              className={navLinkClass("/add-expense")}
               role="menuitem"
-              aria-current={isActive('/add-expense') ? 'page' : undefined}
+              aria-current={isActive("/add-expense") ? "page" : undefined}
             >
               <PlusCircle size={18} aria-hidden="true" />
               <span>سجّل مصروف</span>
             </Link>
           )}
-          <Link 
-            to="/members" 
-            className={navLinkClass('/members')}
+          <Link
+            to="/members"
+            className={navLinkClass("/members")}
             role="menuitem"
-            aria-current={isActive('/members') ? 'page' : undefined}
+            aria-current={isActive("/members") ? "page" : undefined}
           >
             <Users size={18} aria-hidden="true" />
-            <span>الناس</span>
+            <span>المتسخدمين</span>
           </Link>
-          {user.role === 'admin' && (
-            <Link 
-              to="/analytics" 
-              className={navLinkClass('/analytics')}
+          {user.role === "admin" && (
+            <Link
+              to="/analytics"
+              className={navLinkClass("/analytics")}
               role="menuitem"
-              aria-current={isActive('/analytics') ? 'page' : undefined}
+              aria-current={isActive("/analytics") ? "page" : undefined}
             >
               <BarChart3 size={18} aria-hidden="true" />
               <span>التحليلات</span>
             </Link>
           )}
-          <Link 
-            to={user.role === 'admin' ? '/payments' : '/my-payments'}
-            className={navLinkClass(user.role === 'admin' ? '/payments' : '/my-payments')}
+          <Link
+            to={user.role === "admin" ? "/payments" : "/my-payments"}
+            className={navLinkClass(
+              user.role === "admin" ? "/payments" : "/my-payments"
+            )}
             role="menuitem"
-            aria-current={isActive('/payments') || isActive('/my-payments') ? 'page' : undefined}
+            aria-current={
+              isActive("/payments") || isActive("/my-payments")
+                ? "page"
+                : undefined
+            }
           >
             <Banknote size={18} aria-hidden="true" />
             <span>المدفوعات</span>
@@ -102,13 +121,16 @@ const Navbar = () => {
 
         {/* الأدوات */}
         <div className="flex items-center gap-3">
-          <span className="hidden sm:block text-sm text-ios-secondary font-medium" aria-label="المستخدم الحالي">
+          <span
+            className="hidden sm:block text-sm text-ios-secondary font-medium"
+            aria-label="المستخدم الحالي"
+          >
             {user.username}
           </span>
-          
+
           {/* قائمة الثيمات */}
           <div className="relative">
-            <button 
+            <button
               onClick={() => setShowThemeMenu(!showThemeMenu)}
               className="p-2.5 text-ios-primary hover:bg-ios-hover rounded-full transition-all"
               aria-label="غيّر الألوان"
@@ -117,14 +139,14 @@ const Navbar = () => {
             >
               <Palette size={20} aria-hidden="true" />
             </button>
-            
+
             {showThemeMenu && (
-              <div 
+              <div
                 className="absolute left-0 mt-2 bg-ios-surface rounded-2xl shadow-lg border border-ios-border py-2 min-w-[140px] z-50"
                 role="menu"
                 aria-label="خيارات الثيم"
               >
-                {availableThemes.map(theme => (
+                {availableThemes.map((theme) => (
                   <button
                     key={theme.key}
                     onClick={() => {
@@ -133,24 +155,29 @@ const Navbar = () => {
                     }}
                     className={`w-full px-4 py-2.5 text-right text-sm font-medium transition-colors flex items-center justify-between ${
                       currentTheme === theme.key
-                        ? 'bg-ios-primary/10 text-ios-primary'
-                        : 'text-ios-dark hover:bg-ios-hover'
+                        ? "bg-ios-primary/10 text-ios-primary"
+                        : "text-ios-dark hover:bg-ios-hover"
                     }`}
                     role="menuitem"
-                    aria-current={currentTheme === theme.key ? 'true' : undefined}
+                    aria-current={
+                      currentTheme === theme.key ? "true" : undefined
+                    }
                   >
                     {theme.name}
                     {currentTheme === theme.key && (
-                      <div className="w-2 h-2 rounded-full bg-ios-primary" aria-label="محدد"></div>
+                      <div
+                        className="w-2 h-2 rounded-full bg-ios-primary"
+                        aria-label="محدد"
+                      ></div>
                     )}
                   </button>
                 ))}
               </div>
             )}
           </div>
-          
-          <button 
-            onClick={logout} 
+
+          <button
+            onClick={logout}
             className="p-2.5 text-ios-error hover:bg-red-50 rounded-full transition-all"
             aria-label="اطلع"
           >
@@ -158,57 +185,81 @@ const Navbar = () => {
           </button>
         </div>
       </div>
-      
+
       {/* القائمة السفلية للجوال - Bottom Navigation */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-ios-surface/95 backdrop-blur-xl border-t border-ios-border pt-2 pb-safe z-50 shadow-lg">
         <div className="flex justify-around items-center px-2">
-          <Link 
-            to="/" 
-            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${isActive('/') ? 'text-ios-primary bg-ios-hover' : 'text-ios-secondary'}`}
+          <Link
+            to="/"
+            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              isActive("/")
+                ? "text-ios-primary bg-ios-hover"
+                : "text-ios-secondary"
+            }`}
             aria-label="الصفحة الرئيسية"
-            aria-current={isActive('/') ? 'page' : undefined}
+            aria-current={isActive("/") ? "page" : undefined}
             role="menuitem"
           >
             <LayoutDashboard size={22} aria-hidden="true" />
             <span className="text-xs font-medium">الرئيسية</span>
           </Link>
-          <Link 
-            to="/expenses" 
-            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${isActive('/expenses') ? 'text-ios-primary bg-ios-hover' : 'text-ios-secondary'}`}
+          <Link
+            to="/expenses"
+            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              isActive("/expenses")
+                ? "text-ios-primary bg-ios-hover"
+                : "text-ios-secondary"
+            }`}
             aria-label="المصاريف"
-            aria-current={isActive('/expenses') ? 'page' : undefined}
+            aria-current={isActive("/expenses") ? "page" : undefined}
             role="menuitem"
           >
             <Receipt size={22} aria-hidden="true" />
             <span className="text-xs font-medium">المصاريف</span>
           </Link>
-          {user.role === 'admin' && (
-            <Link 
-              to="/add-expense" 
-              className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${isActive('/add-expense') ? 'text-ios-primary bg-ios-hover' : 'text-ios-secondary'}`}
+          {user.role === "admin" && (
+            <Link
+              to="/add-expense"
+              className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+                isActive("/add-expense")
+                  ? "text-ios-primary bg-ios-hover"
+                  : "text-ios-secondary"
+              }`}
               aria-label="سجّل مصروف"
-              aria-current={isActive('/add-expense') ? 'page' : undefined}
+              aria-current={isActive("/add-expense") ? "page" : undefined}
               role="menuitem"
             >
               <PlusCircle size={22} aria-hidden="true" />
               <span className="text-xs font-medium">سجّل</span>
             </Link>
           )}
-          <Link 
-            to="/members" 
-            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${isActive('/members') ? 'text-ios-primary bg-ios-hover' : 'text-ios-secondary'}`}
+          <Link
+            to="/members"
+            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              isActive("/members")
+                ? "text-ios-primary bg-ios-hover"
+                : "text-ios-secondary"
+            }`}
             aria-label="الناس"
-            aria-current={isActive('/members') ? 'page' : undefined}
+            aria-current={isActive("/members") ? "page" : undefined}
             role="menuitem"
           >
             <Users size={22} aria-hidden="true" />
             <span className="text-xs font-medium">الناس</span>
           </Link>
-          <Link 
-            to={user.role === 'admin' ? '/payments' : '/my-payments'}
-            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${isActive('/payments') || isActive('/my-payments') ? 'text-ios-primary bg-ios-hover' : 'text-ios-secondary'}`}
+          <Link
+            to={user.role === "admin" ? "/payments" : "/my-payments"}
+            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              isActive("/payments") || isActive("/my-payments")
+                ? "text-ios-primary bg-ios-hover"
+                : "text-ios-secondary"
+            }`}
             aria-label="المدفوعات"
-            aria-current={isActive('/payments') || isActive('/my-payments') ? 'page' : undefined}
+            aria-current={
+              isActive("/payments") || isActive("/my-payments")
+                ? "page"
+                : undefined
+            }
             role="menuitem"
           >
             <Banknote size={22} aria-hidden="true" />

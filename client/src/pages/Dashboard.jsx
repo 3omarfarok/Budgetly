@@ -12,7 +12,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const endpoint = user.role === 'admin' ? '/stats/admin/dashboard' : `/stats/user/${user.id}`;
+        const endpoint = user.role === "admin" ? "/stats/admin/dashboard" : `/stats/user/${user.id}`;
         const { data } = await api.get(endpoint);
         setStats(data);
       } catch (error) {
@@ -111,11 +111,11 @@ const UserDashboard = ({ stats }) => (
     <section aria-labelledby="balance-heading">
       <h2 id="balance-heading" className="sr-only">رصيدي</h2>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <StatCard 
-          title="رصيدي" 
+        <StatCard
+          title="رصيدي"
           value={`${Math.abs(stats.balance).toFixed(2)} جنيه`}
           subtext={stats.balance >= 0 ? '(ليّا فلوس)' : '(عليّا فلوس)'}
-          type={stats.balance >= 0 ? 'positive' : 'negative'}
+          type={stats.balance >= 0 ? "positive" : "negative"}
           icon={Wallet}
         />
         <StatCard title="اللي دفعته" value={`${stats.totalPaid.toFixed(2)} جنيه`} icon={DollarSign} />

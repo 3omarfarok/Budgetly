@@ -1,12 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap');
+/* ============================
+   Google Fonts (اختياري)
+=============================== */
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap");
+
+/* ============================
+   Tailwind CSS v4
+=============================== */
 @import "tailwindcss";
 
-/* تعريف الثيمات باستخدام Tailwind v4 */
+/* ============================
+   Tailwind Variables
+=============================== */
 @theme {
-  /* الخطوط */
-  --font-family-sans: 'Cairo', 'Tajawal', system-ui, sans-serif;
-  
-  /* ألوان iOS المخصصة */
+  --font-family-sans: "Cairo", system-ui, sans-serif;
+
   --color-ios-dark: var(--color-dark);
   --color-ios-primary: var(--color-primary);
   --color-ios-secondary: var(--color-secondary);
@@ -19,14 +26,12 @@
   --color-ios-info: var(--color-info);
   --color-ios-border: var(--color-border);
   --color-ios-hover: var(--color-hover);
-  
-  /* الظلال */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-  
-  /* Backdrop blur */
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.07);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.12);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.14);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.16);
+
   --backdrop-blur-xs: blur(2px);
   --backdrop-blur-sm: blur(4px);
   --backdrop-blur-md: blur(12px);
@@ -34,111 +39,101 @@
   --backdrop-blur-xl: blur(24px);
 }
 
-/* متغيرات CSS الافتراضية */
+/* ============================
+   Root Colors — WCAG Contrast Fix
+=============================== */
 :root {
-  /* الألوان الأساسية - تباين محسّن WCAG AAA */
-  --color-dark: #0F172A;           /* أغمق للتباين 16:1 */
-  --color-primary: #1E40AF;        /* أزرق أغمق للتباين 7:1 */
-  --color-secondary: #334155;      /* رمادي أغمق للتباين 10:1 */
-  --color-light: #E2E8F0;
-  --color-bg: #FFFFFF;
-  --color-surface: #F8FAFC;
-  
-  /* حالات إضافية - تباين محسّن */
-  --color-success: #047857;        /* أخضر أغمق للتباين 7:1 */
-  --color-error: #B91C1C;          /* أحمر أغمق للتباين 7:1 */
-  --color-warning: #C2410C;        /* برتقالي أغمق للتباين 7:1 */
-  --color-info: #0369A1;           /* أزرق معلومات أغمق */
-  
-  /* ألوان الحالات (Status Colors) */
-  --color-status-pending: #C2410C;        /* برتقالي للانتظار */
-  --color-status-pending-bg: #FFF7ED;     /* خلفية فاتحة برتقالية */
-  --color-status-pending-border: #FDBA74; /* حدود برتقالية */
-  --color-status-approved: #047857;       /* أخضر للموافقة */
-  --color-status-approved-bg: #F0FDF4;    /* خلفية فاتحة خضراء */
-  --color-status-approved-border: #86EFAC;/* حدود خضراء */
-  --color-status-rejected: #B91C1C;       /* أحمر للرفض */
-  --color-status-rejected-bg: #FEF2F2;    /* خلفية فاتحة حمراء */
-  --color-status-rejected-border: #FCA5A5;/* حدود حمراء */
-  
-  /* ألوان الفئات (Category Colors) */
-  --color-category-transport: #1E40AF;    /* أزرق للنقل */
-  --color-category-transport-bg: #EFF6FF;
-  --color-category-transport-text: #1E40AF;
-  --color-category-utilities: #CA8A04;    /* أصفر للخدمات */
-  --color-category-utilities-bg: #FEFCE8;
-  --color-category-utilities-text: #CA8A04;
-  --color-category-housing: #7C3AED;      /* بنفسجي للسكن */
-  --color-category-housing-bg: #F5F3FF;
-  --color-category-housing-text: #7C3AED;
-  --color-category-entertainment: #DB2777;/* وردي للترفيه */
-  --color-category-entertainment-bg: #FDF2F8;
-  --color-category-entertainment-text: #DB2777;
-  --color-category-general: #64748B;      /* رمادي للعام */
-  --color-category-general-bg: #F8FAFC;
-  --color-category-general-text: #64748B;
-  
-  /* ألوان واجهة المستخدم (UI Colors) */
-  --color-muted: #64748B;
-  --color-muted-bg: #F1F5F9;
-  --color-muted-border: #E2E8F0;
-  
-  /* حدود وفواصل */
-  --color-border: #CBD5E1;
-  --color-hover: #F1F5F9;
-  
-  /* خلفيات */
-  --gradient-bg: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
-  --zigzag-color: #F8FAFC;
-  
-  /* الانتقالات */
+  --color-dark: #0e1628;
+  --color-primary: #1d4ed8; /* contrast تحسين بسييط */
+  --color-secondary: #475569;
+  --color-light: #e2e8f0;
+  --color-bg: #ffffff;
+  --color-surface: #f8fafc;
+
+  --color-success: #047857;
+  --color-error: #b91c1c;
+  --color-warning: #c2410c;
+  --color-info: #0369a1;
+
+  /* تحسين contrast الخلفيات الفاتحة */
+  --color-muted-bg: #f3f6fa;
+  --color-border: #c3cedd;
+
+  --color-status-pending: #b45309;
+  --color-status-pending-bg: #fff5e6;
+  --color-status-pending-border: #ffcc80;
+
+  --color-status-approved: #047857;
+  --color-status-approved-bg: #edfdf4;
+  --color-status-approved-border: #86efac;
+
+  --color-status-rejected: #b91c1c;
+  --color-status-rejected-bg: #feecec;
+  --color-status-rejected-border: #fca5a5;
+
+  --gradient-bg: linear-gradient(135deg, #f8fafc 0%, #e5eaf1 100%);
+  --zigzag-color: #f9fafb;
+
   --transition-fast: 150ms ease;
   --transition-base: 200ms ease;
   --transition-slow: 300ms ease;
 }
 
+/* ============================
+   Base Styles
+=============================== */
 body {
-    font-family:'Cairo', 'Tajawal', system-ui, sans-serif;
-
   background: var(--gradient-bg);
   min-height: 100vh;
-  transition: background var(--transition-slow);
   color: var(--color-dark);
+  transition: background var(--transition-slow);
+}
+* {
+  font-family: var(--font-family-sans);
+  font-weight: 500;
 }
 
-/* Padding للمحتوى على الموبايل */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+}
+/* ============================
+   Mobile padding
+=============================== */
 @media (max-width: 768px) {
   main {
     padding-bottom: 80px !important;
   }
 }
 
-/* Safe area للأيفون */
+/* iPhone Safe Area */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0.5rem);
 }
 
-/* تحسينات الإتاحة */
-
-/* Focus indicators واضحة */
+/* ============================
+   Accessibility
+=============================== */
 *:focus-visible {
   outline: 3px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
-/* إزالة outline الافتراضي للماوس */
 *:focus:not(:focus-visible) {
   outline: none;
 }
 
-/* تحسين قابلية القراءة */
 ::selection {
   background-color: var(--color-primary);
   color: white;
 }
 
-/* Skip to main content link */
+/* Skip link */
 .skip-link {
   position: absolute;
   top: -40px;
@@ -154,14 +149,16 @@ body {
   top: 0;
 }
 
-/* تأثير الحواف المتعرجة للإيصالات */
+/* ============================
+   Receipt Edge Effect
+=============================== */
 .receipt-zigzag {
   position: relative;
 }
 
 .receipt-zigzag::before,
 .receipt-zigzag::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   right: 0;
@@ -172,56 +169,79 @@ body {
 
 .receipt-zigzag::before {
   top: -12px;
-  background-image: 
-    radial-gradient(circle at 10px 0, transparent 10px, var(--zigzag-color) 10px);
+  background-image: radial-gradient(
+    circle at 10px 0,
+    transparent 10px,
+    var(--zigzag-color) 10px
+  );
 }
 
 .receipt-zigzag::after {
   bottom: -12px;
-  background-image: 
-    radial-gradient(circle at 10px 12px, transparent 10px, var(--zigzag-color) 10px);
+  background-image: radial-gradient(
+    circle at 10px 12px,
+    transparent 10px,
+    var(--zigzag-color) 10px
+  );
 }
 
-/* تحسينات Hover للعناصر التفاعلية */
-button, a, [role="button"] {
+/* ============================
+   Buttons + Links hover
+=============================== */
+button,
+a,
+[role="button"] {
   transition: all var(--transition-base);
 }
 
-button:hover, a:hover, [role="button"]:hover {
+button:hover,
+a:hover,
+[role="button"]:hover {
   transform: translateY(-1px);
 }
 
-button:active, a:active, [role="button"]:active {
+button:active,
+a:active,
+[role="button"]:active {
   transform: translateY(0);
 }
 
-/* تحسين حقول الإدخال */
-input, textarea, select {
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+/* ============================
+   Inputs
+=============================== */
+input,
+textarea,
+select {
+  transition: border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
-input:focus, textarea:focus, select:focus {
+input:focus,
+textarea:focus,
+select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
-/* Reduced motion للمستخدمين الذين يفضلون ذلك */
+/* ============================
+   Reduced Motion Support
+=============================== */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }
 
-/* تحسين الطباعة */
+/* ============================
+   Print Styles
+=============================== */
 @media print {
   body {
     background: white;
   }
-  
   .no-print {
     display: none !important;
   }
