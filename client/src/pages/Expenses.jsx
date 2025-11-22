@@ -1,14 +1,27 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import api from '../utils/api';
-import { 
-  Receipt, Trash2, Calendar, User, 
-  Utensils, Car, Zap, Home, Smartphone, CircleDollarSign, Layers 
-} from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
+import api from "../utils/api";
+import {
+  Receipt,
+  Calendar,
+  User,
+  Trash2,
+  ShoppingBag,
+  Car,
+  Zap,
+  Home,
+  Smile,
+  Package,
+  PlusCircle,
+} from "lucide-react";
+import Loader from "../components/Loader";
 
 const Expenses = () => {
-  const [expenses, setExpenses] = useState([]);
   const { user } = useAuth();
+  const toast = useToast();
+  const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,109 +31,121 @@ const Expenses = () => {
   const fetchExpenses = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get('/expenses');
+      const { data } = await api.get("/expenses");
       setExpenses(data);
     } catch (error) {
-      console.error('غلط في تحميل المصاريف:', error);
+      console.error("Error fetching expenses:", error);
+      toast.error("فيه مشكلة في تحميل المصاريف");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('متأكد انك عايز تمسحها؟')) return;
+    if (!window.confirm("متأكد تمسح المصروف ده؟")) return;
+
     try {
       await api.delete(`/expenses/${id}`);
-      setExpenses(expenses.filter(e => e._id !== id));
+      setExpenses(expenses.filter((e) => e._id !== id));
+      toast.success("تم مسح المصروف بنجاح");
     } catch (error) {
-      console.error('غلط في المسح:', error);
+      console.error("Error deleting expense:", error);
+      toast.error("فيه مشكلة في مسح المصروف");
     }
   };
 
-  // أيقونات التصنيفات
   const getCategoryIcon = (category) => {
     const icons = {
-      'Food': <Utensils size={20} />,
-      'Transport': <Car size={20} />,
-      'Utilities': <Zap size={20} />,
-      'Housing': <Home size={20} />,
-      'Entertainment': <Smartphone size={20} />,
-      'General': <CircleDollarSign size={20} />,
+      Food: <ShoppingBag size={20} />,
+      Transport: <Car size={20} />,
+      Utilities: <Zap size={20} />,
+      Housing: <Home size={20} />,
+      Entertainment: <Smile size={20} />,
+      General: <Package size={20} />,
     };
-    return icons[category] || <Layers size={20} />;
+    return icons[category] || <Package size={20} />;
   };
 
-  // ألوان التصنيفات من الثيم
   const getCategoryColor = (category) => {
     const colors = {
-      'Food': 'bg-[var(--color-status-pending-bg)] text-[var(--color-status-pending)]',
-      'Transport': 'bg-[var(--color-category-transport-bg)] text-[var(--color-category-transport-text)]',
-      'Utilities': 'bg-[var(--color-category-utilities-bg)] text-[var(--color-category-utilities-text)]',
-      'Housing': 'bg-[var(--color-category-housing-bg)] text-[var(--color-category-housing-text)]',
-      'Entertainment': 'bg-[var(--color-category-entertainment-bg)] text-[var(--color-category-entertainment-text)]',
+      Food: "bg-orange-100 text-orange-600",
+      Transport: "bg-blue-100 text-blue-600",
+      Utilities: "bg-yellow-100 text-yellow-600",
+      Housing: "bg-purple-100 text-purple-600",
+      Entertainment: "bg-pink-100 text-pink-600",
+      General: "bg-gray-100 text-gray-600",
     };
-    return colors[category] || 'bg-[var(--color-category-general-bg)] text-[var(--color-category-general-text)]';
+    return colors[category] || "bg-gray-100 text-gray-600";
   };
 
-  // ترجمة التصنيفات بالعامية المصرية
   const translateCategory = (category) => {
     const translations = {
-      'General': 'عام',
-      'Food': 'أكل وشرب',
-      'Transport': 'مواصلات',
-      'Utilities': 'فواتير',
-      'Housing': 'سكن',
-      'Entertainment': 'ترفيه',
-      'Other': 'حاجات تانية'
+      Food: "أكل وشرب",
+      Transport: "مواصلات",
+      Utilities: "فواتير",
+      Housing: "سكن",
+      Entertainment: "ترفيه",
+      General: "عام",
     };
     return translations[category] || category;
   };
 
+  if (loading) return <Loader text="بنحمّل المصاريف..." />;
+
   return (
-    <div className="pb-8 px-4 max-w-5xl mx-auto">
-      {/* الهيدر */}
-      <div className="flex justify-between items-center mb-8 pt-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--color-dark)]">المصاريف</h1>
-          <p className="text-[var(--color-muted)] text-sm mt-1">تتبع فلوسك اللي صرفتها</p>
-        </div>
-        <div className="p-3 bg-[var(--color-primary)]/10 rounded-full">
-          <Receipt className="text-[var(--color-primary)]" size={24} />
-        </div>
+    <div className="pb-8 px-4 max-w-6xl mx-auto">
+      {/* Header with title and add button */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-[var(--color-dark)]">
+          المصاريف
+        </h1>
+        {user.role === "admin" && (
+          <Link
+            to="/add-expense"
+            className="flex items-center gap-2 px-4 py-2.5 bg-ios-primary text-white rounded-2xl hover:bg-ios-primary/90 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
+          >
+            <PlusCircle size={20} />
+            <span>سجّل مصروف جديد</span>
+          </Link>
+        )}
       </div>
 
-      {/* حالة التحميل */}
-      {loading && (
-        <div className="text-center py-10 text-[var(--color-muted)]">بنحمّل المصاريف...</div>
-      )}
-
-      {/* عرض البطاقات */}
+      {/* قائمة المصاريف */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {!loading && expenses.map(expense => (
-          <div 
-            key={expense._id} 
+        {expenses.map((expense) => (
+          <div
+            key={expense._id}
             className="group bg-[var(--color-bg)] rounded-2xl p-5 shadow-sm border border-[var(--color-muted-border)] hover:shadow-md transition-all duration-200 relative overflow-hidden"
           >
             <div className="flex justify-between items-start mb-3">
               {/* أيقونة التصنيف */}
-              <div className={`p-2.5 rounded-xl ${getCategoryColor(expense.category)}`}>
+              <div
+                className={`p-2.5 rounded-xl ${getCategoryColor(
+                  expense.category
+                )}`}
+              >
                 {getCategoryIcon(expense.category)}
               </div>
-              
+
               {/* المبلغ */}
               <div className="text-right">
                 <span className="block text-xl font-bold text-[var(--color-dark)]">
                   {expense.totalAmount.toFixed(2)}
-                  <span className="text-xs text-[var(--color-muted)] font-normal mr-1">جنيه</span>
+                  <span className="text-xs text-[var(--color-muted)] font-normal mr-1">
+                    جنيه
+                  </span>
                 </span>
               </div>
             </div>
 
             {/* العنوان */}
-            <h3 className="font-semibold text-[var(--color-secondary)] mb-2 line-clamp-1" title={expense.description}>
+            <h3
+              className="font-semibold text-[var(--color-secondary)] mb-2 line-clamp-1"
+              title={expense.description}
+            >
               {expense.description}
             </h3>
-            
+
             {/* التصنيف */}
             <span className="inline-block px-2.5 py-1 bg-[var(--color-ios-surface)] text-[var(--color-muted)] text-xs font-medium rounded-full mb-4">
               {translateCategory(expense.category)}
@@ -132,11 +157,11 @@ const Expenses = () => {
                 <div className="flex items-center gap-1.5">
                   <Calendar size={12} />
                   <span>
-                    {new Date(expense.date).toLocaleDateString('ar-EG', { 
-                      year: 'numeric', 
-                      month: 'short', 
-                      day: 'numeric',
-                      calendar: 'gregory' // ميلادي
+                    {new Date(expense.date).toLocaleDateString("ar-EG", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      calendar: "gregory", // ميلادي
                     })}
                   </span>
                 </div>
@@ -147,8 +172,8 @@ const Expenses = () => {
               </div>
 
               {/* زر المسح (للأدمن بس) */}
-              {user.role === 'admin' && (
-                <button 
+              {user.role === "admin" && (
+                <button
                   onClick={() => handleDelete(expense._id)}
                   className="p-2 text-[var(--color-border)] hover:text-[var(--color-error)] hover:bg-[var(--color-status-rejected-bg)] rounded-lg transition-colors"
                   title="امسح"
@@ -164,9 +189,16 @@ const Expenses = () => {
       {/* لو مفيش مصاريف */}
       {!loading && expenses.length === 0 && (
         <div className="text-center py-20 bg-[var(--color-surface)] rounded-3xl border-2 border-dashed border-[var(--color-border)]">
-          <Receipt size={48} className="mx-auto mb-3 text-[var(--color-border)]" />
-          <p className="text-[var(--color-muted)] font-medium">مفيش مصاريف متسجلة لسه</p>
-          <p className="text-[var(--color-muted)] text-sm mt-1">ابدأ سجّل أول مصروف</p>
+          <Receipt
+            size={48}
+            className="mx-auto mb-3 text-[var(--color-border)]"
+          />
+          <p className="text-[var(--color-muted)] font-medium">
+            مفيش مصاريف متسجلة لسه
+          </p>
+          <p className="text-[var(--color-muted)] text-sm mt-1">
+            ابدأ سجّل أول مصروف
+          </p>
         </div>
       )}
     </div>

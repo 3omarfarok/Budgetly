@@ -1,5 +1,5 @@
-import { createContext, useState, useEffect, useContext } from 'react';
-import api from '../utils/api';
+import { createContext, useState, useEffect, useContext } from "react";
+import api from "../utils/api";
 
 const AuthContext = createContext();
 
@@ -11,14 +11,14 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (token) {
         try {
-          const { data } = await api.get('/auth/me');
+          const { data } = await api.get("/auth/me");
           setUser(data);
         } catch (error) {
-          console.error('Auth check failed:', error);
-          localStorage.removeItem('token');
+          console.error("Auth check failed:", error);
+          localStorage.removeItem("token");
         }
       }
       setLoading(false);
@@ -27,19 +27,23 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (username, password) => {
-    const { data } = await api.post('/auth/login', { username, password });
-    localStorage.setItem('token', data.token);
+    const { data } = await api.post("/auth/login", { username, password });
+    localStorage.setItem("token", data.token);
     setUser(data.user);
     return data.user;
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
     setUser(null);
   };
 
+  const updateUser = (userData) => {
+    setUser(userData);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );

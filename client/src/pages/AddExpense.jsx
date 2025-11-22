@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import api from "../utils/api";
 import { PlusCircle, Check } from "lucide-react";
+
+import Loader from "../components/Loader";
 
 // صفحة إضافة مصروف - تصميم iOS
 const AddExpense = () => {
   const { user } = useAuth();
+  const toast = useToast();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     description: "",
@@ -17,6 +21,7 @@ const AddExpense = () => {
   const [error, setError] = useState("");
   const [users, setUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user && user.role !== "admin") {
@@ -27,10 +32,14 @@ const AddExpense = () => {
 
   const fetchUsers = async () => {
     try {
+      setLoading(true);
       const { data } = await api.get("/users");
       setUsers(data);
     } catch (error) {
       console.error("خطأ في تحميل المستخدمين:", error);
+      toast.error("فيه مشكلة في تحميل المستخدمين");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,7 +63,7 @@ const AddExpense = () => {
     e.preventDefault();
 
     if (formData.splitType === "specific" && selectedUsers.length === 0) {
-      setError("يرجى اختيار مستخدم واحد على الأقل");
+      toast.warning("يرجى اختيار مستخدم واحد على الأقل");
       return;
     }
 
@@ -69,13 +78,18 @@ const AddExpense = () => {
       }
 
       await api.post("/expenses", expenseData);
+      toast.success("تم تسجيل المصروف بنجاح!");
       navigate("/expenses");
     } catch (err) {
-      setError(err.response?.data?.message || "خطأ في إنشاء المصروف");
+      const errorMessage =
+        err.response?.data?.message || "خطأ في إنشاء المصروف";
+      toast.error(errorMessage);
+      setError(errorMessage);
     }
   };
 
   if (user?.role !== "admin") return null;
+  if (loading) return <Loader text="بنحمّل البيانات..." />;
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -112,10 +126,10 @@ const AddExpense = () => {
 
       <form
         onSubmit={handleSubmit}
-        className="bg-white/80 backdrop-blur-xl p-8 rounded-3xl space-y-6 shadow-lg"
+        className="backdrop-blur-xl p-8 rounded-3xl space-y-6 shadow-lg"
         style={{
-          border:
-            "1px solid color-mix(in srgb, var(--color-light) 50%, transparent)",
+          backgroundColor: "var(--color-surface)",
+          border: "1px solid var(--color-border)",
         }}
       >
         <div>
@@ -133,9 +147,8 @@ const AddExpense = () => {
             }
             className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2"
             style={{
-              backgroundColor:
-                "color-mix(in srgb, var(--color-bg) 50%, transparent)",
-              border: "1px solid var(--color-light)",
+              backgroundColor: "var(--color-bg)",
+              border: "1px solid var(--color-border)",
               color: "var(--color-dark)",
             }}
             required
@@ -155,11 +168,10 @@ const AddExpense = () => {
               onChange={(e) =>
                 setFormData({ ...formData, category: e.target.value })
               }
-              className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2"
+              className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2 appearance-none  "
               style={{
-                backgroundColor:
-                  "color-mix(in srgb, var(--color-bg) 50%, transparent)",
-                border: "1px solid var(--color-light)",
+                backgroundColor: "var(--color-bg)",
+                border: "1px solid var(--color-border)",
                 color: "var(--color-dark)",
               }}
             >
@@ -187,11 +199,10 @@ const AddExpense = () => {
               onChange={(e) =>
                 setFormData({ ...formData, totalAmount: e.target.value })
               }
-              className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2"
+              className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2 appearance-none"
               style={{
-                backgroundColor:
-                  "color-mix(in srgb, var(--color-bg) 50%, transparent)",
-                border: "1px solid var(--color-light)",
+                backgroundColor: "var(--color-bg)",
+                border: "1px solid var(--color-border)",
                 color: "var(--color-dark)",
               }}
               required
@@ -209,11 +220,10 @@ const AddExpense = () => {
           <select
             value={formData.splitType}
             onChange={handleSplitTypeChange}
-            className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2"
+            className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2 appearance-none"
             style={{
-              backgroundColor:
-                "color-mix(in srgb, var(--color-bg) 50%, transparent)",
-              border: "1px solid var(--color-light)",
+              backgroundColor: "var(--color-bg)",
+              border: "1px solid var(--color-border)",
               color: "var(--color-dark)",
             }}
           >
@@ -226,9 +236,8 @@ const AddExpense = () => {
           <div
             className="p-5 rounded-2xl"
             style={{
-              backgroundColor:
-                "color-mix(in srgb, var(--color-bg) 50%, transparent)",
-              border: "1px solid var(--color-light)",
+              backgroundColor: "var(--color-muted-bg)",
+              border: "1px solid var(--color-border)",
             }}
           >
             <label
@@ -246,25 +255,24 @@ const AddExpense = () => {
                   style={
                     selectedUsers.includes(u._id)
                       ? {
-                          backgroundColor:
-                            "color-mix(in srgb, var(--color-primary) 20%, transparent)",
-                          border:
-                            "1px solid color-mix(in srgb, var(--color-primary) 50%, transparent)",
+                          backgroundColor: "var(--color-primary-bg)",
+                          border: "1px solid var(--color-primary-border)",
                         }
                       : {
-                          backgroundColor: "white",
-                          border: "1px solid var(--color-light)",
+                          backgroundColor: "var(--color-surface)",
+                          border: "1px solid var(--color-border)",
                         }
                   }
                   onMouseEnter={(e) => {
                     if (!selectedUsers.includes(u._id)) {
                       e.currentTarget.style.backgroundColor =
-                        "color-mix(in srgb, var(--color-light) 30%, transparent)";
+                        "var(--color-hover)";
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!selectedUsers.includes(u._id)) {
-                      e.currentTarget.style.backgroundColor = "white";
+                      e.currentTarget.style.backgroundColor =
+                        "var(--color-surface)";
                     }
                   }}
                 >
@@ -313,7 +321,7 @@ const AddExpense = () => {
 
         <button
           type="submit"
-          className="w-full py-4 px-4 text-white font-bold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl mt-4"
+          className="w-full py-4 px-4 cursor-pointer text-white font-bold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl  mt-4 flex items-center justify-center gap-2"
           style={{ backgroundColor: "var(--color-primary)" }}
           onMouseEnter={(e) =>
             (e.currentTarget.style.backgroundColor = "var(--color-dark)")

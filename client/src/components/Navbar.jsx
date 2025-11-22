@@ -10,6 +10,8 @@ import {
   Palette,
   Banknote,
   BarChart3,
+  User,
+  Info,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -47,7 +49,7 @@ const Navbar = () => {
           <img
             src="/assets/logo.png"
             alt="بدجتلي - Budgetly"
-            className="w-20 h-auto "
+            className="w-20 h-auto dark:invert "
           />
         </div>
 
@@ -66,22 +68,15 @@ const Navbar = () => {
             to="/expenses"
             className={navLinkClass("/expenses")}
             role="menuitem"
-            aria-current={isActive("/expenses") ? "page" : undefined}
+            aria-current={
+              isActive("/expenses") || isActive("/add-expense")
+                ? "page"
+                : undefined
+            }
           >
             <Receipt size={18} aria-hidden="true" />
             <span>المصاريف</span>
           </Link>
-          {user.role === "admin" && (
-            <Link
-              to="/add-expense"
-              className={navLinkClass("/add-expense")}
-              role="menuitem"
-              aria-current={isActive("/add-expense") ? "page" : undefined}
-            >
-              <PlusCircle size={18} aria-hidden="true" />
-              <span>سجّل مصروف</span>
-            </Link>
-          )}
           <Link
             to="/members"
             className={navLinkClass("/members")}
@@ -117,17 +112,28 @@ const Navbar = () => {
             <Banknote size={18} aria-hidden="true" />
             <span>المدفوعات</span>
           </Link>
+          <Link
+            to="/profile"
+            className={navLinkClass("/profile")}
+            role="menuitem"
+            aria-current={isActive("/profile") ? "page" : undefined}
+          >
+            <User size={18} aria-hidden="true" />
+            <span>الملف الشخصي</span>
+          </Link>
+          <Link
+            to="/about"
+            className={navLinkClass("/about")}
+            role="menuitem"
+            aria-current={isActive("/about") ? "page" : undefined}
+          >
+            <Info size={18} aria-hidden="true" />
+            <span>عن التطبيق</span>
+          </Link>
         </div>
 
         {/* الأدوات */}
         <div className="flex items-center gap-3">
-          <span
-            className="hidden sm:block text-sm text-ios-secondary font-medium"
-            aria-label="المستخدم الحالي"
-          >
-            {user.username}
-          </span>
-
           {/* قائمة الثيمات */}
           <div className="relative">
             <button
@@ -206,33 +212,21 @@ const Navbar = () => {
           <Link
             to="/expenses"
             className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
-              isActive("/expenses")
+              isActive("/expenses") || isActive("/add-expense")
                 ? "text-ios-primary bg-ios-hover"
                 : "text-ios-secondary"
             }`}
             aria-label="المصاريف"
-            aria-current={isActive("/expenses") ? "page" : undefined}
+            aria-current={
+              isActive("/expenses") || isActive("/add-expense")
+                ? "page"
+                : undefined
+            }
             role="menuitem"
           >
             <Receipt size={22} aria-hidden="true" />
             <span className="text-xs font-medium">المصاريف</span>
           </Link>
-          {user.role === "admin" && (
-            <Link
-              to="/add-expense"
-              className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
-                isActive("/add-expense")
-                  ? "text-ios-primary bg-ios-hover"
-                  : "text-ios-secondary"
-              }`}
-              aria-label="سجّل مصروف"
-              aria-current={isActive("/add-expense") ? "page" : undefined}
-              role="menuitem"
-            >
-              <PlusCircle size={22} aria-hidden="true" />
-              <span className="text-xs font-medium">سجّل</span>
-            </Link>
-          )}
           <Link
             to="/members"
             className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
@@ -264,6 +258,34 @@ const Navbar = () => {
           >
             <Banknote size={22} aria-hidden="true" />
             <span className="text-xs font-medium">الفلوس</span>
+          </Link>
+          <Link
+            to="/profile"
+            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              isActive("/profile")
+                ? "text-ios-primary bg-ios-hover"
+                : "text-ios-secondary"
+            }`}
+            aria-label="الملف الشخصي"
+            aria-current={isActive("/profile") ? "page" : undefined}
+            role="menuitem"
+          >
+            <User size={22} aria-hidden="true" />
+            <span className="text-xs font-medium">الملف</span>
+          </Link>
+          <Link
+            to="/about"
+            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              isActive("/about")
+                ? "text-ios-primary bg-ios-hover"
+                : "text-ios-secondary"
+            }`}
+            aria-label="عن التطبيق"
+            aria-current={isActive("/about") ? "page" : undefined}
+            role="menuitem"
+          >
+            <Info size={22} aria-hidden="true" />
+            <span className="text-xs font-medium">عن</span>
           </Link>
         </div>
       </div>

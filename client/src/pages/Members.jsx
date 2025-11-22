@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import api from "../utils/api";
 import { Users, UserPlus, ShieldCheck, User as UserIcon } from "lucide-react";
+
+import Loader from "../components/Loader";
 
 // صفحة الأعضاء - تصميم iOS
 const Members = () => {
   const [members, setMembers] = useState([]);
   const { user } = useAuth();
+  const toast = useToast();
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
@@ -14,6 +18,7 @@ const Members = () => {
     name: "",
   });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchMembers();
@@ -21,10 +26,14 @@ const Members = () => {
 
   const fetchMembers = async () => {
     try {
+      setLoading(true);
       const { data } = await api.get("/users");
       setMembers(data);
     } catch (error) {
       console.error("خطأ في تحميل الأعضاء:", error);
+      toast.error("فيه مشكلة في تحميل الأعضاء");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -36,8 +45,11 @@ const Members = () => {
       setShowAddForm(false);
       setFormData({ username: "", password: "", name: "" });
       setError("");
+      toast.success("تم إضافة العضو بنجاح!");
     } catch (err) {
-      setError(err.response?.data?.message || "خطأ في إضافة العضو");
+      const errorMsg = err.response?.data?.message || "خطأ في إضافة العضو";
+      setError(errorMsg);
+      toast.error(errorMsg);
     }
   };
 
@@ -45,11 +57,15 @@ const Members = () => {
     if (!window.confirm("هل أنت متأكد من تعطيل هذا المستخدم؟")) return;
     try {
       await api.delete(`/users/${id}`);
+      toast.success("تم حذف العضو بنجاح");
       fetchMembers();
     } catch (error) {
       console.error("خطأ في تعطيل المستخدم:", error);
+      toast.error("فيه مشكلة في حذف العضو");
     }
   };
+
+  if (loading) return <Loader text="بنحمّل الأعضاء..." />;
 
   return (
     <div className="pb-8">
@@ -58,7 +74,7 @@ const Members = () => {
           <div className="p-3 bg-ios-primary/10 rounded-2xl">
             <Users className="text-ios-primary" size={32} />
           </div>
-          <h1 className="text-3xl font-bold text-[var(--color-dark)]">الناس</h1>
+          <h1 className="text-3xl font-bold text-(--color-dark)">الناس</h1>
         </div>
         {user.role === "admin" && (
           <button
@@ -72,8 +88,8 @@ const Members = () => {
       </div>
 
       {showAddForm && (
-        <div className="bg-[var(--color-surface)] backdrop-blur-xl p-6 rounded-3xl border border-[var(--color-border)] mb-8 max-w-lg mx-auto shadow-lg">
-          <h3 className="text-xl font-bold mb-4 text-[var(--color-dark)]">
+        <div className="bg-[--color-surface] backdrop-blur-xl p-6 rounded-3xl border border-[--color-border] mb-8 max-w-lg mx-auto shadow-lg">
+          <h3 className="text-xl font-bold mb-4 text-[--color-dark]">
             ضيف واحد جديد
           </h3>
           {error && (
@@ -83,7 +99,7 @@ const Members = () => {
           )}
           <form onSubmit={handleAddMember} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-[var(--color-dark)] mb-1">
+              <label className="block text-sm font-semibold text-[--color-dark] mb-1">
                 الاسم
               </label>
               <input
@@ -92,12 +108,12 @@ const Members = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="w-full px-4 py-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl text-[var(--color-dark)] focus:outline-none focus:border-ios-primary focus:ring-2 focus:ring-ios-primary/20 transition-all"
+                className="w-full px-4 py-3 bg-[--color-bg] border border-[--color-border] rounded-2xl text-[--color-dark] focus:outline-none focus:border-ios-primary focus:ring-2 focus:ring-ios-primary/20 transition-all"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-[var(--color-dark)] mb-1">
+              <label className="block text-sm font-semibold text-[--color-dark] mb-1">
                 اسم المستخدم
               </label>
               <input
@@ -106,12 +122,12 @@ const Members = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, username: e.target.value })
                 }
-                className="w-full px-4 py-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl text-[var(--color-dark)] focus:outline-none focus:border-ios-primary focus:ring-2 focus:ring-ios-primary/20 transition-all"
+                className="w-full px-4 py-3 bg-[--color-bg] border border-[--color-border] rounded-2xl text-[--color-dark] focus:outline-none focus:border-ios-primary focus:ring-2 focus:ring-ios-primary/20 transition-all"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-[var(--color-dark)] mb-1">
+              <label className="block text-sm font-semibold text-[--color-dark] mb-1">
                 كلمة المرور
               </label>
               <input
@@ -120,7 +136,7 @@ const Members = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                className="w-full px-4 py-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl text-[var(--color-dark)] focus:outline-none focus:border-ios-primary focus:ring-2 focus:ring-ios-primary/20 transition-all"
+                className="w-full px-4 py-3 bg-[--color-bg] border border-[--color-border] rounded-2xl text-[--color-dark] focus:outline-none focus:border-ios-primary focus:ring-2 focus:ring-ios-primary/20 transition-all"
                 required
               />
             </div>
@@ -138,15 +154,30 @@ const Members = () => {
         {members.map((member) => (
           <div
             key={member._id}
-            className="bg-[var(--color-surface)] backdrop-blur-xl p-6 rounded-3xl border border-[var(--color-border)] flex flex-col items-center text-center hover:shadow-lg transition-all"
+            className="bg-[--color-surface] backdrop-blur-xl p-6 rounded-3xl border border-[--color-border] flex flex-col items-center text-center hover:shadow-lg transition-all"
           >
-            <div className="w-20 h-20 bg-gradient-to-br from-ios-primary to-ios-secondary rounded-full flex items-center justify-center text-3xl font-bold text-white mb-4 shadow-lg">
-              {member.name.charAt(0).toUpperCase()}
-            </div>
-            <h3 className="text-lg font-bold text-[var(--color-dark)] mb-1">
+            {member.profilePicture ? (
+              <img
+                src={`/profiles/${member.profilePicture}`}
+                alt={member.name}
+                className="w-20 h-20 rounded-full shadow-lg object-cover mb-4"
+                style={{ border: "3px solid var(--color-primary)" }}
+              />
+            ) : (
+              <div
+                className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white mb-4 shadow-lg"
+                style={{
+                  background:
+                    "linear-gradient(135deg, var(--color-primary) 0%, var(--color-info) 100%)",
+                }}
+              >
+                {member.name.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <h3 className="text-lg font-bold text-[--color-dark] mb-1">
               {member.name}
             </h3>
-            <p className="text-[var(--color-secondary)] text-sm mb-4">
+            <p className="text-[  --color-secondary] text-sm mb-4">
               @{member.username}
             </p>
 

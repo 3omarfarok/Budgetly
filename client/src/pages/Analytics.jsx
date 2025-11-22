@@ -1,19 +1,23 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import api from "../utils/api";
 import {
   TrendingUp,
   TrendingDown,
+  DollarSign,
+  Calendar,
   BarChart3,
   PieChart,
-  Calendar,
-  DollarSign,
 } from "lucide-react";
+import Loader from "../components/Loader";
 
 const Analytics = () => {
   const { user } = useAuth();
+  const toast = useToast();
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchAnalytics();
@@ -22,26 +26,22 @@ const Analytics = () => {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get(`/analytics/monthly/${user.id}`);
+      const { data } = await api.get("/analytics/monthly");
       setAnalytics(data);
-    } catch (error) {
-      console.error("غلط في تحميل التحليلات:", error);
+    } catch (err) {
+      console.error("Error fetching analytics:", err);
+      setError(err.message);
+      toast.error("فيه مشكلة في تحميل التحليلات");
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="text-center py-20 text-[var(--color-muted)]">
-        بنحمّل التحليلات...
-      </div>
-    );
-  }
+  if (loading) return <Loader text="بنحمّل التحليلات..." />;
 
-  if (!analytics) {
+  if (error) {
     return (
-      <div className="text-center py-20 text-ios-error">
+      <div className="text-center py-20 text-red-500">
         فيه مشكلة في تحميل التحليلات
       </div>
     );

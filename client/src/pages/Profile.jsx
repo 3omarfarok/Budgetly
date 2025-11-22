@@ -1,0 +1,542 @@
+import { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
+import api from "../utils/api";
+import {
+  User,
+  Mail,
+  Shield,
+  Calendar,
+  DollarSign,
+  TrendingUp,
+  CheckCircle,
+  Clock,
+  Edit,
+} from "lucide-react";
+import Loader from "../components/Loader";
+
+// Available profile pictures
+const availableAvatars = [
+  "botttsNeutral-1763768541507.png",
+  "botttsNeutral-1763768546369.png",
+  "botttsNeutral-1763768550746.png",
+  "botttsNeutral-1763768560012.png",
+  "botttsNeutral-1763768565019.png",
+  "botttsNeutral-1763768569238.png",
+  "botttsNeutral-1763768572840.png",
+  "botttsNeutral-1763768577274.png",
+  "botttsNeutral-1763768581968.png",
+  "botttsNeutral-1763768586146.png",
+  "botttsNeutral-1763768589940.png",
+  "botttsNeutral-1763768594623.png",
+  "botttsNeutral-1763768601505.png",
+  "botttsNeutral-1763768605149.png",
+  "botttsNeutral-1763768608769.png",
+  "botttsNeutral-1763768613011.png",
+  "botttsNeutral-1763768617031.png",
+  "botttsNeutral-1763768621235.png",
+  "botttsNeutral-1763768624817.png",
+  "botttsNeutral-1763768628084.png",
+];
+
+const Profile = () => {
+  const { user, updateUser } = useAuth();
+  const toast = useToast();
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState(
+    user.profilePicture || null
+  );
+
+  useEffect(() => {
+    fetchUserStats();
+  }, []);
+
+  const fetchUserStats = async () => {
+    try {
+      setLoading(true);
+      const [balancesRes, paymentsRes, expensesRes] = await Promise.all([
+        api.get("/stats/balances"),
+        api.get("/payments"),
+        api.get("/expenses"),
+      ]);
+
+      // Find current user's balance
+      const userBalance =
+        balancesRes.data.find((b) => b.userId.toString() === user.id) || {};
+
+      // Filter user's payments
+      const userPayments = paymentsRes.data.filter(
+        (p) => p.user._id === user.id
+      );
+
+      // Filter expenses that include this user
+      const userExpenses = expensesRes.data.filter((e) =>
+        e.splits.some((s) => s.user._id === user.id)
+      );
+
+      setStats({
+        balance: userBalance.balance || 0,
+        totalOwed: userBalance.totalOwed || 0,
+        totalPaid: userBalance.totalPaid || 0,
+        paymentsCount: userPayments.length,
+        expensesCount: userExpenses.length,
+        pendingPayments: userPayments.filter((p) => p.status === "pending")
+          .length,
+        approvedPayments: userPayments.filter((p) => p.status === "approved")
+          .length,
+      });
+    } catch (error) {
+      console.error("خطأ في تحميل الإحصائيات:", error);
+      toast.error("فيه مشكلة في تحميل بياناتك");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveAvatar = async () => {
+    try {
+      const response = await api.patch("/users/me/profile-picture", {
+        profilePicture: selectedAvatar,
+      });
+
+      // Update user in auth context
+      if (updateUser) {
+        updateUser(response.data);
+      }
+
+      toast.success("تم حفظ صورة الملف الشخصي بنجاح!");
+      setShowAvatarModal(false);
+    } catch (error) {
+      console.error("خطأ في حفظ الصورة:", error);
+      toast.error("فيه مشكلة في حفظ الصورة");
+    }
+  };
+
+  if (loading) return <Loader text="بنحمّل بياناتك..." />;
+
+  return (
+    <div className="pb-8 max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-8">
+        <div
+          className="p-3 rounded-2xl"
+          style={{ backgroundColor: "var(--color-primary-bg)" }}
+        >
+          <User style={{ color: "var(--color-primary)" }} size={32} />
+        </div>
+        <div>
+          <h1
+            className="text-3xl font-bold"
+            style={{ color: "var(--color-dark)" }}
+          >
+            الملف الشخصي
+          </h1>
+          <p className="text-sm" style={{ color: "var(--color-secondary)" }}>
+            شوف معلوماتك وإحصائياتك
+          </p>
+        </div>
+      </div>
+
+      {/* Profile Card */}
+      <div
+        className="backdrop-blur-xl p-8 rounded-3xl shadow-lg mb-6"
+        style={{
+          backgroundColor: "var(--color-surface)",
+          border: "1px solid var(--color-border)",
+        }}
+      >
+        {/* Avatar and Name */}
+        <div className="flex items-center gap-6 mb-6">
+          <div className="relative">
+            {user.profilePicture ? (
+              <img
+                src={`/profiles/${user.profilePicture}`}
+                alt={user.name}
+                className="w-24 h-24 rounded-full shadow-lg object-cover"
+                style={{ border: "3px solid var(--color-primary)" }}
+              />
+            ) : (
+              <div
+                className="w-24 h-24 rounded-full flex items-center justify-center text-4xl font-bold text-white shadow-lg"
+                style={{
+                  background:
+                    "linear-gradient(135deg, var(--color-primary) 0%, var(--color-info) 100%)",
+                }}
+              >
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <button
+              onClick={() => setShowAvatarModal(true)}
+              className="absolute bottom-0 right-0 p-2 rounded-full shadow-lg transition-all hover:scale-110"
+              style={{
+                backgroundColor: "var(--color-primary)",
+                color: "white",
+              }}
+            >
+              <Edit size={16} />
+            </button>
+          </div>
+          <div className="flex-1">
+            <h2
+              className="text-2xl font-bold mb-1"
+              style={{ color: "var(--color-dark)" }}
+            >
+              {user.name}
+            </h2>
+            <p
+              className="flex items-center gap-2 mb-2"
+              style={{ color: "var(--color-secondary)" }}
+            >
+              <Mail size={16} />@{user.username}
+            </p>
+            <span
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase"
+              style={{
+                backgroundColor:
+                  user.role === "admin"
+                    ? "var(--color-status-pending-bg)"
+                    : "var(--color-primary-bg)",
+                color:
+                  user.role === "admin"
+                    ? "var(--color-status-pending)"
+                    : "var(--color-primary)",
+                border:
+                  user.role === "admin"
+                    ? "1px solid var(--color-status-pending-border)"
+                    : "1px solid var(--color-primary-border)",
+              }}
+            >
+              {user.role === "admin" ? (
+                <>
+                  <Shield size={12} />
+                  أدمن
+                </>
+              ) : (
+                <>
+                  <User size={12} />
+                  عضو
+                </>
+              )}
+            </span>
+          </div>
+        </div>
+
+        {/* User Info Grid */}
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6 border-t"
+          style={{ borderColor: "var(--color-border)" }}
+        >
+          <div
+            className="flex items-center gap-3 p-3 rounded-xl"
+            style={{ backgroundColor: "var(--color-bg)" }}
+          >
+            <Calendar size={20} style={{ color: "var(--color-primary)" }} />
+            <div>
+              <p
+                className="text-xs"
+                style={{ color: "var(--color-secondary)" }}
+              >
+                عضو من
+              </p>
+              <p
+                className="font-semibold"
+                style={{ color: "var(--color-dark)" }}
+              >
+                {new Date(user.createdAt).toLocaleDateString("ar-EG", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
+            </div>
+          </div>
+
+          <div
+            className="flex items-center gap-3 p-3 rounded-xl"
+            style={{ backgroundColor: "var(--color-bg)" }}
+          >
+            <DollarSign
+              size={20}
+              style={{
+                color:
+                  stats.balance < 0
+                    ? "var(--color-error)"
+                    : "var(--color-success)",
+              }}
+            />
+            <div>
+              <p
+                className="text-xs"
+                style={{ color: "var(--color-secondary)" }}
+              >
+                الرصيد الحالي
+              </p>
+              <p
+                className="font-semibold text-lg"
+                style={{
+                  color:
+                    stats.balance < 0
+                      ? "var(--color-error)"
+                      : "var(--color-success)",
+                }}
+              >
+                {stats.balance < 0
+                  ? `عليك ${Math.abs(stats.balance).toFixed(2)}`
+                  : stats.balance > 0
+                  ? `ليك ${stats.balance.toFixed(2)}`
+                  : "0.00"}{" "}
+                جنيه
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div
+          className="p-5 rounded-2xl"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+          }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <TrendingUp size={18} style={{ color: "var(--color-error)" }} />
+            <p className="text-sm" style={{ color: "var(--color-secondary)" }}>
+              إجمالي المصاريف
+            </p>
+          </div>
+          <p
+            className="text-2xl font-bold"
+            style={{ color: "var(--color-dark)" }}
+          >
+            {stats.totalOwed.toFixed(2)}
+          </p>
+          <p className="text-xs" style={{ color: "var(--color-muted)" }}>
+            جنيه
+          </p>
+        </div>
+
+        <div
+          className="p-5 rounded-2xl"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+          }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <CheckCircle size={18} style={{ color: "var(--color-success)" }} />
+            <p className="text-sm" style={{ color: "var(--color-secondary)" }}>
+              إجمالي المدفوع
+            </p>
+          </div>
+          <p
+            className="text-2xl font-bold"
+            style={{ color: "var(--color-dark)" }}
+          >
+            {stats.totalPaid.toFixed(2)}
+          </p>
+          <p className="text-xs" style={{ color: "var(--color-muted)" }}>
+            جنيه
+          </p>
+        </div>
+
+        <div
+          className="p-5 rounded-2xl"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+          }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <TrendingUp size={18} style={{ color: "var(--color-info)" }} />
+            <p className="text-sm" style={{ color: "var(--color-secondary)" }}>
+              عدد المصاريف
+            </p>
+          </div>
+          <p
+            className="text-2xl font-bold"
+            style={{ color: "var(--color-dark)" }}
+          >
+            {stats.expensesCount}
+          </p>
+          <p className="text-xs" style={{ color: "var(--color-muted)" }}>
+            مصروف
+          </p>
+        </div>
+
+        <div
+          className="p-5 rounded-2xl"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+          }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <CheckCircle size={18} style={{ color: "var(--color-primary)" }} />
+            <p className="text-sm" style={{ color: "var(--color-secondary)" }}>
+              عدد الدفعات
+            </p>
+          </div>
+          <p
+            className="text-2xl font-bold"
+            style={{ color: "var(--color-dark)" }}
+          >
+            {stats.paymentsCount}
+          </p>
+          <p className="text-xs" style={{ color: "var(--color-muted)" }}>
+            دفعة
+          </p>
+        </div>
+      </div>
+
+      {/* Payments Status */}
+      <div
+        className="backdrop-blur-xl p-6 rounded-3xl shadow-lg"
+        style={{
+          backgroundColor: "var(--color-surface)",
+          border: "1px solid var(--color-border)",
+        }}
+      >
+        <h3
+          className="text-lg font-bold mb-4"
+          style={{ color: "var(--color-dark)" }}
+        >
+          حالة الدفعات
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div
+            className="p-4 rounded-xl"
+            style={{ backgroundColor: "var(--color-bg)" }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Clock
+                size={18}
+                style={{ color: "var(--color-status-pending)" }}
+              />
+              <p
+                className="text-sm font-semibold"
+                style={{ color: "var(--color-secondary)" }}
+              >
+                دفعات منتظرة
+              </p>
+            </div>
+            <p
+              className="text-3xl font-bold"
+              style={{ color: "var(--color-status-pending)" }}
+            >
+              {stats.pendingPayments}
+            </p>
+          </div>
+
+          <div
+            className="p-4 rounded-xl"
+            style={{ backgroundColor: "var(--color-bg)" }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle
+                size={18}
+                style={{ color: "var(--color-status-approved)" }}
+              />
+              <p
+                className="text-sm font-semibold"
+                style={{ color: "var(--color-secondary)" }}
+              >
+                دفعات موافق عليها
+              </p>
+            </div>
+            <p
+              className="text-3xl font-bold"
+              style={{ color: "var(--color-status-approved)" }}
+            >
+              {stats.approvedPayments}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Avatar Selector Modal */}
+      {showAvatarModal && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowAvatarModal(false)}
+        >
+          <div
+            className="backdrop-blur-xl p-6 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+            style={{
+              backgroundColor: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3
+              className="text-2xl font-bold mb-4"
+              style={{ color: "var(--color-dark)" }}
+            >
+              اختر صورة الملف الشخصي
+            </h3>
+
+            <div className="grid grid-cols-4 sm:grid-cols-5 gap-4 mb-6">
+              {availableAvatars.map((avatar) => (
+                <div
+                  key={avatar}
+                  onClick={() => setSelectedAvatar(avatar)}
+                  className="cursor-pointer transition-all hover:scale-105"
+                  style={{
+                    padding: "4px",
+                    borderRadius: "16px",
+                    border:
+                      selectedAvatar === avatar
+                        ? "3px solid var(--color-primary)"
+                        : "3px solid transparent",
+                  }}
+                >
+                  <img
+                    src={`/profiles/${avatar}`}
+                    alt="Avatar"
+                    className="w-full h-full rounded-xl object-cover"
+                    style={{ aspectRatio: "1/1" }}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleSaveAvatar}
+                className="flex-1 py-3 px-4 text-white font-bold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl"
+                style={{ backgroundColor: "var(--color-primary)" }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor = "var(--color-dark)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.backgroundColor =
+                    "var(--color-primary)")
+                }
+              >
+                احفظ
+              </button>
+              <button
+                onClick={() => setShowAvatarModal(false)}
+                className="flex-1 py-3 px-4 font-bold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl"
+                style={{
+                  backgroundColor: "var(--color-bg)",
+                  color: "var(--color-dark)",
+                  border: "1px solid var(--color-border)",
+                }}
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Profile;

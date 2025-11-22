@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import { useNavigate } from "react-router-dom";
 import api from "../utils/api";
 import {
@@ -12,9 +13,12 @@ import {
   PlusCircle,
 } from "lucide-react";
 
+import Loader from "../components/Loader";
+
 const Payments = () => {
   const [payments, setPayments] = useState([]);
   const { user } = useAuth();
+  const toast = useToast();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
@@ -31,6 +35,7 @@ const Payments = () => {
       setPayments(data);
     } catch (error) {
       console.error("غلط في تحميل المدفوعات:", error);
+      toast.error("فيه مشكلة في تحميل المدفوعات");
     } finally {
       setLoading(false);
     }
@@ -39,18 +44,22 @@ const Payments = () => {
   const handleApprove = async (id) => {
     try {
       await api.patch(`/payments/${id}/approve`);
+      toast.success("تم الموافقة على الدفعة بنجاح");
       fetchPayments();
     } catch (error) {
       console.error("غلط في الموافقة:", error);
+      toast.error("فيه مشكلة في الموافقة");
     }
   };
 
   const handleReject = async (id) => {
     try {
       await api.patch(`/payments/${id}/reject`);
+      toast.success("تم رفض الدفعة");
       fetchPayments();
     } catch (error) {
       console.error("غلط في الرفض:", error);
+      toast.error("فيه مشكلة في الرفض");
     }
   };
 
@@ -86,6 +95,8 @@ const Payments = () => {
     };
     return badges[status] || badges.pending;
   };
+
+  if (loading) return <Loader text="بنحمّل المدفوعات..." />;
 
   return (
     <div className="pb-8 px-4 max-w-5xl mx-auto">
@@ -133,16 +144,6 @@ const Payments = () => {
           </div>
         </div>
       </div>
-
-      {/* حالة التحميل */}
-      {loading && (
-        <div
-          className="text-center py-10"
-          style={{ color: "var(--color-secondary)" }}
-        >
-          بنحمّل المدفوعات...
-        </div>
-      )}
 
       {/* عرض البطاقات */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

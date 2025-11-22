@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import api from "../utils/api";
 import { Banknote, PlusCircle, User as UserIcon } from "lucide-react";
 
+import Loader from "../components/Loader";
+
 const AddPayment = () => {
   const { user } = useAuth();
+  const toast = useToast();
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [balances, setBalances] = useState([]);
@@ -15,6 +19,7 @@ const AddPayment = () => {
     description: "",
   });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchUsers();
@@ -22,6 +27,7 @@ const AddPayment = () => {
 
   const fetchUsers = async () => {
     try {
+      setLoading(true);
       const [usersRes, balancesRes] = await Promise.all([
         api.get("/users"),
         api.get("/stats/balances"),
@@ -44,6 +50,9 @@ const AddPayment = () => {
       setBalances(balancesRes.data);
     } catch (error) {
       console.error("غلط في تحميل الأعضاء:", error);
+      toast.error("فيه مشكلة في تحميل الأعضاء");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -52,16 +61,21 @@ const AddPayment = () => {
     setError("");
 
     if (!formData.user || !formData.amount) {
-      setError("لازم تختار العضو والمبلغ");
+      const errorMsg = "لازم تختار العضو والمبلغ";
+      setError(errorMsg);
+      toast.warning(errorMsg);
       return;
     }
 
     try {
       await api.post("/payments", formData);
+      toast.success("تم تسجيل الدفعة بنجاح!");
       navigate("/payments");
     } catch (error) {
       console.error("غلط في تسجيل الدفعة:", error);
-      setError("فيه مشكلة في تسجيل الدفعة");
+      const errorMsg = "فيه مشكلة في تسجيل الدفعة";
+      setError(errorMsg);
+      toast.error(errorMsg);
     }
   };
 
@@ -74,14 +88,15 @@ const AddPayment = () => {
     );
   }
 
+  if (loading) return <Loader text="بنحمّل الأعضاء..." />;
+
   return (
     <div className="pb-8 max-w-2xl mx-auto">
       <div className="flex items-center gap-3 mb-8">
         <div
           className="p-3 rounded-2xl"
           style={{
-            backgroundColor:
-              "color-mix(in srgb, var(--color-primary) 10%, transparent)",
+            backgroundColor: "var(--color-primary-bg)",
           }}
         >
           <Banknote style={{ color: "var(--color-primary)" }} size={32} />
@@ -109,10 +124,10 @@ const AddPayment = () => {
 
       <form
         onSubmit={handleSubmit}
-        className="bg-white/80 backdrop-blur-xl p-8 rounded-3xl space-y-6 shadow-lg"
+        className="backdrop-blur-xl p-8 rounded-3xl space-y-6 shadow-lg"
         style={{
-          border:
-            "1px solid color-mix(in srgb, var(--color-light) 50%, transparent)",
+          backgroundColor: "var(--color-surface)",
+          border: "1px solid var(--color-border)",
         }}
       >
         <div>
@@ -125,12 +140,7 @@ const AddPayment = () => {
           <select
             value={formData.user}
             onChange={(e) => setFormData({ ...formData, user: e.target.value })}
-            className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2"
-            style={{
-              backgroundColor: "var(--color-bg)",
-              border: "1px solid var(--color-border)",
-              color: "var(--color-dark)",
-            }}
+            className="w-full appearance-none   px-5 py-3.5 rounded-2xl transition-all border border-(--color-border)    bg-(--color-bg) border-(color-border) text-(color-dark)"
             required
           >
             <option value="">-- اختار عضو --</option>
@@ -144,10 +154,7 @@ const AddPayment = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label
-              className="block text-sm font-semibold mb-2"
-              style={{ color: "var(--color-dark)" }}
-            >
+            <label className="block text-sm font-semibold mb-2 text-(color-dark)">
               المبلغ (جنيه)
             </label>
             <input
@@ -157,22 +164,14 @@ const AddPayment = () => {
               onChange={(e) =>
                 setFormData({ ...formData, amount: e.target.value })
               }
-              className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2"
-              style={{
-                backgroundColor: "var(--color-bg)",
-                border: "1px solid var(--color-border)",
-                color: "var(--color-dark)",
-              }}
+              className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2 border border-(--color-border) bg-(--color-bg) text-(--color-dark)"
               placeholder="0.00"
               required
             />
           </div>
 
           <div>
-            <label
-              className="block text-sm font-semibold mb-2"
-              style={{ color: "var(--color-dark)" }}
-            >
+            <label className="block text-sm font-semibold mb-2 text-(color-dark)">
               التاريخ
             </label>
             <input
@@ -181,21 +180,13 @@ const AddPayment = () => {
               onChange={(e) =>
                 setFormData({ ...formData, date: e.target.value })
               }
-              className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2"
-              style={{
-                backgroundColor: "var(--color-bg)",
-                border: "1px solid var(--color-border)",
-                color: "var(--color-dark)",
-              }}
+              className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2  bg-(--color-bg) border border-(--color-border) text-(--color-dark)  "
             />
           </div>
         </div>
 
         <div>
-          <label
-            className="block text-sm font-semibold mb-2"
-            style={{ color: "var(--color-dark)" }}
-          >
+          <label className="block text-sm font-semibold mb-2 text-(color-dark)">
             وصف (اختياري)
           </label>
           <textarea
@@ -203,12 +194,7 @@ const AddPayment = () => {
             onChange={(e) =>
               setFormData({ ...formData, description: e.target.value })
             }
-            className="w-full px-5 py-3.5 rounded-2xl transition-all resize-none focus:outline-none focus:ring-2"
-            style={{
-              backgroundColor: "var(--color-bg)",
-              border: "1px solid var(--color-border)",
-              color: "var(--color-dark)",
-            }}
+            className="w-full px-5 py-3.5 rounded-2xl transition-all resize-none focus:outline-none focus:ring-2 border  bg-(--color-bg) border-(--color-border) text-(--color-dark)"
             rows="3"
             placeholder="أي ملاحظات..."
           />
@@ -216,14 +202,8 @@ const AddPayment = () => {
 
         <button
           type="submit"
-          className="w-full py-4 px-4 text-white font-bold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl mt-4 flex items-center justify-center gap-2"
+          className="w-full py-4 px-4 cursor-pointer text-white hover:bg-[--color-dark] hover:text-[--color-primary]  font-bold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl mt-4 flex items-center justify-center gap-2"
           style={{ backgroundColor: "var(--color-primary)" }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = "var(--color-dark)")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.backgroundColor = "var(--color-primary)")
-          }
         >
           <PlusCircle size={20} />
           سجّل الدفعة
@@ -232,10 +212,10 @@ const AddPayment = () => {
 
       {/* قائمة الأعضاء للمرجع */}
       <div
-        className="mt-8 bg-white/80 backdrop-blur-xl p-6 rounded-3xl shadow-lg"
+        className="mt-8 backdrop-blur-xl p-6 rounded-3xl shadow-lg"
         style={{
-          border:
-            "1px solid color-mix(in srgb, var(--color-light) 50%, transparent)",
+          backgroundColor: "var(--color-surface)",
+          border: "1px solid var(--color-border)",
         }}
       >
         <h3
