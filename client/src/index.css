@@ -13,7 +13,6 @@
 =============================== */
 @theme {
   --font-family-sans: "Cairo", system-ui, sans-serif;
-
   --color-ios-dark: var(--color-dark);
   --color-ios-primary: var(--color-primary);
   --color-ios-secondary: var(--color-secondary);

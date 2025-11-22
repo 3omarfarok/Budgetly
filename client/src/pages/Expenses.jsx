@@ -96,9 +96,7 @@ const Expenses = () => {
     <div className="pb-8 px-4 max-w-6xl mx-auto">
       {/* Header with title and add button */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-[var(--color-dark)]">
-          المصاريف
-        </h1>
+        <h1 className="text-2xl font-bold text-(--color-dark)">المصاريف</h1>
         {user.role === "admin" && (
           <Link
             to="/add-expense"
@@ -115,7 +113,7 @@ const Expenses = () => {
         {expenses.map((expense) => (
           <div
             key={expense._id}
-            className="group bg-[var(--color-bg)] rounded-2xl p-5 shadow-sm border border-[var(--color-muted-border)] hover:shadow-md transition-all duration-200 relative overflow-hidden"
+            className="group bg-(--color-bg) rounded-2xl p-5 shadow-sm border border-(--color-muted) hover:shadow-md transition-all duration-200 relative overflow-hidden"
           >
             <div className="flex justify-between items-start mb-3">
               {/* أيقونة التصنيف */}
@@ -129,9 +127,9 @@ const Expenses = () => {
 
               {/* المبلغ */}
               <div className="text-right">
-                <span className="block text-xl font-bold text-[var(--color-dark)]">
+                <span className="block text-xl font-bold text-(--color-dark)">
                   {expense.totalAmount.toFixed(2)}
-                  <span className="text-xs text-[var(--color-muted)] font-normal mr-1">
+                  <span className="text-xs text-(--color-muted) font-normal mr-1">
                     جنيه
                   </span>
                 </span>
@@ -140,20 +138,20 @@ const Expenses = () => {
 
             {/* العنوان */}
             <h3
-              className="font-semibold text-[var(--color-secondary)] mb-2 line-clamp-1"
+              className="font-semibold text-(--color-secondary) mb-2 line-clamp-1"
               title={expense.description}
             >
               {expense.description}
             </h3>
 
             {/* التصنيف */}
-            <span className="inline-block px-2.5 py-1 bg-[var(--color-ios-surface)] text-[var(--color-muted)] text-xs font-medium rounded-full mb-4">
+            <span className="inline-block px-2.5 py-1 bg-ios-surface text-(--color-muted) text-xs font-medium rounded-full mb-4">
               {translateCategory(expense.category)}
             </span>
 
             {/* المعلومات */}
-            <div className="flex items-center justify-between pt-4 border-t border-[var(--color-hover)] mt-auto">
-              <div className="flex flex-col gap-1 text-xs text-[var(--color-muted)]">
+            <div className="flex items-center justify-between pt-4 border-t border-(--color-hover) mt-auto">
+              <div className="flex flex-col gap-1 text-xs text-(--color-muted)">
                 <div className="flex items-center gap-1.5">
                   <Calendar size={12} />
                   <span>
@@ -175,7 +173,7 @@ const Expenses = () => {
               {user.role === "admin" && (
                 <button
                   onClick={() => handleDelete(expense._id)}
-                  className="p-2 text-[var(--color-border)] hover:text-[var(--color-error)] hover:bg-[var(--color-status-rejected-bg)] rounded-lg transition-colors"
+                  className="p-2 text-(--color-border) hover:text-(--color-error) hover:bg-(--color-status-rejected-bg) rounded-lg transition-colors cursor-pointer"
                   title="امسح"
                 >
                   <Trash2 size={18} />
@@ -188,15 +186,12 @@ const Expenses = () => {
 
       {/* لو مفيش مصاريف */}
       {!loading && expenses.length === 0 && (
-        <div className="text-center py-20 bg-[var(--color-surface)] rounded-3xl border-2 border-dashed border-[var(--color-border)]">
-          <Receipt
-            size={48}
-            className="mx-auto mb-3 text-[var(--color-border)]"
-          />
-          <p className="text-[var(--color-muted)] font-medium">
+        <div className="text-center py-20 bg-(--color-surface) rounded-3xl border-2 border-dashed border-[--color-border]">
+          <Receipt size={48} className="mx-auto mb-3 text-(--color-border)" />
+          <p className="text-(--color-muted) font-medium">
             مفيش مصاريف متسجلة لسه
           </p>
-          <p className="text-[var(--color-muted)] text-sm mt-1">
+          <p className="text-(--color-muted) text-sm mt-1">
             ابدأ سجّل أول مصروف
           </p>
         </div>

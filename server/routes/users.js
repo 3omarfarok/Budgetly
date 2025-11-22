@@ -134,4 +134,64 @@ router.patch("/me/profile-picture", authenticate, async (req, res) => {
   }
 });
 
+// Update own username (Any authenticated user)
+router.patch("/me/username", authenticate, async (req, res) => {
+  try {
+    const { username } = req.body;
+
+    if (!username || username.trim() === "") {
+      return res.status(400).json({ message: "اليوزرنيم مينفعش يكون فاضي" });
+    }
+
+    // Check if username already exists
+    const existingUser = await User.findOne({ username: username.trim() });
+    if (existingUser && existingUser._id.toString() !== req.user.id) {
+      return res
+        .status(400)
+        .json({ message: "اليوزرنيم ده موجود عند حد تاني" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { username: username.trim() },
+      { new: true }
+    ).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error("Update username error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Update own name (Any authenticated user)
+router.patch("/me/name", authenticate, async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    if (!name || name.trim() === "") {
+      return res.status(400).json({ message: "الاسم مينفعش يكون فاضي" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { name: name.trim() },
+      { new: true }
+    ).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error("Update name error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 export default router;

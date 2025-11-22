@@ -39,7 +39,7 @@ const Login = () => {
           <img
             src="/assets/logo.png"
             alt="بدجتلي - Budgetly"
-            className="w-28 h-auto dark:invert "
+            className="w-28 h-auto dark:invert"
           />
         </div>
 

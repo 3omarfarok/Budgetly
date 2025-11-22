@@ -48,6 +48,12 @@ const Profile = () => {
   const [selectedAvatar, setSelectedAvatar] = useState(
     user.profilePicture || null
   );
+  const [editingUsername, setEditingUsername] = useState(false);
+  const [newUsername, setNewUsername] = useState(user.username || "");
+  const [savingUsername, setSavingUsername] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [newName, setNewName] = useState(user.name || "");
+  const [savingName, setSavingName] = useState(false);
 
   useEffect(() => {
     fetchUserStats();
@@ -112,6 +118,90 @@ const Profile = () => {
       console.error("خطأ في حفظ الصورة:", error);
       toast.error("فيه مشكلة في حفظ الصورة");
     }
+  };
+
+  const handleSaveUsername = async () => {
+    // Validation
+    if (!newUsername || newUsername.trim() === "") {
+      toast.warning("اليوزرنيم مينفعش يكون فاضي");
+      return;
+    }
+
+    if (newUsername.trim() === user.username) {
+      setEditingUsername(false);
+      return;
+    }
+
+    try {
+      setSavingUsername(true);
+      const response = await api.patch("/users/me/username", {
+        username: newUsername.trim(),
+      });
+
+      // Update user in auth context
+      if (updateUser) {
+        updateUser(response.data);
+      }
+
+      toast.success("تم تغيير اليوزرنيم بنجاح!");
+      setEditingUsername(false);
+    } catch (error) {
+      console.error("خطأ في تغيير اليوزرنيم:", error);
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("فيه مشكلة في تغيير اليوزرنيم");
+      }
+    } finally {
+      setSavingUsername(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setNewUsername(user.username);
+    setEditingUsername(false);
+  };
+
+  const handleSaveName = async () => {
+    // Validation
+    if (!newName || newName.trim() === "") {
+      toast.warning("الاسم مينفعش يكون فاضي");
+      return;
+    }
+
+    if (newName.trim() === user.name) {
+      setEditingName(false);
+      return;
+    }
+
+    try {
+      setSavingName(true);
+      const response = await api.patch("/users/me/name", {
+        name: newName.trim(),
+      });
+
+      // Update user in auth context
+      if (updateUser) {
+        updateUser(response.data);
+      }
+
+      toast.success("تم تغيير الاسم بنجاح!");
+      setEditingName(false);
+    } catch (error) {
+      console.error("خطأ في تغيير الاسم:", error);
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("فيه مشكلة في تغيير الاسم");
+      }
+    } finally {
+      setSavingName(false);
+    }
+  };
+
+  const handleCancelNameEdit = () => {
+    setNewName(user.name);
+    setEditingName(false);
   };
 
   if (loading) return <Loader text="بنحمّل بياناتك..." />;
@@ -180,18 +270,128 @@ const Profile = () => {
             </button>
           </div>
           <div className="flex-1">
-            <h2
-              className="text-2xl font-bold mb-1"
-              style={{ color: "var(--color-dark)" }}
-            >
-              {user.name}
-            </h2>
-            <p
-              className="flex items-center gap-2 mb-2"
-              style={{ color: "var(--color-secondary)" }}
-            >
-              <Mail size={16} />@{user.username}
-            </p>
+            {/* Editable Name */}
+            <div className="flex items-center gap-2 mb-1">
+              {editingName ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    className="px-2 py-1 rounded-lg text-xl font-bold border"
+                    style={{
+                      backgroundColor: "var(--color-bg)",
+                      borderColor: "var(--color-border)",
+                      color: "var(--color-dark)",
+                    }}
+                    placeholder="الاسم"
+                    disabled={savingName}
+                  />
+                  <button
+                    onClick={handleSaveName}
+                    disabled={savingName}
+                    className="px-3 py-1 rounded-lg text-xs font-semibold transition-all"
+                    style={{
+                      backgroundColor: "var(--color-success)",
+                      color: "white",
+                      opacity: savingName ? 0.6 : 1,
+                    }}
+                  >
+                    {savingName ? "..." : "حفظ"}
+                  </button>
+                  <button
+                    onClick={handleCancelNameEdit}
+                    disabled={savingName}
+                    className="px-3 py-1 rounded-lg text-xs font-semibold transition-all"
+                    style={{
+                      backgroundColor: "var(--color-muted-bg)",
+                      color: "var(--color-secondary)",
+                    }}
+                  >
+                    إلغاء
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <h2
+                    className="text-2xl font-bold"
+                    style={{ color: "var(--color-dark)" }}
+                  >
+                    {user.name}
+                  </h2>
+                  <button
+                    onClick={() => setEditingName(true)}
+                    className="p-1 rounded-lg hover:bg-opacity-10 transition-all"
+                    style={{
+                      color: "var(--color-primary)",
+                    }}
+                    title="تعديل الاسم"
+                  >
+                    <Edit size={16} />
+                  </button>
+                </div>
+              )}
+            </div>
+            {/* Editable Username */}
+            <div className="flex items-center gap-2 mb-2">
+              <Mail size={16} style={{ color: "var(--color-secondary)" }} />
+              {editingUsername ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={newUsername}
+                    onChange={(e) => setNewUsername(e.target.value)}
+                    className="px-2 py-1 rounded-lg text-sm border"
+                    style={{
+                      backgroundColor: "var(--color-bg)",
+                      borderColor: "var(--color-border)",
+                      color: "var(--color-dark)",
+                    }}
+                    placeholder="اليوزرنيم"
+                    disabled={savingUsername}
+                  />
+                  <button
+                    onClick={handleSaveUsername}
+                    disabled={savingUsername}
+                    className="px-3 py-1 rounded-lg text-xs font-semibold transition-all"
+                    style={{
+                      backgroundColor: "var(--color-success)",
+                      color: "white",
+                      opacity: savingUsername ? 0.6 : 1,
+                    }}
+                  >
+                    {savingUsername ? "..." : "حفظ"}
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    disabled={savingUsername}
+                    className="px-3 py-1 rounded-lg text-xs font-semibold transition-all"
+                    style={{
+                      backgroundColor: "var(--color-muted-bg)",
+                      color: "var(--color-secondary)",
+                    }}
+                  >
+                    إلغاء
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span style={{ color: "var(--color-secondary)" }}>
+                    @{user.username}
+                  </span>
+                  <button
+                    onClick={() => setEditingUsername(true)}
+                    className="p-1 rounded-lg hover:bg-opacity-10 transition-all"
+                    style={{
+                      color: "var(--color-primary)",
+                    }}
+                    title="تعديل اليوزرنيم"
+                  >
+                    <Edit size={14} />
+                  </button>
+                </div>
+              )}
+            </div>
             <span
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase"
               style={{
