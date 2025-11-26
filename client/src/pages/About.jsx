@@ -52,12 +52,9 @@ const About = () => {
           >
             المميزات الرئيسية
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-4 ">
             <div className="flex items-start gap-3">
-              <div
-                className="p-2 rounded-xl"
-                style={{ backgroundColor: "var(--color-primary-bg)" }}
-              >
+              <div className="p-2 rounded-xl bg-(--color-surface) border border-(--color-border)">
                 <DollarSign
                   size={20}
                   style={{ color: "var(--color-primary)" }}
@@ -81,10 +78,7 @@ const About = () => {
             </div>
 
             <div className="flex items-start gap-3">
-              <div
-                className="p-2 rounded-xl"
-                style={{ backgroundColor: "var(--color-primary-bg)" }}
-              >
+              <div className="p-2 rounded-xl bg-(--color-surface) border border-(--color-border)">
                 <Users size={20} style={{ color: "var(--color-primary)" }} />
               </div>
               <div>
@@ -104,10 +98,7 @@ const About = () => {
             </div>
 
             <div className="flex items-start gap-3">
-              <div
-                className="p-2 rounded-xl"
-                style={{ backgroundColor: "var(--color-primary-bg)" }}
-              >
+              <div className="p-2 rounded-xl bg-(--color-surface) border border-(--color-border)">
                 <TrendingUp
                   size={20}
                   style={{ color: "var(--color-primary)" }}
@@ -133,13 +124,7 @@ const About = () => {
         </div>
 
         {/* How to Use */}
-        <div
-          className="p-6 rounded-3xl shadow-sm"
-          style={{
-            backgroundColor: "var(--color-surface)",
-            border: "1px solid var(--color-border)",
-          }}
-        >
+        <div className="p-6 rounded-3xl shadow-sm bg-(--color-surface) border border-(--color-border)">
           <h2
             className="text-xl font-bold mb-4"
             style={{ color: "var(--color-dark)" }}
@@ -148,10 +133,7 @@ const About = () => {
           </h2>
           <div className="space-y-3">
             <div className="flex gap-3">
-              <div
-                className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white"
-                style={{ backgroundColor: "var(--color-primary)" }}
-              >
+              <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white border border-(--color-primary)">
                 1
               </div>
               <div>
@@ -170,11 +152,8 @@ const About = () => {
               </div>
             </div>
 
-            <div className="flex gap-3">
-              <div
-                className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white"
-                style={{ backgroundColor: "var(--color-primary)" }}
-              >
+            <div className="flex gap-3 items-center">
+              <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white border border-(--color-primary)">
                 2
               </div>
               <div>
@@ -193,11 +172,8 @@ const About = () => {
               </div>
             </div>
 
-            <div className="flex gap-3">
-              <div
-                className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white"
-                style={{ backgroundColor: "var(--color-primary)" }}
-              >
+            <div className="flex gap-3 items-center">
+              <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white border border-(--color-primary)">
                 3
               </div>
               <div>
@@ -217,10 +193,7 @@ const About = () => {
             </div>
 
             <div className="flex gap-3">
-              <div
-                className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white"
-                style={{ backgroundColor: "var(--color-primary)" }}
-              >
+              <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white border border-(--color-primary)">
                 4
               </div>
               <div>
@@ -242,13 +215,7 @@ const About = () => {
         </div>
 
         {/* Tips */}
-        <div
-          className="p-6 rounded-3xl shadow-sm"
-          style={{
-            backgroundColor: "var(--color-surface)",
-            border: "1px solid var(--color-border)",
-          }}
-        >
+        <div className="p-6 rounded-3xl shadow-sm bg-(--color-surface) border border-(--color-border)">
           <h2
             className="text-xl font-bold mb-4"
             style={{ color: "var(--color-dark)" }}
@@ -256,31 +223,20 @@ const About = () => {
             نصايح للاستخدام الأمثل
           </h2>
           <ul className="space-y-2">
-            <li
-              className="flex items-start gap-2"
-              style={{ color: "var(--color-secondary)" }}
-            >
+            <li className="flex items-start gap-2 text-(--color-secondary) ">
               <span style={{ color: "var(--color-primary)" }}>•</span>
               <span>سجل المصاريف أول ما تحصل عشان ما تنساش</span>
             </li>
-            <li
-              className="flex items-start gap-2"
-              style={{ color: "var(--color-secondary)" }}
-            >
+            <li className="flex items-start gap-2 text-(--color-secondary) ">
               <span style={{ color: "var(--color-primary)" }}>•</span>
               <span>راجع التحليلات كل شهر عشان تعرف على إيه بتصرف</span>
             </li>
-            <li
-              className="flex items-start gap-2"
-              style={{ color: "var(--color-secondary)" }}
-            >
+            <li className="flex items-start gap-2 text-(--color-secondary) ">
               <span style={{ color: "var(--color-primary)" }}>•</span>
+
               <span>سدد فلوسك بانتظام عشان ما تتجمعش عليك</span>
             </li>
-            <li
-              className="flex items-start gap-2"
-              style={{ color: "var(--color-secondary)" }}
-            >
+            <li className="flex items-start gap-2 text-(--color-secondary) ">
               <span style={{ color: "var(--color-primary)" }}>•</span>
               <span>
                 استخدم الفلاتر في صفحة المصاريف لو بتدور على حاجة معينة

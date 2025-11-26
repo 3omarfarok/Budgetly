@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import Loader from "../components/Loader";
+import QuoteCard from "../components/QuoteCard";
 
 // صفحة لوحة التحكم - محسّنة للإتاحة
 const Dashboard = () => {
@@ -54,6 +55,11 @@ const Dashboard = () => {
         </div>
         <h1 className="text-3xl font-bold text-ios-dark">الصفحة الرئيسية</h1>
       </div>
+
+      <div className="mb-8">
+        <QuoteCard />
+      </div>
+
       {user.role === "admin" ? (
         <AdminDashboard stats={stats} />
       ) : (

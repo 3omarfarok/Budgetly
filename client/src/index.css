@@ -2,6 +2,7 @@
    Google Fonts (اختياري)
 =============================== */
 @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Rakkas&display=swap");
 
 /* ============================
    Tailwind CSS v4
@@ -353,4 +354,7 @@ input[type="number"]::-webkit-outer-spin-button {
 /* Smooth scrolling for the whole page */
 html {
   scroll-behavior: smooth;
+}
+.Qoute-Card {
+  font-family: "Rakkas", serif;
 }
