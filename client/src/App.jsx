@@ -19,6 +19,7 @@ import MyPayments from "./pages/MyPayments";
 import Analytics from "./pages/Analytics";
 import Profile from "./pages/Profile";
 import About from "./pages/About";
+import NotFound from "./pages/NotFound";
 
 // مكون الحماية للصفحات
 const ProtectedRoute = ({ children }) => {
@@ -117,6 +118,14 @@ function App() {
                     element={
                       <ProtectedRoute>
                         <About />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="*"
+                    element={
+                      <ProtectedRoute>
+                        <NotFound />
                       </ProtectedRoute>
                     }
                   />
