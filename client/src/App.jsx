@@ -36,7 +36,7 @@ function App() {
       <AuthProvider>
         <ToastProvider>
           <Router>
-            <div className="min-h-screen flex flex-col font-sans">
+            <div className="min-h-screen flex flex-col font-primary">
               <Navbar />
               <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
                 <Routes>

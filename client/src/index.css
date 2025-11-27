@@ -1,19 +1,17 @@
 /* ============================
-   Google Fonts (اختياري)
-=============================== */
-@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Rakkas&display=swap");
-
-/* ============================
    Tailwind CSS v4
 =============================== */
 @import "tailwindcss";
 
 /* ============================
-   Tailwind Variables
+   Tailwind Variables & Font Families
 =============================== */
 @theme {
+  /* Multiple Font Families for Different Purposes */
   --font-family-sans: "Cairo", system-ui, sans-serif;
+  --font-family-headings: "Poppins", sans-serif;
+  --font-family-numbers: "Roboto Mono", monospace;
+  --font-family-decorative: "Handjet", serif;
   --color-ios-dark: var(--color-dark);
   --color-ios-primary: var(--color-primary);
   --color-ios-secondary: var(--color-secondary);
@@ -40,9 +38,16 @@
 }
 
 /* ============================
-   Root Colors — WCAG Contrast Fix
+   Root Colors & Font Families
 =============================== */
 :root {
+  /* Font Families */
+  --font-primary: "Cairo", sans-serif;
+  --font-headings: "Poppins", sans-serif;
+  --font-numbers: "Roboto Mono", monospace;
+  --font-decorative: "Rakkas", serif;
+
+  /* Colors — WCAG Contrast Fix */
   --color-dark: #0e1628;
   --color-primary: #1d4ed8; /* contrast تحسين بسييط */
   --color-primary-bg: #dbeafe;
@@ -88,6 +93,11 @@
 =============================== */
 @media (prefers-color-scheme: dark) {
   :root {
+    --font-primary: "Cairo", sans-serif;
+    --font-headings: "Poppins", sans-serif;
+    --font-numbers: "Roboto Mono", monospace;
+    --font-decorative: "Amiri", serif;
+
     --color-dark: #f8fafc;
     --color-primary: #60a5fa;
     --color-primary-bg: #1e3a8a;
@@ -125,26 +135,61 @@
 }
 
 /* ============================
-   Base Styles
+   Base Styles & Font Application
 =============================== */
+/* .Quote-Card {
+  font-family: var(--font-family-decorative) !important;
+  font-weight: 100;
+  font-style: normal;
+} */
+
 body {
   background: var(--gradient-bg);
   min-height: 100vh;
   color: var(--color-dark);
   transition: background var(--transition-slow);
-}
-* {
-  font-family: var(--font-family-sans);
-  font-weight: 500;
+  font-family: var(--font-primary);
 }
 
+.font-decorative {
+  font-family: var(--font-decorative);
+}
+
+/* Headings use Poppins */
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  font-weight: 700;
+  font-weight: 500;
+}
+
+/* Numbers, currency, and data use Roboto Mono */
+.font-numbers,
+.currency,
+.stats,
+.data-value,
+input[type="number"],
+.number-display {
+  font-family: var(--font-numbers);
+}
+
+/* Utility classes for font families */
+.font-primary {
+  font-family: var(--font-primary);
+}
+
+.font-headings {
+  font-family: var(--font-headings);
+}
+
+.font-numbers {
+  font-family: var(--font-numbers);
+}
+
+.font-decorative {
+  font-family: var(--font-decorative);
 }
 /* ============================
    Mobile padding
@@ -354,7 +399,4 @@ input[type="number"]::-webkit-outer-spin-button {
 /* Smooth scrolling for the whole page */
 html {
   scroll-behavior: smooth;
-}
-.Qoute-Card {
-  font-family: "Rakkas", serif;
 }

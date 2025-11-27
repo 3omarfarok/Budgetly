@@ -82,7 +82,7 @@ const Analytics = () => {
     .slice(0, 6); // Last 6 months
 
   return (
-    <div className="pb-8 px-4 max-w-6xl mx-auto">
+    <div className="pb-8 px-4 max-w-6xl mx-auto font-primary">
       {/* Header */}
       <div className="flex items-center gap-3 mb-8 pt-4">
         <div className="p-3 bg-ios-primary/10 rounded-2xl">

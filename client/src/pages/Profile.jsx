@@ -207,7 +207,7 @@ const Profile = () => {
   if (loading) return <Loader text="بنحمّل بياناتك..." />;
 
   return (
-    <div className="pb-8 max-w-4xl mx-auto">
+    <div className="pb-8 max-w-4xl mx-auto font-primary">
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <div

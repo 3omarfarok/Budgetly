@@ -22,14 +22,14 @@ const QuoteCard = () => {
   }, []);
 
   return (
-    <div className="bg-(--color-surface) rounded-2xl p-6 shadow-lg border border-(--color-border) relative overflow-hidden group hover:shadow-xl transition-all duration-300 Qoute-Card">
+    <div className="bg-(--color-surface) rounded-2xl p-6 shadow-lg border border-(--color-border) relative overflow-hidden group hover:shadow-xl transition-all duration-300 font-decorative Quote-Card">
       <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
         <Quote size={48} className="text-(--color-primary)" />
       </div>
 
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-(--color-primary) font-cairo flex items-center gap-2">
+          <h3 className="text-lg font-bold text-(--color-primary) font-cairo flex items-center gap-2 animate-pulse">
             <Quote size={20} />
             حكمة اليوم
           </h3>
@@ -50,7 +50,7 @@ const QuoteCard = () => {
             isAnimating ? "opacity-0" : "opacity-100"
           }`}
         >
-          <p className=" text-center font-bold text-(--color-dark) font-cairo leading-relaxed sm:text-2xl text-lg">
+          <p className=" text-center font-bold text-(--color-dark) font-cairo leading-relaxed sm:text-2xl text-lg  ">
             "{quote}"
           </p>
         </div>

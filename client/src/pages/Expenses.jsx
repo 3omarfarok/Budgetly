@@ -93,7 +93,7 @@ const Expenses = () => {
   if (loading) return <Loader text="بنحمّل المصاريف..." />;
 
   return (
-    <div className="pb-8 px-4 max-w-6xl mx-auto">
+    <div className="pb-8 px-4 max-w-6xl mx-auto font-primary">
       {/* Header with title and add button */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-(--color-dark)">المصاريف</h1>

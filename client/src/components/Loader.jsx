@@ -3,7 +3,7 @@ import { Loader2 } from "lucide-react";
 const Loader = ({ text = "بنحمّل..." }) => {
   return (
     <div
-      className="flex flex-col items-center justify-center min-h-[50vh] w-full p-8"
+      className="flex flex-col items-center justify-center min-h-[50vh] w-full p-8 font-primary"
       role="status"
       aria-live="polite"
     >

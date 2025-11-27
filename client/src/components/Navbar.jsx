@@ -13,6 +13,8 @@ import {
   User,
   Info,
 } from "lucide-react";
+import { BiColorFill } from "react-icons/bi";
+
 import { useState } from "react";
 
 // مكون شريط التنقل - محسّن للإتاحة
@@ -35,7 +37,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className="bg-ios-surface backdrop-blur-xl border-b border-ios-border px-4 sm:px-6 py-3 sticky top-0 z-50 shadow-sm"
+      className="bg-ios-surface backdrop-blur-xl border-b border-ios-border px-4 sm:px-6 py-3 sticky top-0 z-50 shadow-sm font-primary"
       role="navigation"
       aria-label="التنقل الرئيسي"
     >
@@ -143,7 +145,7 @@ const Navbar = () => {
               aria-expanded={showThemeMenu}
               aria-haspopup="true"
             >
-              <Palette size={20} aria-hidden="true" />
+              <BiColorFill size={20} aria-hidden="true" />
             </button>
 
             {showThemeMenu && (

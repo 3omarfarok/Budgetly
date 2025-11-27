@@ -4,7 +4,7 @@ import { Home, Frown } from "lucide-react";
 
 const NotFound = () => {
   return (
-    <div className="min-h-[80vh] flex flex-col items-center justify-center text-center px-4">
+    <div className="min-h-[80vh] flex flex-col items-center justify-center text-center px-4 font-primary">
       <h1 className="text-9xl font-bold text-(--color-primary) opacity-10 select-none">
         404
       </h1>

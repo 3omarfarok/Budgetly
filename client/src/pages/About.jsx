@@ -2,7 +2,7 @@ import { Users, DollarSign, TrendingUp, Facebook } from "lucide-react";
 
 const About = () => {
   return (
-    <div className="pb-8 max-w-4xl mx-auto">
+    <div className="pb-8 max-w-4xl mx-auto font-primary">
       {/* Header with Logo */}
       <div className="flex flex-col items-center text-center mb-8">
         <img

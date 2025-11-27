@@ -48,7 +48,7 @@ const Dashboard = () => {
     );
 
   return (
-    <div className="pb-8" id="main-content">
+    <div className="pb-8 font-primary" id="main-content">
       <div className="flex items-center gap-3 mb-8">
         <div className="p-3 bg-ios-primary/10 rounded-2xl">
           <Wallet className="text-ios-primary" size={32} aria-hidden="true" />

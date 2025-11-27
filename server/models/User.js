@@ -30,6 +30,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    house: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "House",
+      default: null,
+    },
   },
   {
     timestamps: true,

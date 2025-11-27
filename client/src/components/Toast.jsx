@@ -33,7 +33,7 @@ const Toast = ({ message, type = "info", onClose, duration = 4000 }) => {
 
   return (
     <div
-      className={`${styles[type]} border rounded-2xl p-4 shadow-lg backdrop-blur-sm flex items-start gap-3 min-w-[300px] max-w-md animate-slide-in`}
+      className={`${styles[type]} border rounded-2xl p-4 shadow-lg backdrop-blur-sm flex items-start gap-3 min-w-[300px] max-w-md animate-slide-in font-primary`}
       role="alert"
       aria-live="polite"
     >

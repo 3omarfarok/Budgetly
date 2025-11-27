@@ -99,7 +99,7 @@ const Payments = () => {
   if (loading) return <Loader text="بنحمّل المدفوعات..." />;
 
   return (
-    <div className="pb-8 px-4 max-w-5xl mx-auto">
+    <div className="pb-8 px-4 max-w-5xl mx-auto font-primary">
       {/* الهيدر */}
       <div className="flex justify-between items-center mb-8 pt-4">
         <div>

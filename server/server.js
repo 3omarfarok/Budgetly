@@ -11,9 +11,11 @@ import expenseRoutes from "./routes/expenses.js";
 import paymentRoutes from "./routes/payments.js";
 import statsRoutes from "./routes/stats.js";
 import analyticsRoutes from "./routes/analytics.js";
+import housesRoutes from "./routes/houses.js";
 
 // Import models
 import User from "./models/User.js";
+import House from "./models/House.js";
 
 dotenv.config();
 
@@ -39,18 +41,53 @@ mongoose
   .then(async () => {
     console.log("✅ MongoDB Connected");
 
-    // Create default admin user if doesn't exist
-    const adminExists = await User.findOne({ username: "gaper" });
-    if (!adminExists) {
-      const hashedPassword = await bcrypt.hash("admin123", 10);
-      await User.create({
-        username: "gaper",
-        password: hashedPassword,
-        role: "admin",
-        name: "Admin",
+    // Create default house if doesn't exist
+    let defaultHouse = await House.findOne({ name: "Default House" });
+
+    if (!defaultHouse) {
+      // Create default admin user if doesn't exist
+      let adminUser = await User.findOne({ username: "gaper" });
+      if (!adminUser) {
+        const hashedPassword = await bcrypt.hash("admin123", 10);
+        adminUser = await User.create({
+          username: "gaper",
+          password: hashedPassword,
+          role: "admin",
+          name: "Admin",
+        });
+        console.log(
+          "✅ Default admin user created (username: gaper, password: admin123)"
+        );
+      }
+
+      // Create default house with admin as owner
+      defaultHouse = await House.create({
+        name: "Default House",
+        admin: adminUser._id,
+        members: [adminUser._id],
       });
+      console.log("✅ Default House created");
+
+      // Assign house to admin
+      adminUser.house = defaultHouse._id;
+      await adminUser.save();
+    }
+
+    // Migrate existing users without a house to default house
+    const usersWithoutHouse = await User.find({ house: null });
+    if (usersWithoutHouse.length > 0) {
+      for (const user of usersWithoutHouse) {
+        user.house = defaultHouse._id;
+        await user.save();
+
+        // Add user to house members if not already there
+        if (!defaultHouse.members.includes(user._id)) {
+          defaultHouse.members.push(user._id);
+        }
+      }
+      await defaultHouse.save();
       console.log(
-        "✅ Default admin user created (username: gaper, password: admin123)"
+        `✅ Migrated ${usersWithoutHouse.length} users to Default House`
       );
     }
   })
@@ -58,6 +95,7 @@ mongoose
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/houses", housesRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/payments", paymentRoutes);

@@ -68,7 +68,7 @@ const Members = () => {
   if (loading) return <Loader text="بنحمّل الأعضاء..." />;
 
   return (
-    <div className="pb-8">
+    <div className="pb-8 font-primary">
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-3">
           <div className="p-3 bg-ios-primary/10 rounded-2xl">
@@ -199,7 +199,7 @@ const Members = () => {
             {user.role === "admin" && member.role !== "admin" && (
               <button
                 onClick={() => handleDeactivate(member._id)}
-                className="mt-auto px-4 py-2 border-2 border-red-200 text-red-600 hover:bg-red-50 rounded-2xl text-sm font-semibold transition-all w-full"
+                className="mt-auto px-4 py-2 border-2 cursor-pointer border-red-200 text-red-600 hover:bg-red-50 rounded-2xl text-sm font-semibold transition-all w-full"
               >
                 امسحه
               </button>

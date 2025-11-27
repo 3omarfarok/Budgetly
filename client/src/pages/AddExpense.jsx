@@ -92,7 +92,7 @@ const AddExpense = () => {
   if (loading) return <Loader text="بنحمّل البيانات..." />;
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto font-primary">
       <div className="flex items-center gap-3 mb-8">
         <div
           className="p-3 rounded-2xl"
