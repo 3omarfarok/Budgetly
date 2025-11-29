@@ -12,6 +12,9 @@ const HouseSelection = () => {
   const [error, setError] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newHouseName, setNewHouseName] = useState("");
+  const [newHousePassword, setNewHousePassword] = useState("");
+  const [joinPassword, setJoinPassword] = useState("");
+  const [selectedHouse, setSelectedHouse] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const { user, createHouse, joinHouse } = useAuth();
@@ -43,10 +46,15 @@ const HouseSelection = () => {
       return;
     }
 
+    if (!newHousePassword || newHousePassword.length < 4) {
+      setError("كلمة المرور يجب أن تكون 4 أحرف على الأقل");
+      return;
+    }
+
     setSubmitting(true);
     setError("");
     try {
-      await createHouse(newHouseName.trim());
+      await createHouse(newHouseName.trim(), newHousePassword);
       navigate("/");
     } catch (err) {
       setError(err.response?.data?.message || "فشل إنشاء البيت");
@@ -56,15 +64,28 @@ const HouseSelection = () => {
   };
 
   const handleJoinHouse = async (houseId) => {
+    setSelectedHouse(houseId);
+    setJoinPassword("");
+  };
+
+  const handleJoinSubmit = async (e) => {
+    e.preventDefault();
+    if (!joinPassword) {
+      setError("يرجى إدخال كلمة المرور");
+      return;
+    }
+
     setSubmitting(true);
     setError("");
     try {
-      await joinHouse(houseId);
+      await joinHouse(selectedHouse, joinPassword);
       navigate("/");
     } catch (err) {
       setError(err.response?.data?.message || "فشل الانضمام للبيت");
     } finally {
       setSubmitting(false);
+      setSelectedHouse(null);
+      setJoinPassword("");
     }
   };
 
@@ -114,20 +135,31 @@ const HouseSelection = () => {
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 إنشاء بيت جديد
               </h3>
-              <div className="flex gap-3">
+              <div className="space-y-3">
                 <input
                   type="text"
                   value={newHouseName}
                   onChange={(e) => setNewHouseName(e.target.value)}
                   placeholder="اسم البيت (مثال: عائلة أحمد)"
-                  className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   disabled={submitting}
                   autoFocus
                 />
+                <input
+                  type="password"
+                  value={newHousePassword}
+                  onChange={(e) => setNewHousePassword(e.target.value)}
+                  placeholder="كلمة المرور (4 أحرف على الأقل)"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled={submitting}
+                  minLength={4}
+                />
+              </div>
+              <div className="flex gap-3 mt-4">
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? "جاري الإنشاء..." : "إنشاء"}
                 </button>
@@ -136,6 +168,7 @@ const HouseSelection = () => {
                   onClick={() => {
                     setShowCreateForm(false);
                     setNewHouseName("");
+                    setNewHousePassword("");
                   }}
                   disabled={submitting}
                   className="bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white px-6 py-3 rounded-xl font-semibold transition-all"
@@ -164,28 +197,68 @@ const HouseSelection = () => {
                 {houses.map((house) => (
                   <div
                     key={house._id}
-                    className="flex items-center justify-between p-5 bg-gray-50 dark:bg-gray-700 rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 transition-all"
+                    className="p-5 bg-gray-50 dark:bg-gray-700 rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 transition-all"
                   >
-                    <div className="flex-1">
-                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-                        {house.name}
-                      </h4>
-                      <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                        <span className="flex items-center gap-1">
-                          <Users className="w-4 h-4" />
-                          {house.memberCount} عضو
-                        </span>
-                        <span>مدير: {house.admin?.name}</span>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex-1">
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                          {house.name}
+                        </h4>
+                        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                          <span className="flex items-center gap-1">
+                            <Users className="w-4 h-4" />
+                            {house.memberCount} عضو
+                          </span>
+                          <span>مدير: {house.admin?.name}</span>
+                        </div>
                       </div>
+                      {selectedHouse !== house._id && (
+                        <button
+                          onClick={() => handleJoinHouse(house._id)}
+                          disabled={submitting}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                          <LogIn className="w-5 h-5" />
+                          انضم
+                        </button>
+                      )}
                     </div>
-                    <button
-                      onClick={() => handleJoinHouse(house._id)}
-                      disabled={submitting}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                    >
-                      <LogIn className="w-5 h-5" />
-                      انضم
-                    </button>
+                    {selectedHouse === house._id && (
+                      <form
+                        onSubmit={handleJoinSubmit}
+                        className="mt-3 pt-3 border-t border-gray-300 dark:border-gray-600"
+                      >
+                        <div className="flex gap-2">
+                          <input
+                            type="password"
+                            value={joinPassword}
+                            onChange={(e) => setJoinPassword(e.target.value)}
+                            placeholder="ادخل كلمة المرور"
+                            className="flex-1 px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                            disabled={submitting}
+                            autoFocus
+                          />
+                          <button
+                            type="submit"
+                            disabled={submitting}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-semibold transition-all disabled:opacity-50"
+                          >
+                            {submitting ? "..." : "تأكيد"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedHouse(null);
+                              setJoinPassword("");
+                            }}
+                            disabled={submitting}
+                            className="bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white px-4 py-2 rounded-xl font-semibold transition-all"
+                          >
+                            إلغاء
+                          </button>
+                        </div>
+                      </form>
+                    )}
                   </div>
                 ))}
               </div>

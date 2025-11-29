@@ -9,10 +9,12 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { ToastProvider } from "./context/ToastContext";
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
+import HouseSelection from "./pages/HouseSelection";
+import HouseDetails from "./pages/HouseDetails";
 import Dashboard from "./pages/Dashboard";
 import Expenses from "./pages/Expenses";
 import AddExpense from "./pages/AddExpense";
-import Members from "./pages/Members";
 import Payments from "./pages/Payments";
 import AddPayment from "./pages/AddPayment";
 import MyPayments from "./pages/MyPayments";
@@ -26,6 +28,10 @@ const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
   if (!user) {
     return <Navigate to="/login" />;
+  }
+  // If user doesn't have a house, redirect to house selection
+  if (!user.house) {
+    return <Navigate to="/house-selection" />;
   }
   return children;
 };
@@ -41,6 +47,8 @@ function App() {
               <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
                 <Routes>
                   <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/house-selection" element={<HouseSelection />} />
                   <Route
                     path="/"
                     element={
@@ -98,14 +106,6 @@ function App() {
                     }
                   />
                   <Route
-                    path="/members"
-                    element={
-                      <ProtectedRoute>
-                        <Members />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
                     path="/profile"
                     element={
                       <ProtectedRoute>
@@ -118,6 +118,14 @@ function App() {
                     element={
                       <ProtectedRoute>
                         <About />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/house-details"
+                    element={
+                      <ProtectedRoute>
+                        <HouseDetails />
                       </ProtectedRoute>
                     }
                   />

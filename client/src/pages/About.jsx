@@ -133,7 +133,7 @@ const About = () => {
           </h2>
           <div className="space-y-3">
             <div className="flex gap-3">
-              <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white border border-(--color-primary)">
+              <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-(--color-primary) border border-(--color-primary)">
                 1
               </div>
               <div>
@@ -153,7 +153,7 @@ const About = () => {
             </div>
 
             <div className="flex gap-3 items-center">
-              <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white border border-(--color-primary)">
+              <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-(--color-primary) border border-(--color-primary)">
                 2
               </div>
               <div>
@@ -173,7 +173,7 @@ const About = () => {
             </div>
 
             <div className="flex gap-3 items-center">
-              <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white border border-(--color-primary)">
+              <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-(--color-primary) border border-(--color-primary)">
                 3
               </div>
               <div>
@@ -193,7 +193,7 @@ const About = () => {
             </div>
 
             <div className="flex gap-3">
-              <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white border border-(--color-primary)">
+              <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-(--color-primary) border border-(--color-primary)">
                 4
               </div>
               <div>

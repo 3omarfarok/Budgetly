@@ -12,6 +12,7 @@ import {
   BarChart3,
   User,
   Info,
+  Home,
 } from "lucide-react";
 import { BiColorFill } from "react-icons/bi";
 
@@ -79,15 +80,6 @@ const Navbar = () => {
             <Receipt size={18} aria-hidden="true" />
             <span>المصاريف</span>
           </Link>
-          <Link
-            to="/members"
-            className={navLinkClass("/members")}
-            role="menuitem"
-            aria-current={isActive("/members") ? "page" : undefined}
-          >
-            <Users size={18} aria-hidden="true" />
-            <span>المتسخدمين</span>
-          </Link>
           {user.role === "admin" && (
             <Link
               to="/analytics"
@@ -131,6 +123,15 @@ const Navbar = () => {
           >
             <Info size={18} aria-hidden="true" />
             <span>عن التطبيق</span>
+          </Link>
+          <Link
+            to="/house-details"
+            className={navLinkClass("/house-details")}
+            role="menuitem"
+            aria-current={isActive("/house-details") ? "page" : undefined}
+          >
+            <Home size={18} aria-hidden="true" />
+            <span>البيت</span>
           </Link>
         </div>
 

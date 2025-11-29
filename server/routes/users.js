@@ -5,10 +5,22 @@ import { authenticate, isAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Get all users
+// Get all users (from same house)
 router.get("/", authenticate, async (req, res) => {
   try {
-    const users = await User.find({ isActive: true }).select("-password");
+    // Get current user to find their house
+    const currentUser = await User.findById(req.user.id);
+
+    if (!currentUser || !currentUser.house) {
+      return res.status(400).json({ message: "User not in a house" });
+    }
+
+    // Only return users from the same house
+    const users = await User.find({
+      isActive: true,
+      house: currentUser.house,
+    }).select("-password");
+
     res.json(users);
   } catch (error) {
     console.error("Get users error:", error);

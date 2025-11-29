@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { Lock, AlertCircle } from "lucide-react";
@@ -111,6 +111,19 @@ const Login = () => {
                 ادخل
               </button>
             </form>
+
+            {/* Registration Link */}
+            <div className="mt-6 text-center">
+              <p className="text-ios-secondary">
+                مش عندك حساب؟{" "}
+                <Link
+                  to="/register"
+                  className="text-ios-primary hover:underline font-semibold transition-colors"
+                >
+                  سجل دلوقتي
+                </Link>
+              </p>
+            </div>
           </>
         )}
       </div>

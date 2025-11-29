@@ -154,7 +154,7 @@ const Members = () => {
         {members.map((member) => (
           <div
             key={member._id}
-            className="bg-[--color-surface] backdrop-blur-xl p-6 rounded-3xl border border-[--color-border] flex flex-col items-center text-center hover:shadow-lg transition-all"
+            className="bg-[--color-surface] backdrop-blur-xl p-6 rounded-3xl border border-(--color-muted) flex flex-col items-center text-center hover:shadow-lg transition-all"
           >
             {member.profilePicture ? (
               <img

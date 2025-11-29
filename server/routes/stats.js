@@ -6,12 +6,28 @@ import { authenticate } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Get balance summary for all users
+// Get balance summary for all users (in same house)
 router.get("/balances", authenticate, async (req, res) => {
   try {
-    const users = await User.find({ isActive: true });
-    const expenses = await Expense.find();
-    const payments = await Payment.find({ status: "approved" });
+    // Get current user to find their house
+    const currentUser = await User.findById(req.user.id);
+
+    if (!currentUser || !currentUser.house) {
+      return res.status(400).json({ message: "User not in a house" });
+    }
+
+    // Only get users from the same house
+    const users = await User.find({
+      isActive: true,
+      house: currentUser.house,
+    });
+
+    // Only get expenses and payments from the same house
+    const expenses = await Expense.find({ house: currentUser.house });
+    const payments = await Payment.find({
+      status: "approved",
+      house: currentUser.house,
+    });
 
     const balances = await Promise.all(
       users.map(async (user) => {
@@ -60,23 +76,32 @@ router.get("/balances", authenticate, async (req, res) => {
   }
 });
 
-// Get detailed stats for specific user
+// Get detailed stats for specific user (in same house)
 router.get("/user/:userId", authenticate, async (req, res) => {
   try {
     const userId = req.params.userId;
 
-    // Get user expenses
+    // Get current user to find their house
+    const currentUser = await User.findById(req.user.id);
+
+    if (!currentUser || !currentUser.house) {
+      return res.status(400).json({ message: "User not in a house" });
+    }
+
+    // Get user expenses (only from same house)
     const expenses = await Expense.find({
       "splits.user": userId,
+      house: currentUser.house,
     })
       .populate("createdBy", "name username")
       .populate("splits.user", "name username")
       .sort({ date: -1 });
 
-    // Get user payments
+    // Get user payments (only from same house)
     const payments = await Payment.find({
       user: userId,
       status: "approved",
+      house: currentUser.house,
     })
       .populate("recordedBy", "name username")
       .sort({ date: -1 });
@@ -128,12 +153,26 @@ router.get("/user/:userId", authenticate, async (req, res) => {
   }
 });
 
-// Get admin dashboard stats
+// Get admin dashboard stats (for same house)
 router.get("/admin/dashboard", authenticate, async (req, res) => {
   try {
-    const users = await User.find({ isActive: true });
-    const expenses = await Expense.find();
-    const payments = await Payment.find({ status: "approved" });
+    // Get current user to find their house
+    const currentUser = await User.findById(req.user.id);
+
+    if (!currentUser || !currentUser.house) {
+      return res.status(400).json({ message: "User not in a house" });
+    }
+
+    // Only get users, expenses, and payments from the same house
+    const users = await User.find({
+      isActive: true,
+      house: currentUser.house,
+    });
+    const expenses = await Expense.find({ house: currentUser.house });
+    const payments = await Payment.find({
+      status: "approved",
+      house: currentUser.house,
+    });
 
     // Total statistics
     const totalExpenses = expenses.reduce(

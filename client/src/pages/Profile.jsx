@@ -211,10 +211,10 @@ const Profile = () => {
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <div
-          className="p-3 rounded-2xl"
-          style={{ backgroundColor: "var(--color-primary-bg)" }}
+          className="p-3 rounded-2xl border border-(--color-border)"
+          style={{ backgroundColor: "var(--color-surface)" }}
         >
-          <User style={{ color: "var(--color-primary)" }} size={32} />
+          <User size={32} color="var(--color-primary)" />
         </div>
         <div>
           <h1
@@ -266,7 +266,7 @@ const Profile = () => {
                 color: "white",
               }}
             >
-              <Edit size={16} />
+              <Edit size={16} className="cursor-pointer" />
             </button>
           </div>
           <div className="flex-1">
@@ -327,7 +327,7 @@ const Profile = () => {
                     }}
                     title="تعديل الاسم"
                   >
-                    <Edit size={16} />
+                    <Edit size={16} className="cursor-pointer" />
                   </button>
                 </div>
               )}
@@ -387,7 +387,7 @@ const Profile = () => {
                     }}
                     title="تعديل اليوزرنيم"
                   >
-                    <Edit size={14} />
+                    <Edit size={14} className="cursor-pointer" />
                   </button>
                 </div>
               )}
