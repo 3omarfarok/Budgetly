@@ -273,24 +273,7 @@ const Navbar = () => {
             <Receipt size={22} aria-hidden="true" />
             <span className="text-xs font-medium">المصاريف</span>
           </Link>
-          <Link
-            to="/members"
-            onClick={handleLockedLinkClick}
-            {...(isLocked && { pointerEvents: "none" })}
-            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
-              isLocked ? "opacity-50 cursor-not-allowed" : ""
-            } ${
-              isActive("/members")
-                ? "text-ios-primary bg-ios-hover"
-                : "text-ios-secondary"
-            }`}
-            aria-label="الناس"
-            aria-current={isActive("/members") ? "page" : undefined}
-            role="menuitem"
-          >
-            <Users size={22} aria-hidden="true" />
-            <span className="text-xs font-medium">الناس</span>
-          </Link>
+
           <Link
             to={user.role === "admin" ? "/payments" : "/my-payments"}
             onClick={handleLockedLinkClick}
