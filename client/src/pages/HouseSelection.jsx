@@ -94,14 +94,14 @@ const HouseSelection = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 font-primary bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+    <div className=" flex items-center justify-center p-4 font-primary  dark:from-gray-900 dark:to-gray-800">
       <div className="w-full max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-600 rounded-full mb-4 shadow-lg">
+          <div className="inline-flex items-center justify-center w-20 h-20 border border-(--color-border-muted) animate-bounce rounded-full mb-4 shadow-lg">
             <Home className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2 font-headings">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2 ">
             اختر بيتك
           </h1>
           <p className="text-gray-600 dark:text-gray-400 text-lg">
@@ -119,7 +119,7 @@ const HouseSelection = () => {
             <button
               onClick={() => setShowCreateForm(true)}
               disabled={submitting}
-              className="w-full mb-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              className="w-full mb-6 bg-(--color-primary) cursor-pointer text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
             >
               <Plus className="w-5 h-5" />
               إنشاء بيت جديد

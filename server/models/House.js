@@ -19,6 +19,10 @@ const houseSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    password: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,

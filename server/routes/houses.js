@@ -32,7 +32,14 @@ router.get("/", async (req, res) => {
 // Get house details
 router.get("/:id", authenticate, async (req, res) => {
   try {
-    const house = await House.findById(req.params.id)
+    const { id } = req.params;
+
+    // Validate ID format
+    if (!id || id === "undefined" || !id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ message: "Invalid house ID" });
+    }
+
+    const house = await House.findById(id)
       .populate("admin", "name username profilePicture")
       .populate("members", "name username profilePicture")
       .select("-password"); // Exclude password
@@ -116,7 +123,22 @@ router.post("/", authenticate, async (req, res) => {
 router.post("/:id/join", authenticate, async (req, res) => {
   try {
     const { password } = req.body;
+    const { id } = req.params;
+
+    // Validate ID format
+    if (!id || id === "undefined" || !id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ message: "Invalid house ID" });
+    }
+
+    // Verify password is provided
+    if (!password) {
+      return res.status(400).json({ message: "Password is required" });
+    }
+
     const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
     // If user already has a house, remove them from it
     if (user.house) {
@@ -130,19 +152,25 @@ router.post("/:id/join", authenticate, async (req, res) => {
       }
     }
 
-    const house = await House.findById(req.params.id);
+    const house = await House.findById(id);
     if (!house) {
       return res.status(404).json({ message: "House not found" });
     }
 
-    // Verify password
-    if (!password) {
-      return res.status(400).json({ message: "Password is required" });
+    // Verify password - ensure house.password exists
+    if (!house.password) {
+      console.error("House has no password:", id);
+      return res.status(500).json({ message: "House configuration error" });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, house.password);
-    if (!isPasswordValid) {
-      return res.status(403).json({ message: "Incorrect password" });
+    try {
+      const isPasswordValid = await bcrypt.compare(password, house.password);
+      if (!isPasswordValid) {
+        return res.status(403).json({ message: "Incorrect password" });
+      }
+    } catch (bcryptError) {
+      console.error("Bcrypt comparison error:", bcryptError);
+      return res.status(500).json({ message: "Authentication error" });
     }
 
     // Check if user is already a member
@@ -168,8 +196,8 @@ router.post("/:id/join", authenticate, async (req, res) => {
 
     res.json(populatedHouse);
   } catch (error) {
-    console.error("Join house error:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Join house error:", error.message, error.stack);
+    res.status(500).json({ message: "Server error: " + error.message });
   }
 });
 

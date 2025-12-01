@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import { useToast } from "../context/ToastContext";
 import {
   LayoutDashboard,
   Receipt,
@@ -13,6 +14,7 @@ import {
   User,
   Info,
   Home,
+  Lock,
 } from "lucide-react";
 import { BiColorFill } from "react-icons/bi";
 
@@ -23,18 +25,29 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const { currentTheme, changeTheme, availableThemes } = useTheme();
   const location = useLocation();
+  const toast = useToast();
   const [showThemeMenu, setShowThemeMenu] = useState(false);
 
   if (!user) return null;
 
   const isActive = (path) => location.pathname === path;
+  const isLocked = !user.house; // Check if user has no house
 
-  const navLinkClass = (path) =>
-    `flex items-center gap-2 px-4 py-2.5 rounded-2xl transition-all duration-200 font-medium ${
-      isActive(path)
-        ? "bg-ios-primary text-white shadow-md"
-        : "text-ios-dark hover:bg-ios-hover focus-within:bg-ios-hover"
-    }`;
+  const handleLockedLinkClick = (e) => {
+    if (isLocked) {
+      e.preventDefault();
+      toast.error("يرجى اختيار أو إنشاء بيت أولاً");
+    }
+  };
+
+  const navLinkClass = (path) => {
+    const baseClass = `flex items-center gap-2 px-4 py-2.5 rounded-2xl transition-all duration-200 font-medium`;
+    const lockedClass = isLocked ? "opacity-50 cursor-not-allowed" : "";
+    const activeClass = isActive(path)
+      ? "bg-ios-primary text-white shadow-md"
+      : "text-ios-dark hover:bg-ios-hover focus-within:bg-ios-hover";
+    return `${baseClass} ${lockedClass} ${activeClass}`;
+  };
 
   return (
     <nav
@@ -46,6 +59,14 @@ const Navbar = () => {
       <a href="#main-content" className="skip-link">
         روح للصفحة الرئيسية
       </a>
+
+      {/* Locked Notification */}
+      {isLocked && (
+        <div className="mb-3 px-3 py-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg flex items-center gap-2 text-sm text-yellow-800 dark:text-yellow-400">
+          <Lock size={16} />
+          <span>يرجى اختيار بيت للوصول إلى المزيد من الخيارات</span>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <div className="flex items-center">
@@ -63,6 +84,8 @@ const Navbar = () => {
             className={navLinkClass("/")}
             role="menuitem"
             aria-current={isActive("/") ? "page" : undefined}
+            onClick={handleLockedLinkClick}
+            {...(isLocked && { pointerEvents: "none" })}
           >
             <LayoutDashboard size={18} aria-hidden="true" />
             <span>الصفحة الرئيسية</span>
@@ -76,6 +99,8 @@ const Navbar = () => {
                 ? "page"
                 : undefined
             }
+            onClick={handleLockedLinkClick}
+            {...(isLocked && { pointerEvents: "none" })}
           >
             <Receipt size={18} aria-hidden="true" />
             <span>المصاريف</span>
@@ -86,6 +111,8 @@ const Navbar = () => {
               className={navLinkClass("/analytics")}
               role="menuitem"
               aria-current={isActive("/analytics") ? "page" : undefined}
+              onClick={handleLockedLinkClick}
+              {...(isLocked && { pointerEvents: "none" })}
             >
               <BarChart3 size={18} aria-hidden="true" />
               <span>التحليلات</span>
@@ -102,6 +129,8 @@ const Navbar = () => {
                 ? "page"
                 : undefined
             }
+            onClick={handleLockedLinkClick}
+            {...(isLocked && { pointerEvents: "none" })}
           >
             <Banknote size={18} aria-hidden="true" />
             <span>المدفوعات</span>
@@ -111,6 +140,8 @@ const Navbar = () => {
             className={navLinkClass("/profile")}
             role="menuitem"
             aria-current={isActive("/profile") ? "page" : undefined}
+            onClick={handleLockedLinkClick}
+            {...(isLocked && { pointerEvents: "none" })}
           >
             <User size={18} aria-hidden="true" />
             <span>الملف الشخصي</span>
@@ -120,6 +151,8 @@ const Navbar = () => {
             className={navLinkClass("/about")}
             role="menuitem"
             aria-current={isActive("/about") ? "page" : undefined}
+            onClick={handleLockedLinkClick}
+            {...(isLocked && { pointerEvents: "none" })}
           >
             <Info size={18} aria-hidden="true" />
             <span>عن التطبيق</span>
@@ -129,6 +162,8 @@ const Navbar = () => {
             className={navLinkClass("/house-details")}
             role="menuitem"
             aria-current={isActive("/house-details") ? "page" : undefined}
+            onClick={handleLockedLinkClick}
+            {...(isLocked && { pointerEvents: "none" })}
           >
             <Home size={18} aria-hidden="true" />
             <span>البيت</span>
@@ -200,7 +235,11 @@ const Navbar = () => {
         <div className="flex justify-around items-center px-2">
           <Link
             to="/"
+            onClick={handleLockedLinkClick}
+            {...(isLocked && { pointerEvents: "none" })}
             className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              isLocked ? "opacity-50 cursor-not-allowed" : ""
+            } ${
               isActive("/")
                 ? "text-ios-primary bg-ios-hover"
                 : "text-ios-secondary"
@@ -214,7 +253,11 @@ const Navbar = () => {
           </Link>
           <Link
             to="/expenses"
+            onClick={handleLockedLinkClick}
+            {...(isLocked && { pointerEvents: "none" })}
             className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              isLocked ? "opacity-50 cursor-not-allowed" : ""
+            } ${
               isActive("/expenses") || isActive("/add-expense")
                 ? "text-ios-primary bg-ios-hover"
                 : "text-ios-secondary"
@@ -232,7 +275,11 @@ const Navbar = () => {
           </Link>
           <Link
             to="/members"
+            onClick={handleLockedLinkClick}
+            {...(isLocked && { pointerEvents: "none" })}
             className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              isLocked ? "opacity-50 cursor-not-allowed" : ""
+            } ${
               isActive("/members")
                 ? "text-ios-primary bg-ios-hover"
                 : "text-ios-secondary"
@@ -246,7 +293,11 @@ const Navbar = () => {
           </Link>
           <Link
             to={user.role === "admin" ? "/payments" : "/my-payments"}
+            onClick={handleLockedLinkClick}
+            {...(isLocked && { pointerEvents: "none" })}
             className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              isLocked ? "opacity-50 cursor-not-allowed" : ""
+            } ${
               isActive("/payments") || isActive("/my-payments")
                 ? "text-ios-primary bg-ios-hover"
                 : "text-ios-secondary"
@@ -264,7 +315,11 @@ const Navbar = () => {
           </Link>
           <Link
             to="/profile"
+            onClick={handleLockedLinkClick}
+            {...(isLocked && { pointerEvents: "none" })}
             className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              isLocked ? "opacity-50 cursor-not-allowed" : ""
+            } ${
               isActive("/profile")
                 ? "text-ios-primary bg-ios-hover"
                 : "text-ios-secondary"
@@ -278,7 +333,11 @@ const Navbar = () => {
           </Link>
           <Link
             to="/about"
+            onClick={handleLockedLinkClick}
+            {...(isLocked && { pointerEvents: "none" })}
             className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              isLocked ? "opacity-50 cursor-not-allowed" : ""
+            } ${
               isActive("/about")
                 ? "text-ios-primary bg-ios-hover"
                 : "text-ios-secondary"

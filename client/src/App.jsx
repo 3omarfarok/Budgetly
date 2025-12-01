@@ -23,6 +23,8 @@ import Profile from "./pages/Profile";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
+import AIButton from "./components/AIButton";
+
 // مكون الحماية للصفحات
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
@@ -33,7 +35,12 @@ const ProtectedRoute = ({ children }) => {
   if (!user.house) {
     return <Navigate to="/house-selection" />;
   }
-  return children;
+  return (
+    <>
+      {children}
+      <AIButton />
+    </>
+  );
 };
 
 function App() {
