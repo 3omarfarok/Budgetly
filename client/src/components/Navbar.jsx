@@ -15,6 +15,7 @@ import {
   Info,
   Home,
   Lock,
+  Bot,
 } from "lucide-react";
 import { BiColorFill } from "react-icons/bi";
 
@@ -315,22 +316,40 @@ const Navbar = () => {
             <span className="text-xs font-medium">الملف</span>
           </Link>
           <Link
-            to="/about"
+            to="/house-details"
             onClick={handleLockedLinkClick}
             {...(isLocked && { pointerEvents: "none" })}
             className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
               isLocked ? "opacity-50 cursor-not-allowed" : ""
             } ${
-              isActive("/about")
+              isActive("/house-details")
                 ? "text-ios-primary bg-ios-hover"
                 : "text-ios-secondary"
             }`}
-            aria-label="عن التطبيق"
-            aria-current={isActive("/about") ? "page" : undefined}
+            aria-label="البيت"
+            aria-current={isActive("/house-details") ? "page" : undefined}
             role="menuitem"
           >
-            <Info size={22} aria-hidden="true" />
-            <span className="text-xs font-medium">عن</span>
+            <Home size={22} aria-hidden="true" />
+            <span className="text-xs font-medium">البيت</span>
+          </Link>
+          <Link
+            to="/ai"
+            onClick={handleLockedLinkClick}
+            {...(isLocked && { pointerEvents: "none" })}
+            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              isLocked ? "opacity-50 cursor-not-allowed" : ""
+            } ${
+              isActive("/ai")
+                ? "text-ios-primary bg-ios-hover"
+                : "text-ios-secondary"
+            }`}
+            aria-label="المساعد"
+            aria-current={isActive("/ai") ? "page" : undefined}
+            role="menuitem"
+          >
+            <Bot size={22} aria-hidden="true" />
+            <span className="text-xs font-medium">AI</span>
           </Link>
         </div>
       </div>

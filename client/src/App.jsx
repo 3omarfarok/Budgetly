@@ -3,6 +3,7 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -22,12 +23,15 @@ import Analytics from "./pages/Analytics";
 import Profile from "./pages/Profile";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
+import AIPage from "./pages/AIPage";
 
 import AIButton from "./components/AIButton";
 
 // مكون الحماية للصفحات
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
+  const location = useLocation();
+
   if (!user) {
     return <Navigate to="/login" />;
   }
@@ -38,7 +42,7 @@ const ProtectedRoute = ({ children }) => {
   return (
     <>
       {children}
-      <AIButton />
+      {location.pathname !== "/ai" && <AIButton />}
     </>
   );
 };
@@ -133,6 +137,14 @@ function App() {
                     element={
                       <ProtectedRoute>
                         <HouseDetails />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/ai"
+                    element={
+                      <ProtectedRoute>
+                        <AIPage />
                       </ProtectedRoute>
                     }
                   />
