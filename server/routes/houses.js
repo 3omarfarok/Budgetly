@@ -1,5 +1,6 @@
 import express from "express";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import House from "../models/House.js";
 import User from "../models/User.js";
 import { authenticate } from "../middleware/auth.js";
@@ -107,12 +108,19 @@ router.post("/", authenticate, async (req, res) => {
     user.role = "admin"; // Become admin of the house
     await user.save();
 
+    // Generate new token with updated role
+    const token = jwt.sign(
+      { id: user._id, username: user.username, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "30d" }
+    );
+
     const populatedHouse = await House.findById(house._id)
       .populate("admin", "name username profilePicture")
       .populate("members", "name username profilePicture")
       .select("-password"); // Exclude password from response
 
-    res.status(201).json(populatedHouse);
+    res.status(201).json({ house: populatedHouse, token });
   } catch (error) {
     console.error("Create house error:", error);
     res.status(500).json({ message: "Server error" });

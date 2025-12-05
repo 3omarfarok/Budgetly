@@ -46,12 +46,14 @@ export const AuthProvider = ({ children }) => {
 
   const createHouse = async (name, password) => {
     const { data } = await api.post("/houses", { name, password });
+    // Save the new token with admin role
+    localStorage.setItem("token", data.token);
     setUser((prevUser) => ({
       ...prevUser,
-      house: data._id,
+      house: data.house,
       role: "admin",
     }));
-    return data;
+    return data.house;
   };
 
   const joinHouse = async (houseId, password) => {
