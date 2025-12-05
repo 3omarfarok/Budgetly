@@ -119,6 +119,13 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     const theme = themes[currentTheme];
 
+    // Toggle dark class on HTML element for Tailwind dark: utilities
+    if (currentTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+
     // تطبيق جميع المتغيرات
     Object.keys(theme.colors).forEach((key) => {
       document.documentElement.style.setProperty(

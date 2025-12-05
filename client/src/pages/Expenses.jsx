@@ -17,12 +17,15 @@ import {
   PlusCircle,
 } from "lucide-react";
 import Loader from "../components/Loader";
+import ConfirmModal from "../components/ConfirmModal";
 
 const Expenses = () => {
   const { user } = useAuth();
   const toast = useToast();
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingExpenseId, setDeletingExpenseId] = useState(null);
 
   useEffect(() => {
     fetchExpenses();
@@ -41,13 +44,18 @@ const Expenses = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("متأكد تمسح المصروف ده؟")) return;
+  const handleDelete = (id) => {
+    setDeletingExpenseId(id);
+    setShowDeleteModal(true);
+  };
 
+  const confirmDelete = async () => {
     try {
-      await api.delete(`/expenses/${id}`);
-      setExpenses(expenses.filter((e) => e._id !== id));
+      await api.delete(`/expenses/${deletingExpenseId}`);
+      setExpenses(expenses.filter((e) => e._id !== deletingExpenseId));
       toast.success("تم مسح المصروف بنجاح");
+      setShowDeleteModal(false);
+      setDeletingExpenseId(null);
     } catch (error) {
       console.error("Error deleting expense:", error);
       toast.error("فيه مشكلة في مسح المصروف");
@@ -196,6 +204,19 @@ const Expenses = () => {
           </p>
         </div>
       )}
+
+      {/* Confirm Delete Modal */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setDeletingExpenseId(null);
+        }}
+        onConfirm={confirmDelete}
+        title="حذف المصروف"
+        message="متأكد تمسح المصروف ده؟"
+        type="danger"
+      />
     </div>
   );
 };

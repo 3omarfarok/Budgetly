@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import Loader from "../components/Loader";
+import ConfirmModal from "../components/ConfirmModal";
 
 const MyPayments = () => {
   const { user } = useAuth();
@@ -29,6 +30,8 @@ const MyPayments = () => {
     date: new Date().toISOString().split("T")[0], // التاريخ الحالي افتراضي
   });
   const [error, setError] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingPaymentId, setDeletingPaymentId] = useState(null);
 
   useEffect(() => {
     fetchMyPayments();
@@ -119,14 +122,19 @@ const MyPayments = () => {
     setShowAddForm(true);
   };
 
-  const handleDelete = async (paymentId) => {
-    if (!window.confirm("متأكد إنك عايز تمسح الدفعة دي؟")) return;
+  const handleDelete = (paymentId) => {
+    setDeletingPaymentId(paymentId);
+    setShowDeleteModal(true);
+  };
 
+  const confirmDelete = async () => {
     try {
-      await api.delete(`/payments/${paymentId}`);
+      await api.delete(`/payments/${deletingPaymentId}`);
       toast.success("تم حذف الدفعة بنجاح");
       fetchMyPayments();
       fetchUserBalance();
+      setShowDeleteModal(false);
+      setDeletingPaymentId(null);
     } catch (error) {
       console.error("غلط في مسح الدفعة:", error);
       toast.error("فيه مشكلة في حذف الدفعة");
@@ -143,20 +151,38 @@ const MyPayments = () => {
     setShowAddForm(false);
   };
 
+  const getStatusStyle = (status) => {
+    const styles = {
+      pending: {
+        backgroundColor: "var(--color-status-pending-bg)",
+        color: "var(--color-status-pending)",
+        borderColor: "var(--color-status-pending-border)",
+      },
+      approved: {
+        backgroundColor: "var(--color-status-approved-bg)",
+        color: "var(--color-status-approved)",
+        borderColor: "var(--color-status-approved-border)",
+      },
+      rejected: {
+        backgroundColor: "var(--color-status-rejected-bg)",
+        color: "var(--color-status-rejected)",
+        borderColor: "var(--color-status-rejected-border)",
+      },
+    };
+    return styles[status] || styles.pending;
+  };
+
   const getStatusBadge = (status) => {
     const badges = {
       pending: {
-        color: "bg-yellow-100 text-yellow-600",
         icon: Clock,
         text: "مستني",
       },
       approved: {
-        color: "bg-green-100 text-green-600",
         icon: CheckCircle,
         text: "موافق عليه",
       },
       rejected: {
-        color: "bg-red-100 text-red-600",
         icon: XCircle,
         text: "مرفوض",
       },
@@ -184,16 +210,20 @@ const MyPayments = () => {
       <div className="mb-8 pt-4">
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-[var(--color-dark)]">
+            <h1
+              className="text-2xl font-bold"
+              style={{ color: "var(--color-dark)" }}
+            >
               مدفوعاتي
             </h1>
-            <p className="text-[var(--color-muted)] text-sm mt-1">
+            <p className="text-sm mt-1" style={{ color: "var(--color-muted)" }}>
               سجّل الفلوس اللي دفعتها
             </p>
           </div>
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="px-4 py-2.5 bg-ios-primary hover:bg-ios-dark text-white font-semibold rounded-2xl transition-all shadow-lg flex items-center gap-2"
+            className="px-4 py-2.5 text-white font-semibold rounded-2xl transition-all shadow-lg flex items-center gap-2"
+            style={{ backgroundColor: "var(--color-primary)" }}
           >
             <PlusCircle size={18} />
             {showAddForm ? "إلغاء" : "سجّل دفعة"}
@@ -204,23 +234,39 @@ const MyPayments = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {/* المبلغ المطلوب سداده */}
           <div
-            className={`${
-              amountOwed > 0
-                ? "bg-gradient-to-br from-red-50 to-red-100 border-red-200"
-                : "bg-gradient-to-br from-green-50 to-green-100 border-green-200"
-            } p-4 rounded-2xl border`}
+            className="p-4 rounded-2xl"
+            style={{
+              backgroundColor:
+                amountOwed > 0
+                  ? "var(--color-status-rejected-bg)"
+                  : "var(--color-status-approved-bg)",
+              borderColor:
+                amountOwed > 0
+                  ? "var(--color-status-rejected-border)"
+                  : "var(--color-status-approved-border)",
+              borderWidth: "1px",
+              borderStyle: "solid",
+            }}
           >
             <p
-              className={`text-sm ${
-                amountOwed > 0 ? "text-red-700" : "text-green-700"
-              } mb-1 flex items-center gap-1`}
+              className="text-sm mb-1 flex items-center gap-1"
+              style={{
+                color:
+                  amountOwed > 0
+                    ? "var(--color-status-rejected)"
+                    : "var(--color-status-approved)",
+              }}
             >
               {amountOwed > 0 ? "💸 المطلوب دفعه" : "✅ رصيدك"}
             </p>
             <p
-              className={`text-2xl font-bold ${
-                amountOwed > 0 ? "text-red-900" : "text-green-900"
-              }`}
+              className="text-2xl font-bold"
+              style={{
+                color:
+                  amountOwed > 0
+                    ? "var(--color-error)"
+                    : "var(--color-success)",
+              }}
             >
               {amountOwed > 0
                 ? amountOwed.toFixed(2)
@@ -229,21 +275,69 @@ const MyPayments = () => {
             </p>
           </div>
 
-          <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-2xl border border-green-200">
-            <p className="text-sm text-green-700 mb-1">الموافق عليه</p>
-            <p className="text-2xl font-bold text-green-900">
+          <div
+            className="p-4 rounded-2xl"
+            style={{
+              backgroundColor: "var(--color-status-approved-bg)",
+              borderColor: "var(--color-status-approved-border)",
+              borderWidth: "1px",
+              borderStyle: "solid",
+            }}
+          >
+            <p
+              className="text-sm mb-1"
+              style={{ color: "var(--color-status-approved)" }}
+            >
+              الموافق عليه
+            </p>
+            <p
+              className="text-2xl font-bold"
+              style={{ color: "var(--color-success)" }}
+            >
               {totalPaid.toFixed(2)} <span className="text-sm">جنيه</span>
             </p>
           </div>
-          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-2xl border border-yellow-200">
-            <p className="text-sm text-yellow-700 mb-1">المستني موافقة</p>
-            <p className="text-2xl font-bold text-yellow-900">
+          <div
+            className="p-4 rounded-2xl"
+            style={{
+              backgroundColor: "var(--color-status-pending-bg)",
+              borderColor: "var(--color-status-pending-border)",
+              borderWidth: "1px",
+              borderStyle: "solid",
+            }}
+          >
+            <p
+              className="text-sm mb-1"
+              style={{ color: "var(--color-status-pending)" }}
+            >
+              المستني موافقة
+            </p>
+            <p
+              className="text-2xl font-bold"
+              style={{ color: "var(--color-warning)" }}
+            >
               {pendingAmount.toFixed(2)} <span className="text-sm">جنيه</span>
             </p>
           </div>
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-2xl border border-blue-200">
-            <p className="text-sm text-blue-700 mb-1">إجمالي المدفوعات</p>
-            <p className="text-2xl font-bold text-blue-900">
+          <div
+            className="p-4 rounded-2xl"
+            style={{
+              backgroundColor: "var(--color-primary-bg)",
+              borderColor: "var(--color-primary-border)",
+              borderWidth: "1px",
+              borderStyle: "solid",
+            }}
+          >
+            <p
+              className="text-sm mb-1"
+              style={{ color: "var(--color-primary)" }}
+            >
+              إجمالي المدفوعات
+            </p>
+            <p
+              className="text-2xl font-bold"
+              style={{ color: "var(--color-info)" }}
+            >
               {payments.length}
             </p>
           </div>
@@ -252,29 +346,68 @@ const MyPayments = () => {
 
       {/* فورم إضافة/تعديل دفعة */}
       {showAddForm && (
-        <div className="bg-[var(--color-surface)] backdrop-blur-xl p-6 rounded-3xl border border-[var(--color-border)] mb-8 shadow-lg">
+        <div
+          className="backdrop-blur-xl p-6 rounded-3xl mb-8 shadow-lg"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            borderColor: "var(--color-border)",
+            borderWidth: "1px",
+            borderStyle: "solid",
+          }}
+        >
           <div className="flex justify-between items-start mb-4">
-            <h3 className="text-xl font-bold text-[var(--color-dark)]">
+            <h3
+              className="text-xl font-bold"
+              style={{ color: "var(--color-dark)" }}
+            >
               {editingPayment ? "عدّل الدفعة" : "سجّل دفعة جديدة"}
             </h3>
             {amountOwed > 0 && (
-              <div className="bg-red-50 px-4 py-2 rounded-xl border border-red-200">
-                <p className="text-xs text-red-600 mb-0.5">المطلوب دفعه:</p>
-                <p className="text-lg font-bold text-red-700">
+              <div
+                className="px-4 py-2 rounded-xl"
+                style={{
+                  backgroundColor: "var(--color-status-rejected-bg)",
+                  borderColor: "var(--color-status-rejected-border)",
+                  borderWidth: "1px",
+                  borderStyle: "solid",
+                }}
+              >
+                <p
+                  className="text-xs mb-0.5"
+                  style={{ color: "var(--color-status-rejected)" }}
+                >
+                  المطلوب دفعه:
+                </p>
+                <p
+                  className="text-lg font-bold"
+                  style={{ color: "var(--color-error)" }}
+                >
                   {amountOwed.toFixed(2)} جنيه
                 </p>
               </div>
             )}
           </div>
           {error && (
-            <div className="bg-red-50 text-red-600 p-3 rounded-2xl mb-4 text-sm border border-red-200">
+            <div
+              className="p-3 rounded-2xl mb-4 text-sm"
+              style={{
+                backgroundColor: "var(--color-status-rejected-bg)",
+                color: "var(--color-error)",
+                borderColor: "var(--color-status-rejected-border)",
+                borderWidth: "1px",
+                borderStyle: "solid",
+              }}
+            >
               {error}
             </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-[var(--color-dark)] mb-1">
+                <label
+                  className="block text-sm font-semibold mb-1"
+                  style={{ color: "var(--color-dark)" }}
+                >
                   المبلغ (جنيه)
                 </label>
                 <input
@@ -284,14 +417,24 @@ const MyPayments = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, amount: e.target.value })
                   }
-                  className="w-full px-4 py-3 bg-(--color-bg) border border-(--color-border) rounded-2xl text-(--color-dark) transition-all"
+                  className="w-full px-4 py-3 rounded-2xl transition-all"
+                  style={{
+                    backgroundColor: "var(--color-bg)",
+                    borderColor: "var(--color-border)",
+                    borderWidth: "1px",
+                    borderStyle: "solid",
+                    color: "var(--color-dark)",
+                  }}
                   placeholder="0.00"
                   required
                   autoFocus
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-(--color-dark) mb-1">
+                <label
+                  className="block text-sm font-semibold mb-1"
+                  style={{ color: "var(--color-dark)" }}
+                >
                   التاريخ
                 </label>
                 <input
@@ -300,12 +443,22 @@ const MyPayments = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, date: e.target.value })
                   }
-                  className="w-full px-4 py-3 bg-(--color-bg) border border-(--color-border) rounded-2xl text-(--color-dark) transition-all"
+                  className="w-full px-4 py-3 rounded-2xl transition-all"
+                  style={{
+                    backgroundColor: "var(--color-bg)",
+                    borderColor: "var(--color-border)",
+                    borderWidth: "1px",
+                    borderStyle: "solid",
+                    color: "var(--color-dark)",
+                  }}
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold text(--color-dark) mb-1">
+              <label
+                className="block text-sm font-semibold mb-1"
+                style={{ color: "var(--color-dark)" }}
+              >
                 وصف (اختياري)
               </label>
               <input
@@ -314,14 +467,22 @@ const MyPayments = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                className="w-full px-4 py-3 bg-(--color-bg) border border-(--color-border) rounded-2xl text-ios-dark transition-all"
+                className="w-full px-4 py-3 rounded-2xl transition-all"
+                style={{
+                  backgroundColor: "var(--color-bg)",
+                  borderColor: "var(--color-border)",
+                  borderWidth: "1px",
+                  borderStyle: "solid",
+                  color: "var(--color-dark)",
+                }}
                 placeholder="مثال: دفعة شهر يناير"
               />
             </div>
             <div className="flex gap-3">
               <button
                 type="submit"
-                className="flex-1 py-3 px-4 bg-ios-primary hover:bg-ios-dark text-white font-bold rounded-2xl transition-all shadow-lg"
+                className="flex-1 py-3 px-4 text-white font-bold rounded-2xl transition-all shadow-lg"
+                style={{ backgroundColor: "var(--color-primary)" }}
               >
                 {editingPayment ? "حفظ التعديل" : "سجّل الدفعة"}
               </button>
@@ -329,7 +490,11 @@ const MyPayments = () => {
                 <button
                   type="button"
                   onClick={handleCancelEdit}
-                  className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-(--color-secondary) font-bold rounded-2xl transition-all"
+                  className="px-6 py-3 font-bold rounded-2xl transition-all"
+                  style={{
+                    backgroundColor: "var(--color-light)",
+                    color: "var(--color-secondary)",
+                  }}
                 >
                   إلغاء
                 </button>
@@ -345,15 +510,23 @@ const MyPayments = () => {
           payments.map((payment) => {
             const statusBadge = getStatusBadge(payment.status);
             const StatusIcon = statusBadge.icon;
+            const statusStyle = getStatusStyle(payment.status);
 
             return (
               <div
                 key={payment._id}
-                className="bg-(--color-surface) rounded-2xl p-5 shadow-sm border border-(--color-border) hover:shadow-md transition-all"
+                className="rounded-2xl p-5 shadow-sm hover:shadow-md transition-all"
+                style={{
+                  backgroundColor: "var(--color-surface)",
+                  borderColor: "var(--color-border)",
+                  borderWidth: "1px",
+                  borderStyle: "solid",
+                }}
               >
                 <div className="flex justify-between items-start mb-3">
                   <div
-                    className={`px-3 py-1.5 rounded-xl ${statusBadge.color} flex items-center gap-1.5`}
+                    className="px-3 py-1.5 rounded-xl flex items-center gap-1.5"
+                    style={statusStyle}
                   >
                     <StatusIcon size={14} />
                     <span className="text-xs font-semibold">
@@ -361,9 +534,15 @@ const MyPayments = () => {
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="block text-xl font-bold text-(--color-dark)">
+                    <span
+                      className="block text-xl font-bold"
+                      style={{ color: "var(--color-dark)" }}
+                    >
                       {payment.amount?.toFixed(2) || "0.00"}
-                      <span className="text-xs text-(--color-muted) font-normal mr-1">
+                      <span
+                        className="text-xs font-normal mr-1"
+                        style={{ color: "var(--color-muted)" }}
+                      >
                         جنيه
                       </span>
                     </span>
@@ -371,12 +550,18 @@ const MyPayments = () => {
                 </div>
 
                 {payment.description && (
-                  <p className="text-(--color-secondary) mb-2">
+                  <p
+                    className="mb-2"
+                    style={{ color: "var(--color-secondary)" }}
+                  >
                     {payment.description}
                   </p>
                 )}
 
-                <div className="flex items-center gap-2 text-xs text-(--color-muted)">
+                <div
+                  className="flex items-center gap-2 text-xs"
+                  style={{ color: "var(--color-muted)" }}
+                >
                   <Calendar size={12} />
                   <span>
                     {new Date(
@@ -392,17 +577,32 @@ const MyPayments = () => {
 
                 {/* أزرار التعديل والحذف (للمدفوعات pending فقط) */}
                 {payment.status === "pending" && (
-                  <div className="flex gap-2 mt-3 pt-3 border-t border-(--color-border)">
+                  <div
+                    className="flex gap-2 mt-3 pt-3"
+                    style={{
+                      borderTopColor: "var(--color-border)",
+                      borderTopWidth: "1px",
+                      borderTopStyle: "solid",
+                    }}
+                  >
                     <button
                       onClick={() => handleEdit(payment)}
-                      className="flex-1 py-2 px-3 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2"
+                      className="flex-1 py-2 px-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2"
+                      style={{
+                        backgroundColor: "var(--color-primary-bg)",
+                        color: "var(--color-primary)",
+                      }}
                     >
                       <Edit2 size={14} />
                       عدّل
                     </button>
                     <button
                       onClick={() => handleDelete(payment._id)}
-                      className="flex-1 py-2 px-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2"
+                      className="flex-1 py-2 px-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2"
+                      style={{
+                        backgroundColor: "var(--color-status-rejected-bg)",
+                        color: "var(--color-error)",
+                      }}
                     >
                       <Trash2 size={14} />
                       امسح
@@ -416,20 +616,47 @@ const MyPayments = () => {
 
       {/* لو مفيش مدفوعات */}
       {!loading && payments.length === 0 && !showAddForm && (
-        <div className="text-center py-20 bg-(--color-surface) rounded-3xl border-2 border-dashed border-(--color-border)">
-          <Banknote size={48} className="mx-auto mb-3 text-gray-300" />
-          <p className="text-(--color-muted) font-medium mb-3">
+        <div
+          className="text-center py-20 rounded-3xl border-2 border-dashed"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            borderColor: "var(--color-border)",
+          }}
+        >
+          <Banknote
+            size={48}
+            className="mx-auto mb-3"
+            style={{ color: "var(--color-muted)" }}
+          />
+          <p
+            className="font-medium mb-3"
+            style={{ color: "var(--color-muted)" }}
+          >
             مسجلتش أي دفعة لسه
           </p>
           <button
             onClick={() => setShowAddForm(true)}
-            className="px-6 py-3 bg-ios-primary hover:bg-ios-dark text-white font-semibold rounded-2xl transition-all shadow-lg inline-flex items-center gap-2"
+            className="px-6 py-3 text-white font-semibold rounded-2xl transition-all shadow-lg inline-flex items-center gap-2"
+            style={{ backgroundColor: "var(--color-primary)" }}
           >
             <PlusCircle size={18} />
             سجّل أول دفعة
           </button>
         </div>
       )}
+
+      {/* Confirm Delete Modal */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setDeletingPaymentId(null);
+        }}
+        onConfirm={confirmDelete}
+        title="حذف الدفعة"
+        message="متأكد إنك عايز تمسح الدفعة دي؟"
+        type="danger"
+      />
     </div>
   );
 };

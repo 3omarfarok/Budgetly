@@ -5,6 +5,7 @@ import api from "../utils/api";
 import { Users, UserPlus, ShieldCheck, User as UserIcon } from "lucide-react";
 
 import Loader from "../components/Loader";
+import ConfirmModal from "../components/ConfirmModal";
 
 // صفحة الأعضاء - تصميم iOS
 const Members = () => {
@@ -19,6 +20,8 @@ const Members = () => {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingMemberId, setDeletingMemberId] = useState(null);
 
   useEffect(() => {
     fetchMembers();
@@ -53,12 +56,18 @@ const Members = () => {
     }
   };
 
-  const handleDeactivate = async (id) => {
-    if (!window.confirm("هل أنت متأكد من تعطيل هذا المستخدم؟")) return;
+  const handleDeactivate = (id) => {
+    setDeletingMemberId(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
     try {
-      await api.delete(`/users/${id}`);
+      await api.delete(`/users/${deletingMemberId}`);
       toast.success("تم حذف العضو بنجاح");
       fetchMembers();
+      setShowDeleteModal(false);
+      setDeletingMemberId(null);
     } catch (error) {
       console.error("خطأ في تعطيل المستخدم:", error);
       toast.error("فيه مشكلة في حذف العضو");
@@ -207,6 +216,19 @@ const Members = () => {
           </div>
         ))}
       </div>
+
+      {/* Confirm Delete Modal */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setDeletingMemberId(null);
+        }}
+        onConfirm={confirmDelete}
+        title="حذف عضو"
+        message="هل أنت متأكد من حذف هذا العضو؟"
+        type="danger"
+      />
     </div>
   );
 };

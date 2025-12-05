@@ -28,7 +28,7 @@ import AIPage from "./pages/AIPage";
 import AIButton from "./components/AIButton";
 
 // مكون الحماية للصفحات
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, requireHouse = true }) => {
   const { user } = useAuth();
   const location = useLocation();
 
@@ -36,13 +36,13 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" />;
   }
   // If user doesn't have a house, redirect to house selection
-  if (!user.house) {
+  if (requireHouse && !user.house) {
     return <Navigate to="/house-selection" />;
   }
   return (
     <>
       {children}
-      {location.pathname !== "/ai" && <AIButton />}
+      {requireHouse && location.pathname !== "/ai" && <AIButton />}
     </>
   );
 };
@@ -59,7 +59,14 @@ function App() {
                 <Routes>
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
-                  <Route path="/house-selection" element={<HouseSelection />} />
+                  <Route
+                    path="/house-selection"
+                    element={
+                      <ProtectedRoute requireHouse={false}>
+                        <HouseSelection />
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route
                     path="/"
                     element={

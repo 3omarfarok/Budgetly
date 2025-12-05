@@ -94,17 +94,29 @@ const HouseSelection = () => {
   }
 
   return (
-    <div className=" flex items-center justify-center p-4 font-primary  dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen flex items-center justify-center px-4 py-6 sm:p-4 font-primary">
       <div className="w-full max-w-4xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 border border-(--color-border-muted) animate-bounce rounded-full mb-4 shadow-lg">
-            <Home className="w-10 h-10 text-white" />
+        <div className="text-center mb-6 sm:mb-8">
+          <div
+            className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 border animate-bounce rounded-full mb-3 sm:mb-4 shadow-lg"
+            style={{
+              borderColor: "var(--color-border)",
+              backgroundColor: "var(--color-primary)",
+            }}
+          >
+            <Home className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2 ">
+          <h1
+            className="text-2xl sm:text-4xl font-bold mb-2"
+            style={{ color: "var(--color-dark)" }}
+          >
             اختر بيتك
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-lg">
+          <p
+            className="text-base sm:text-lg"
+            style={{ color: "var(--color-muted)" }}
+          >
             انضم لبيت موجود أو أنشئ بيت جديد
           </p>
         </div>
@@ -113,13 +125,20 @@ const HouseSelection = () => {
           <Toast message={error} type="error" onClose={() => setError("")} />
         )}
 
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 border border-gray-200 dark:border-gray-700">
+        <div
+          className="rounded-2xl shadow-2xl p-4 sm:p-8 border"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            borderColor: "var(--color-border)",
+          }}
+        >
           {/* Create New House Button */}
           {!showCreateForm && (
             <button
               onClick={() => setShowCreateForm(true)}
               disabled={submitting}
-              className="w-full mb-6 bg-(--color-primary) cursor-pointer text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              className="w-full mb-4 sm:mb-6 cursor-pointer text-white font-semibold py-3 sm:py-4 px-4 sm:px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-sm sm:text-base"
+              style={{ backgroundColor: "var(--color-primary)" }}
             >
               <Plus className="w-5 h-5" />
               إنشاء بيت جديد
@@ -130,9 +149,13 @@ const HouseSelection = () => {
           {showCreateForm && (
             <form
               onSubmit={handleCreateHouse}
-              className="mb-6 p-6 bg-blue-50 dark:bg-gray-700 rounded-xl"
+              className="mb-4 sm:mb-6 p-4 sm:p-6 rounded-xl"
+              style={{ backgroundColor: "var(--color-hover)" }}
             >
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <h3
+                className="text-base sm:text-lg font-semibold mb-3 sm:mb-4"
+                style={{ color: "var(--color-dark)" }}
+              >
                 إنشاء بيت جديد
               </h3>
               <div className="space-y-3">
@@ -141,7 +164,12 @@ const HouseSelection = () => {
                   value={newHouseName}
                   onChange={(e) => setNewHouseName(e.target.value)}
                   placeholder="اسم البيت (مثال: عائلة أحمد)"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-xl border focus:ring-2 focus:border-transparent text-sm sm:text-base"
+                  style={{
+                    backgroundColor: "var(--color-bg)",
+                    borderColor: "var(--color-border)",
+                    color: "var(--color-dark)",
+                  }}
                   disabled={submitting}
                   autoFocus
                 />
@@ -150,16 +178,22 @@ const HouseSelection = () => {
                   value={newHousePassword}
                   onChange={(e) => setNewHousePassword(e.target.value)}
                   placeholder="كلمة المرور (4 أحرف على الأقل)"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-xl border focus:ring-2 focus:border-transparent text-sm sm:text-base"
+                  style={{
+                    backgroundColor: "var(--color-bg)",
+                    borderColor: "var(--color-border)",
+                    color: "var(--color-dark)",
+                  }}
                   disabled={submitting}
                   minLength={4}
                 />
               </div>
-              <div className="flex gap-3 mt-4">
+              <div className="flex flex-col sm:flex-row gap-3 mt-4">
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 text-white px-6 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                  style={{ backgroundColor: "var(--color-primary)" }}
                 >
                   {submitting ? "جاري الإنشاء..." : "إنشاء"}
                 </button>
@@ -171,7 +205,11 @@ const HouseSelection = () => {
                     setNewHousePassword("");
                   }}
                   disabled={submitting}
-                  className="bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white px-6 py-3 rounded-xl font-semibold transition-all"
+                  className="px-6 py-3 rounded-xl font-semibold transition-all text-sm sm:text-base"
+                  style={{
+                    backgroundColor: "var(--color-light)",
+                    color: "var(--color-dark)",
+                  }}
                 >
                   إلغاء
                 </button>
@@ -181,30 +219,46 @@ const HouseSelection = () => {
 
           {/* Available Houses List */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <h3
+              className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center gap-2"
+              style={{ color: "var(--color-dark)" }}
+            >
               <Users className="w-5 h-5" />
               البيوت المتاحة
             </h3>
 
             {houses.length === 0 ? (
-              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                <Home className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                <p>لا توجد بيوت حالياً</p>
-                <p className="text-sm mt-2">كن أول من ينشئ بيت!</p>
+              <div
+                className="text-center py-8 sm:py-12"
+                style={{ color: "var(--color-muted)" }}
+              >
+                <Home className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 opacity-50" />
+                <p className="text-sm sm:text-base">لا توجد بيوت حالياً</p>
+                <p className="text-xs sm:text-sm mt-2">كن أول من ينشئ بيت!</p>
               </div>
             ) : (
-              <div className="grid gap-4">
+              <div className="grid gap-3 sm:gap-4">
                 {houses.map((house) => (
                   <div
                     key={house._id}
-                    className="p-5 bg-gray-50 dark:bg-gray-700 rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 transition-all"
+                    className="p-4 sm:p-5 rounded-xl border-2 transition-all"
+                    style={{
+                      backgroundColor: "var(--color-bg)",
+                      borderColor: "var(--color-border)",
+                    }}
                   >
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
                       <div className="flex-1">
-                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                        <h4
+                          className="text-base sm:text-lg font-semibold mb-1"
+                          style={{ color: "var(--color-dark)" }}
+                        >
                           {house.name}
                         </h4>
-                        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div
+                          className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm"
+                          style={{ color: "var(--color-muted)" }}
+                        >
                           <span className="flex items-center gap-1">
                             <Users className="w-4 h-4" />
                             {house.memberCount} عضو
@@ -216,7 +270,8 @@ const HouseSelection = () => {
                         <button
                           onClick={() => handleJoinHouse(house._id)}
                           disabled={submitting}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                          className="w-full sm:w-auto text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
+                          style={{ backgroundColor: "var(--color-primary)" }}
                         >
                           <LogIn className="w-5 h-5" />
                           انضم
@@ -226,36 +281,51 @@ const HouseSelection = () => {
                     {selectedHouse === house._id && (
                       <form
                         onSubmit={handleJoinSubmit}
-                        className="mt-3 pt-3 border-t border-gray-300 dark:border-gray-600"
+                        className="mt-3 pt-3 border-t"
+                        style={{ borderColor: "var(--color-border)" }}
                       >
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
                           <input
                             type="password"
                             value={joinPassword}
                             onChange={(e) => setJoinPassword(e.target.value)}
                             placeholder="ادخل كلمة المرور"
-                            className="flex-1 px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                            className="flex-1 px-4 py-2.5 sm:py-2 rounded-xl border focus:ring-2 text-sm sm:text-base"
+                            style={{
+                              backgroundColor: "var(--color-bg)",
+                              borderColor: "var(--color-border)",
+                              color: "var(--color-dark)",
+                            }}
                             disabled={submitting}
                             autoFocus
                           />
-                          <button
-                            type="submit"
-                            disabled={submitting}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-semibold transition-all disabled:opacity-50"
-                          >
-                            {submitting ? "..." : "تأكيد"}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedHouse(null);
-                              setJoinPassword("");
-                            }}
-                            disabled={submitting}
-                            className="bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white px-4 py-2 rounded-xl font-semibold transition-all"
-                          >
-                            إلغاء
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              type="submit"
+                              disabled={submitting}
+                              className="flex-1 sm:flex-initial text-white px-4 py-2.5 sm:py-2 rounded-xl font-semibold transition-all disabled:opacity-50 text-sm sm:text-base"
+                              style={{
+                                backgroundColor: "var(--color-primary)",
+                              }}
+                            >
+                              {submitting ? "..." : "تأكيد"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedHouse(null);
+                                setJoinPassword("");
+                              }}
+                              disabled={submitting}
+                              className="flex-1 sm:flex-initial px-4 py-2.5 sm:py-2 rounded-xl font-semibold transition-all text-sm sm:text-base"
+                              style={{
+                                backgroundColor: "var(--color-light)",
+                                color: "var(--color-dark)",
+                              }}
+                            >
+                              إلغاء
+                            </button>
+                          </div>
                         </div>
                       </form>
                     )}
@@ -267,7 +337,10 @@ const HouseSelection = () => {
         </div>
 
         {/* Info Message */}
-        <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+        <div
+          className="mt-4 sm:mt-6 text-center text-xs sm:text-sm px-4"
+          style={{ color: "var(--color-muted)" }}
+        >
           <p>💡 البيت هو المجموعة التي تدير ميزانيتها معاً</p>
         </div>
       </div>

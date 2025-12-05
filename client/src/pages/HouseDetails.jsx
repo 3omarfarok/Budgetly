@@ -13,7 +13,10 @@ import {
   X,
   LogOut,
   UserX,
+  Trash2,
 } from "lucide-react";
+
+import ConfirmModal from "../components/ConfirmModal";
 
 const HouseDetails = () => {
   const { user, updateUser } = useAuth();
@@ -25,6 +28,15 @@ const HouseDetails = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [newHouseName, setNewHouseName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Modal State
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "danger",
+    onConfirm: () => {},
+  });
 
   useEffect(() => {
     if (!user?.house) {
@@ -73,46 +85,88 @@ const HouseDetails = () => {
     }
   };
 
-  const handleRemoveMember = async (memberId, memberName) => {
-    if (!confirm(`هل أنت متأكد من إزالة ${memberName} من البيت؟`)) {
-      return;
-    }
-
-    setSubmitting(true);
-    setError("");
-    setSuccess("");
-    try {
-      await api.delete(`/houses/${user.house._id}/members/${memberId}`);
-      setSuccess(`تم إزالة ${memberName} من البيت بنجاح`);
-      await fetchHouseDetails();
-    } catch (err) {
-      setError(err.response?.data?.message || "فشل إزالة العضو");
-    } finally {
-      setSubmitting(false);
-    }
+  const confirmAction = (title, message, action, type = "danger") => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      message,
+      type,
+      onConfirm: async () => {
+        setModalConfig((prev) => ({ ...prev, isOpen: false }));
+        await action();
+      },
+    });
   };
 
-  const handleLeaveHouse = async () => {
-    if (!confirm("هل أنت متأكد من الخروج من هذا البيت؟")) {
-      return;
-    }
+  const handleRemoveMember = (memberId, memberName) => {
+    confirmAction(
+      "إزالة عضو",
+      `هل أنت متأكد من إزالة ${memberName} من البيت؟`,
+      async () => {
+        setSubmitting(true);
+        setError("");
+        setSuccess("");
+        try {
+          await api.delete(`/houses/${user.house._id}/members/${memberId}`);
+          setSuccess(`تم إزالة ${memberName} من البيت بنجاح`);
+          await fetchHouseDetails();
+        } catch (err) {
+          setError(err.response?.data?.message || "فشل إزالة العضو");
+        } finally {
+          setSubmitting(false);
+        }
+      }
+    );
+  };
 
-    setSubmitting(true);
-    setError("");
-    try {
-      await api.post(`/houses/${user.house._id}/leave`);
-      setSuccess("تم الخروج من البيت بنجاح");
-      // Refresh user data and redirect
-      const { data: userData } = await api.get("/auth/me");
-      updateUser(userData);
-      setTimeout(() => {
-        navigate("/house-selection");
-      }, 1500);
-    } catch (err) {
-      setError(err.response?.data?.message || "فشل الخروج من البيت");
-    } finally {
-      setSubmitting(false);
-    }
+  const handleLeaveHouse = () => {
+    confirmAction(
+      "مغادرة البيت",
+      "هل أنت متأكد من الخروج من هذا البيت؟",
+      async () => {
+        setSubmitting(true);
+        setError("");
+        try {
+          await api.post(`/houses/${user.house._id}/leave`);
+          setSuccess("تم الخروج من البيت بنجاح");
+          // Refresh user data and redirect
+          const { data: userData } = await api.get("/auth/me");
+          updateUser(userData);
+          setTimeout(() => {
+            navigate("/house-selection");
+          }, 1500);
+        } catch (err) {
+          setError(err.response?.data?.message || "فشل الخروج من البيت");
+        } finally {
+          setSubmitting(false);
+        }
+      }
+    );
+  };
+
+  const handleDeleteHouse = () => {
+    confirmAction(
+      "حذف البيت نهائياً",
+      "هل أنت متأكد من حذف البيت نهائياً؟ هذا الإجراء لا يمكن التراجع عنه وسيتم إخراج جميع الأعضاء.",
+      async () => {
+        setSubmitting(true);
+        setError("");
+        try {
+          await api.delete(`/houses/${user.house._id}`);
+          setSuccess("تم حذف البيت بنجاح");
+          // Refresh user data and redirect
+          const { data: userData } = await api.get("/auth/me");
+          updateUser(userData);
+          setTimeout(() => {
+            navigate("/house-selection");
+          }, 1500);
+        } catch (err) {
+          setError(err.response?.data?.message || "فشل حذف البيت");
+        } finally {
+          setSubmitting(false);
+        }
+      }
+    );
   };
 
   const isAdmin = user?.house && houseData && user.id === houseData.admin._id;
@@ -403,22 +457,35 @@ const HouseDetails = () => {
         </div>
 
         {/* Actions Card */}
-        {!isAdmin && (
-          <div
-            className="rounded-2xl shadow-lg p-6"
-            style={{
-              backgroundColor: "var(--color-surface)",
-              borderColor: "var(--color-border)",
-              borderWidth: "1px",
-              borderStyle: "solid",
-            }}
+        <div
+          className="rounded-2xl shadow-lg p-6"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            borderColor: "var(--color-border)",
+            borderWidth: "1px",
+            borderStyle: "solid",
+          }}
+        >
+          <h2
+            className="text-xl font-semibold mb-4"
+            style={{ color: "var(--color-dark)" }}
           >
-            <h2
-              className="text-xl font-semibold mb-4"
-              style={{ color: "var(--color-dark)" }}
+            الإجراءات
+          </h2>
+          {isAdmin ? (
+            <button
+              onClick={handleDeleteHouse}
+              disabled={submitting}
+              className="w-full font-semibold py-3 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              style={{
+                backgroundColor: "var(--color-error)",
+                color: "white",
+              }}
             >
-              الإجراءات
-            </h2>
+              <Trash2 className="w-5 h-5" />
+              حذف البيت نهائياً
+            </button>
+          ) : (
             <button
               onClick={handleLeaveHouse}
               disabled={submitting}
@@ -431,9 +498,19 @@ const HouseDetails = () => {
               <LogOut className="w-5 h-5" />
               مغادرة البيت
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
+
+      {/* Reusable Confirm Modal */}
+      <ConfirmModal
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={modalConfig.onConfirm}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
+      />
     </div>
   );
 };

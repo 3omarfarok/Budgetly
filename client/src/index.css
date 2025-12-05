@@ -4,6 +4,11 @@
 @import "tailwindcss";
 
 /* ============================
+   Dark Mode Configuration (Class-based)
+=============================== */
+@variant dark (&:where(.dark, .dark *));
+
+/* ============================
    Tailwind Variables & Font Families
 =============================== */
 @theme {
@@ -89,49 +94,47 @@
 }
 
 /* ============================
-   Dark Mode Colors
+   Dark Mode Colors (Class-based)
 =============================== */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --font-primary: "Cairo", sans-serif;
-    --font-headings: "Poppins", sans-serif;
-    --font-numbers: "Roboto Mono", monospace;
-    --font-decorative: "Amiri", serif;
+.dark {
+  --font-primary: "Cairo", sans-serif;
+  --font-headings: "Poppins", sans-serif;
+  --font-numbers: "Roboto Mono", monospace;
+  --font-decorative: "Amiri", serif;
 
-    --color-dark: #f8fafc;
-    --color-primary: #60a5fa;
-    --color-primary-bg: #1e3a8a;
-    --color-primary-border: #3b82f6;
-    --color-secondary: #94a3b8;
-    --color-light: #334155;
-    --color-bg: #0f172a;
-    --color-surface: #1e293b;
+  --color-dark: #f8fafc;
+  --color-primary: #60a5fa;
+  --color-primary-bg: #1e3a8a;
+  --color-primary-border: #3b82f6;
+  --color-secondary: #94a3b8;
+  --color-light: #334155;
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
 
-    --color-success: #10b981;
-    --color-error: #ef4444;
-    --color-warning: #f59e0b;
-    --color-info: #3b82f6;
+  --color-success: #10b981;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
 
-    --color-muted-bg: #0f172a;
-    --color-muted: #94a3b8;
-    --color-border: #475569;
-    --color-hover: #334155;
+  --color-muted-bg: #0f172a;
+  --color-muted: #94a3b8;
+  --color-border: #475569;
+  --color-hover: #334155;
 
-    --color-status-pending: #f59e0b;
-    --color-status-pending-bg: #422006;
-    --color-status-pending-border: #78350f;
+  --color-status-pending: #f59e0b;
+  --color-status-pending-bg: #422006;
+  --color-status-pending-border: #78350f;
 
-    --color-status-approved: #10b981;
-    --color-status-approved-bg: #022c22;
-    --color-status-approved-border: #065f46;
+  --color-status-approved: #10b981;
+  --color-status-approved-bg: #022c22;
+  --color-status-approved-border: #065f46;
 
-    --color-status-rejected: #ef4444;
-    --color-status-rejected-bg: #450a0a;
-    --color-status-rejected-border: #991b1b;
+  --color-status-rejected: #ef4444;
+  --color-status-rejected-bg: #450a0a;
+  --color-status-rejected-border: #991b1b;
 
-    --gradient-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    --zigzag-color: #1e293b;
-  }
+  --gradient-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --zigzag-color: #1e293b;
 }
 
 /* ============================
