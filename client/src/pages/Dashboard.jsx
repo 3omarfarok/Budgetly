@@ -12,6 +12,7 @@ import {
 
 import Loader from "../components/Loader";
 import QuoteCard from "../components/QuoteCard";
+import WelcomeModal from "../components/WelcomeModal";
 
 // صفحة لوحة التحكم - محسّنة للإتاحة
 const Dashboard = () => {
@@ -55,6 +56,8 @@ const Dashboard = () => {
         </div>
         <h1 className="text-3xl font-bold text-ios-dark">الصفحة الرئيسية</h1>
       </div>
+
+      <WelcomeModal />
 
       <div className="mb-8">
         <QuoteCard />

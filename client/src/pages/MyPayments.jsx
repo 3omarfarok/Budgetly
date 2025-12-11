@@ -33,6 +33,7 @@ const MyPayments = () => {
   const [error, setError] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletingPaymentId, setDeletingPaymentId] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchMyPayments();
@@ -74,6 +75,7 @@ const MyPayments = () => {
     }
 
     try {
+      setIsSubmitting(true);
       if (editingPayment) {
         // تعديل دفعة موجودة
         await api.put(`/payments/${editingPayment._id}`, {
@@ -108,6 +110,8 @@ const MyPayments = () => {
       const errorMsg = "فيه مشكلة في تسجيل الدفعة";
       setError(errorMsg);
       toast.error(errorMsg);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -130,6 +134,7 @@ const MyPayments = () => {
 
   const confirmDelete = async () => {
     try {
+      setIsSubmitting(true);
       await api.delete(`/payments/${deletingPaymentId}`);
       toast.success("تم حذف الدفعة بنجاح");
       fetchMyPayments();
@@ -139,6 +144,8 @@ const MyPayments = () => {
     } catch (error) {
       console.error("غلط في مسح الدفعة:", error);
       toast.error("فيه مشكلة في حذف الدفعة");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -410,7 +417,6 @@ const MyPayments = () => {
                   placeholder="0.00"
                   required
                   autoFocus
-                  variant="filled"
                 />
               </div>
               <div>
@@ -421,7 +427,6 @@ const MyPayments = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, date: e.target.value })
                   }
-                  variant="filled"
                 />
               </div>
             </div>
@@ -434,16 +439,22 @@ const MyPayments = () => {
                   setFormData({ ...formData, description: e.target.value })
                 }
                 placeholder="مثال: دفعة شهر يناير"
-                variant="filled"
               />
             </div>
             <div className="flex gap-3">
               <button
                 type="submit"
-                className="flex-1 py-3 px-4 text-white font-bold rounded-2xl transition-all shadow-lg"
+                disabled={isSubmitting}
+                className={`flex-1 py-3 px-4 text-white font-bold rounded-2xl transition-all shadow-lg ${
+                  isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+                }`}
                 style={{ backgroundColor: "var(--color-primary)" }}
               >
-                {editingPayment ? "حفظ التعديل" : "سجّل الدفعة"}
+                {isSubmitting
+                  ? "جاري الحفظ..."
+                  : editingPayment
+                  ? "حفظ التعديل"
+                  : "سجّل الدفعة"}
               </button>
               {editingPayment && (
                 <button

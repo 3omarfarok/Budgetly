@@ -1,14 +1,29 @@
 import Expense from "../models/Expense.js";
 import User from "../models/User.js";
 
-// Get all expenses
+// Get all expenses with pagination
 export const getExpenses = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const totalExpenses = await Expense.countDocuments();
+    const totalPages = Math.ceil(totalExpenses / limit);
+
     const expenses = await Expense.find()
       .populate("createdBy", "name username")
       .populate("splits.user", "name username")
-      .sort({ date: -1 });
-    res.json(expenses);
+      .sort({ date: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.json({
+      expenses,
+      currentPage: page,
+      totalPages,
+      totalExpenses,
+    });
   } catch (error) {
     console.error("Get expenses error:", error);
     res.status(500).json({ message: "Server error" });

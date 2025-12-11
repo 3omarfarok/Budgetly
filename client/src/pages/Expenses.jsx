@@ -26,16 +26,23 @@ const Expenses = () => {
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletingExpenseId, setDeletingExpenseId] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    fetchExpenses();
-  }, []);
+    fetchExpenses(page);
+  }, [page]);
 
-  const fetchExpenses = async () => {
+  const fetchExpenses = async (currentPage) => {
     try {
       setLoading(true);
-      const { data } = await api.get("/expenses");
-      setExpenses(data);
+      const { data } = await api.get(`/expenses?page=${currentPage}&limit=10`);
+      if (data.expenses) {
+        setExpenses(data.expenses);
+        setTotalPages(data.totalPages);
+      } else {
+        setExpenses(data); // Fallback if API structure differs
+      }
     } catch (error) {
       console.error("Error fetching expenses:", error);
       toast.error("فيه مشكلة في تحميل المصاريف");
@@ -74,16 +81,45 @@ const Expenses = () => {
     return icons[category] || <Package size={20} />;
   };
 
-  const getCategoryColor = (category) => {
-    const colors = {
-      Food: "bg-orange-100 text-orange-600",
-      Transport: "bg-blue-100 text-blue-600",
-      Utilities: "bg-yellow-100 text-yellow-600",
-      Housing: "bg-purple-100 text-purple-600",
-      Entertainment: "bg-pink-100 text-pink-600",
-      General: "bg-gray-100 text-gray-600",
+  const getCategoryStyles = (category) => {
+    const styles = {
+      Food: {
+        backgroundColor: "var(--color-status-pending-bg)",
+        color: "var(--color-status-pending)",
+      },
+      Transport: {
+        backgroundColor: "var(--color-primary-bg)",
+        color: "var(--color-primary)",
+      },
+      Utilities: {
+        backgroundColor: "var(--color-status-pending-bg)",
+        color: "var(--color-status-pending)",
+      },
+      Housing: {
+        backgroundColor: "var(--color-primary-bg)",
+        color: "var(--color-primary)",
+      },
+      Entertainment: {
+        backgroundColor: "var(--color-status-rejected-bg)",
+        color: "var(--color-status-rejected)",
+      },
+      General: {
+        backgroundColor: "var(--color-surface)",
+        color: "var(--color-secondary)",
+        border: "1px solid var(--color-border)",
+      },
+      Other: {
+        backgroundColor: "var(--color-surface)",
+        color: "var(--color-secondary)",
+        border: "1px solid var(--color-border)",
+      },
     };
-    return colors[category] || "bg-gray-100 text-gray-600";
+    return (
+      styles[category] || {
+        backgroundColor: "var(--color-surface)",
+        color: "var(--color-secondary)",
+      }
+    );
   };
 
   const translateCategory = (category) => {
@@ -121,14 +157,13 @@ const Expenses = () => {
         {expenses.map((expense) => (
           <div
             key={expense._id}
-            className="group bg-(--color-bg) rounded-2xl p-5 shadow-sm border border-(--color-muted) hover:shadow-md transition-all duration-200 relative overflow-hidden"
+            className="group bg-(--color-bg) rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 relative overflow-hidden"
           >
             <div className="flex justify-between items-start mb-3">
               {/* أيقونة التصنيف */}
               <div
-                className={`p-2.5 rounded-xl ${getCategoryColor(
-                  expense.category
-                )}`}
+                className="p-2.5 rounded-xl"
+                style={getCategoryStyles(expense.category)}
               >
                 {getCategoryIcon(expense.category)}
               </div>
@@ -202,6 +237,37 @@ const Expenses = () => {
           <p className="text-(--color-muted) text-sm mt-1">
             ابدأ سجّل أول مصروف
           </p>
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-4 mt-8">
+          <button
+            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+            disabled={page === 1}
+            className={`px-4 py-2 rounded-xl transition-all ${
+              page === 1
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-white text-gray-700 hover:bg-gray-50 shadow-sm"
+            }`}
+          >
+            السابق
+          </button>
+          <span className="text-(--color-secondary) font-bold">
+            صفحة {page} من {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={page === totalPages}
+            className={`px-4 py-2 rounded-xl transition-all ${
+              page === totalPages
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-white text-gray-700 hover:bg-gray-50 shadow-sm"
+            }`}
+          >
+            التالي
+          </button>
         </div>
       )}
 

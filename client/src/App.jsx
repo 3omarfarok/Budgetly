@@ -26,6 +26,8 @@ import NotFound from "./pages/NotFound";
 import AIPage from "./pages/AIPage";
 
 import AIButton from "./components/AIButton";
+import GuidePage from "./pages/GuidePage";
+import NotesPage from "./pages/NotesPage";
 
 // مكون الحماية للصفحات
 const ProtectedRoute = ({ children, requireHouse = true }) => {
@@ -152,6 +154,30 @@ function App() {
                     element={
                       <ProtectedRoute>
                         <AIPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/guide"
+                    element={
+                      <ProtectedRoute>
+                        <GuidePage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/notes"
+                    element={
+                      <ProtectedRoute>
+                        <NotesPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/notes"
+                    element={
+                      <ProtectedRoute>
+                        <NotesPage />
                       </ProtectedRoute>
                     }
                   />

@@ -66,7 +66,7 @@ const Profile = () => {
       const [balancesRes, paymentsRes, expensesRes] = await Promise.all([
         api.get("/stats/balances"),
         api.get("/payments"),
-        api.get("/expenses"),
+        api.get("/expenses?limit=1000"),
       ]);
 
       // Find current user's balance
@@ -79,7 +79,12 @@ const Profile = () => {
       );
 
       // Filter expenses that include this user
-      const userExpenses = expensesRes.data.filter((e) =>
+      // Handle both paginated (object) and non-paginated (array) responses for backward compatibility
+      const allExpenses = Array.isArray(expensesRes.data)
+        ? expensesRes.data
+        : expensesRes.data.expenses || [];
+
+      const userExpenses = allExpenses.filter((e) =>
         e.splits.some((s) => s.user._id === user.id)
       );
 
@@ -206,6 +211,9 @@ const Profile = () => {
   };
 
   if (loading) return <Loader text="بنحمّل بياناتك..." />;
+
+  // Safely handle missing stats
+  if (!stats) return null;
 
   return (
     <div className="pb-8 max-w-4xl mx-auto font-primary">

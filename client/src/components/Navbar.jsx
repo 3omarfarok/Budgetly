@@ -16,6 +16,7 @@ import {
   Home,
   Lock,
   Bot,
+  StickyNote,
 } from "lucide-react";
 import { BiColorFill } from "react-icons/bi";
 
@@ -196,6 +197,18 @@ const Navbar = () => {
             >
               <Home size={18} aria-hidden="true" />
               <span>البيت</span>
+            </Link>
+            <Link
+              to="/notes"
+              className={navLinkClass("/notes")}
+              style={navLinkStyle("/notes")}
+              role="menuitem"
+              aria-current={isActive("/notes") ? "page" : undefined}
+              onClick={handleLockedLinkClick}
+              {...(isLocked && { pointerEvents: "none" })}
+            >
+              <StickyNote size={18} aria-hidden="true" />
+              <span>الملاحظات</span>
             </Link>
           </div>
 
@@ -405,6 +418,28 @@ const Navbar = () => {
             >
               <Home size={22} aria-hidden="true" />
               <span className="text-xs font-medium">البيت</span>
+            </Link>
+            <Link
+              to="/notes"
+              onClick={handleLockedLinkClick}
+              {...(isLocked && { pointerEvents: "none" })}
+              className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+                isLocked ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              style={{
+                color: isActive("/notes")
+                  ? "var(--color-primary)"
+                  : "var(--color-secondary)",
+                backgroundColor: isActive("/notes")
+                  ? "var(--color-hover)"
+                  : "transparent",
+              }}
+              aria-label="الملاحظات"
+              aria-current={isActive("/notes") ? "page" : undefined}
+              role="menuitem"
+            >
+              <StickyNote size={22} aria-hidden="true" />
+              <span className="text-xs font-medium">ملاحظات</span>
             </Link>
             <Link
               to="/ai"

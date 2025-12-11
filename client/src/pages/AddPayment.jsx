@@ -29,6 +29,7 @@ const AddPayment = () => {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -77,6 +78,7 @@ const AddPayment = () => {
     }
 
     try {
+      setIsSubmitting(true);
       await api.post("/payments", formData);
       toast.success("تم تسجيل الدفعة بنجاح!");
       navigate("/payments");
@@ -85,6 +87,8 @@ const AddPayment = () => {
       const errorMsg = "فيه مشكلة في تسجيل الدفعة";
       setError(errorMsg);
       toast.error(errorMsg);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -198,11 +202,20 @@ const AddPayment = () => {
 
         <button
           type="submit"
-          className="w-full py-4 px-4 cursor-pointer text-white hover:bg-[--color-dark] hover:text-[--color-primary]  font-bold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl mt-4 flex items-center justify-center gap-2"
+          disabled={isSubmitting}
+          className={`w-full py-4 px-4 cursor-pointer text-white hover:bg-[--color-dark] hover:text-[--color-primary] font-bold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl mt-4 flex items-center justify-center gap-2 ${
+            isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+          }`}
           style={{ backgroundColor: "var(--color-primary)" }}
         >
-          <PlusCircle size={20} />
-          سجّل الدفعة
+          {isSubmitting ? (
+            "جاري التسجيل..."
+          ) : (
+            <>
+              <PlusCircle size={20} />
+              سجّل الدفعة
+            </>
+          )}
         </button>
       </form>
 

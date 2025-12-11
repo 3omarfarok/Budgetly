@@ -24,6 +24,7 @@ const AddExpense = () => {
   const [users, setUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (user && user.role !== "admin") {
@@ -70,6 +71,7 @@ const AddExpense = () => {
     }
 
     try {
+      setIsSubmitting(true);
       const expenseData = {
         ...formData,
         totalAmount: Number(formData.totalAmount),
@@ -87,6 +89,8 @@ const AddExpense = () => {
         err.response?.data?.message || "خطأ في إنشاء المصروف";
       toast.error(errorMessage);
       setError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -281,16 +285,21 @@ const AddExpense = () => {
 
         <button
           type="submit"
-          className="w-full py-4 px-4 cursor-pointer text-white font-bold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl  mt-4 flex items-center justify-center gap-2"
+          disabled={isSubmitting}
+          className={`w-full py-4 px-4 cursor-pointer text-white font-bold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl mt-4 flex items-center justify-center gap-2 ${
+            isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+          }`}
           style={{ backgroundColor: "var(--color-primary)" }}
           onMouseEnter={(e) =>
+            !isSubmitting &&
             (e.currentTarget.style.backgroundColor = "var(--color-dark)")
           }
           onMouseLeave={(e) =>
+            !isSubmitting &&
             (e.currentTarget.style.backgroundColor = "var(--color-primary)")
           }
         >
-          سجّل المصروف
+          {isSubmitting ? "جاري التسجيل..." : "سجّل المصروف"}
         </button>
       </form>
     </div>

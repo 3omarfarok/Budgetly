@@ -190,9 +190,7 @@ const AIAssistant = ({ isOpen, onClose }) => {
               </div>
               <div>
                 <h3 className="font-bold text-lg leading-tight">Budgetly AI</h3>
-                <p className="text-xs  opacity-90">
-                  Financial Assistant
-                </p>
+                <p className="text-xs  opacity-90">Financial Assistant</p>
               </div>
             </div>
             <div className="flex gap-2 items-center">

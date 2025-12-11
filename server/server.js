@@ -10,8 +10,11 @@ import expenseRoutes from "./routes/expenses.js";
 import paymentRoutes from "./routes/payments.js";
 import statsRoutes from "./routes/stats.js";
 import analyticsRoutes from "./routes/analytics.js";
+import noteRoutes from "./routes/notes.js";
 import housesRoutes from "./routes/houses.js";
 import aiRoutes from "./routes/ai.js";
+
+import { rateLimiter } from "./middleware/rateLimiter.js";
 
 dotenv.config();
 
@@ -32,6 +35,7 @@ const corsOptions = {
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(rateLimiter);
 
 // MongoDB Connection
 mongoose
@@ -51,6 +55,7 @@ app.use("/api/expenses", expenseRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/notes", noteRoutes);
 app.use("/api/ai", aiRoutes);
 
 // Health check
