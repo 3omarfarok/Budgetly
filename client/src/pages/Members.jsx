@@ -6,6 +6,7 @@ import { Users, UserPlus, ShieldCheck, User as UserIcon } from "lucide-react";
 
 import Loader from "../components/Loader";
 import ConfirmModal from "../components/ConfirmModal";
+import Input from "../components/Input";
 
 // صفحة الأعضاء - تصميم iOS
 const Members = () => {
@@ -108,45 +109,37 @@ const Members = () => {
           )}
           <form onSubmit={handleAddMember} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-[--color-dark] mb-1">
-                الاسم
-              </label>
-              <input
-                type="text"
+              <Input
+                label="الاسم"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="w-full px-4 py-3 bg-[--color-bg] border border-[--color-border] rounded-2xl text-[--color-dark] focus:outline-none focus:border-ios-primary focus:ring-2 focus:ring-ios-primary/20 transition-all"
                 required
+                variant="filled"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-[--color-dark] mb-1">
-                اسم المستخدم
-              </label>
-              <input
-                type="text"
+              <Input
+                label="اسم المستخدم"
                 value={formData.username}
                 onChange={(e) =>
                   setFormData({ ...formData, username: e.target.value })
                 }
-                className="w-full px-4 py-3 bg-[--color-bg] border border-[--color-border] rounded-2xl text-[--color-dark] focus:outline-none focus:border-ios-primary focus:ring-2 focus:ring-ios-primary/20 transition-all"
                 required
+                variant="filled"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-[--color-dark] mb-1">
-                كلمة المرور
-              </label>
-              <input
+              <Input
+                label="كلمة المرور"
                 type="password"
                 value={formData.password}
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                className="w-full px-4 py-3 bg-[--color-bg] border border-[--color-border] rounded-2xl text-[--color-dark] focus:outline-none focus:border-ios-primary focus:ring-2 focus:ring-ios-primary/20 transition-all"
                 required
+                variant="filled"
               />
             </div>
             <button

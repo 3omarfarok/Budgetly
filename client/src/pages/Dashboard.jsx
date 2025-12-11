@@ -198,7 +198,7 @@ const UserDashboard = ({ stats }) => (
           icon={DollarSign}
         />
         <StatCard
-          title="حصتي"
+          title="اجمالي المصاريف"
           value={`${stats.totalOwed.toFixed(2)} جنيه`}
           icon={TrendingDown}
         />
@@ -225,9 +225,16 @@ const UserDashboard = ({ stats }) => (
                 <span className="text-ios-dark font-medium">
                   {expense.description}
                 </span>
-                <span className="font-bold text-ios-primary">
-                  {expense.totalAmount.toFixed(2)} جنيه
-                </span>
+                <div className="flex flex-col items-end gap-1">
+                  <span className="font-bold text-ios-primary">
+                    {expense.totalAmount.toFixed(2)} جنيه
+                  </span>
+                  {expense.userShare && (
+                    <span className="text-sm text-ios-error">
+                      حصتك: {expense.userShare.toFixed(2)} جنيه
+                    </span>
+                  )}
+                </div>
               </li>
             ))}
           </ul>

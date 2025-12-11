@@ -4,11 +4,6 @@
 @import "tailwindcss";
 
 /* ============================
-   Dark Mode Configuration (Class-based)
-=============================== */
-@variant dark (&:where(.dark, .dark *));
-
-/* ============================
    Tailwind Variables & Font Families
 =============================== */
 @theme {
@@ -307,6 +302,48 @@ textarea,
 select {
   transition: border-color var(--transition-fast),
     box-shadow var(--transition-fast);
+}
+
+/* Custom Caret Animation */
+@keyframes caret-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes caret-pulse {
+  0%,
+  100% {
+    box-shadow: inset 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: inset 2px 0 0 0 var(--color-primary);
+  }
+}
+
+.caret {
+  caret-color: var(--color-primary);
+  animation: caret-glow 1.2s ease-in-out infinite;
+}
+
+@keyframes caret-glow {
+  0%,
+  100% {
+    caret-color: var(--color-primary);
+  }
+  50% {
+    caret-color: color-mix(in srgb, var(--color-primary) 60%, transparent);
+  }
+}
+
+/* Make caret thicker and more visible */
+.caret::selection {
+  background-color: var(--color-primary);
+  color: white;
 }
 
 /* ============================

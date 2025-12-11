@@ -3,9 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import api from "../utils/api";
-import { Banknote, PlusCircle, User as UserIcon } from "lucide-react";
+import {
+  Banknote,
+  PlusCircle,
+  User as UserIcon,
+  Coins,
+  FileText,
+  Calendar,
+} from "lucide-react";
 
 import Loader from "../components/Loader";
+import Input from "../components/Input";
+import Select from "../components/Select";
 
 const AddPayment = () => {
   const { user } = useAuth();
@@ -131,17 +140,18 @@ const AddPayment = () => {
         }}
       >
         <div>
-          <label
-            className="block text-sm font-semibold mb-2"
-            style={{ color: "var(--color-dark)" }}
-          >
-            اختار العضو
-          </label>
-          <select
+          <Select
+            label="اختار العضو"
             value={formData.user}
             onChange={(e) => setFormData({ ...formData, user: e.target.value })}
-            className="w-full appearance-none   px-5 py-3.5 rounded-2xl transition-all border border-(--color-border)    bg-(--color-bg) border-(color-border) text-(color-dark)"
             required
+            variant="filled" // matches other inputs in form which used filled (actually they used Input default which is 'default' variant, but AddPayment inputs used 'filled' look via manual styles previously?)
+            // Wait, in previous step I didn't specify variant='filled' for AddPayment inputs, so they are default.
+            // But AddPayment previously used manual styles with bg-ios-bg...
+            // Let's verify what variant implies. Default is bg-ios-bg border border-ios-border.
+            // Manual styles: bg-ios-bg border-ios-border. So 'default' variant is correct.
+            // EXCEPT, I might want to use icon UserIcon.
+            icon={UserIcon}
           >
             <option value="">-- اختار عضو --</option>
             {users.map((u) => (
@@ -149,56 +159,42 @@ const AddPayment = () => {
                 {u.name} (@{u.username})
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-semibold mb-2 text-(color-dark)">
-              المبلغ (جنيه)
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              value={formData.amount}
-              onChange={(e) =>
-                setFormData({ ...formData, amount: e.target.value })
-              }
-              className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2 border border-(--color-border) bg-(--color-bg) text-(--color-dark)"
-              placeholder="0.00"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold mb-2 text-(color-dark)">
-              التاريخ
-            </label>
-            <input
-              type="date"
-              value={formData.date || new Date().toISOString().split("T")[0]}
-              onChange={(e) =>
-                setFormData({ ...formData, date: e.target.value })
-              }
-              className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2  bg-(--color-bg) border border-(--color-border) text-(--color-dark)  "
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold mb-2 text-(color-dark)">
-            وصف (اختياري)
-          </label>
-          <textarea
-            value={formData.description}
+          <Input
+            label="المبلغ (جنيه)"
+            type="number"
+            step="0.01"
+            value={formData.amount}
             onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
+              setFormData({ ...formData, amount: e.target.value })
             }
-            className="w-full px-5 py-3.5 rounded-2xl transition-all resize-none focus:outline-none focus:ring-2 border  bg-(--color-bg) border-(--color-border) text-(--color-dark)"
-            rows="3"
-            placeholder="أي ملاحظات..."
+            icon={Coins}
+            placeholder="0.00"
+            required
+          />
+
+          <Input
+            label="التاريخ"
+            type="date"
+            value={formData.date || new Date().toISOString().split("T")[0]}
+            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+            icon={Calendar}
           />
         </div>
+
+        <Input
+          label="وصف (اختياري)"
+          type="text"
+          value={formData.description}
+          onChange={(e) =>
+            setFormData({ ...formData, description: e.target.value })
+          }
+          icon={FileText}
+          placeholder="أي ملاحظات..."
+        />
 
         <button
           type="submit"

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../utils/api";
 import Loader from "../components/Loader";
 import Toast from "../components/Toast";
+import Input from "../components/Input";
 import {
   Home,
   Users,
@@ -254,20 +255,13 @@ const HouseDetails = () => {
 
           {isEditing ? (
             <form onSubmit={handleUpdateHouseName} className="flex gap-3">
-              <input
-                type="text"
+              <Input
                 value={newHouseName}
                 onChange={(e) => setNewHouseName(e.target.value)}
-                className="flex-1 px-4 py-3 rounded-xl"
-                style={{
-                  borderColor: "var(--color-border)",
-                  borderWidth: "1px",
-                  borderStyle: "solid",
-                  backgroundColor: "var(--color-bg)",
-                  color: "var(--color-dark)",
-                }}
                 disabled={submitting}
                 autoFocus
+                variant="filled" // Using filled variant to match general style
+                wrapperClassName="flex-1"
               />
               <button
                 type="submit"

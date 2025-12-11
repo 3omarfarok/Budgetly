@@ -15,6 +15,7 @@ import {
 
 import Loader from "../components/Loader";
 import ConfirmModal from "../components/ConfirmModal";
+import Input from "../components/Input";
 
 const MyPayments = () => {
   const { user } = useAuth();
@@ -328,16 +329,10 @@ const MyPayments = () => {
               borderStyle: "solid",
             }}
           >
-            <p
-              className="text-sm mb-1"
-              style={{ color: "var(--color-primary)" }}
-            >
+            <p className="text-sm mb-1 text-(--color-primary)">
               إجمالي المدفوعات
             </p>
-            <p
-              className="text-2xl font-bold"
-              style={{ color: "var(--color-info)" }}
-            >
+            <p className="text-2xl font-bold text-(--color-primary)">
               {payments.length}
             </p>
           </div>
@@ -404,78 +399,42 @@ const MyPayments = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label
-                  className="block text-sm font-semibold mb-1"
-                  style={{ color: "var(--color-dark)" }}
-                >
-                  المبلغ (جنيه)
-                </label>
-                <input
+                <Input
+                  label="المبلغ (جنيه)"
                   type="number"
                   step="0.01"
                   value={formData.amount}
                   onChange={(e) =>
                     setFormData({ ...formData, amount: e.target.value })
                   }
-                  className="w-full px-4 py-3 rounded-2xl transition-all"
-                  style={{
-                    backgroundColor: "var(--color-bg)",
-                    borderColor: "var(--color-border)",
-                    borderWidth: "1px",
-                    borderStyle: "solid",
-                    color: "var(--color-dark)",
-                  }}
                   placeholder="0.00"
                   required
                   autoFocus
+                  variant="filled"
                 />
               </div>
               <div>
-                <label
-                  className="block text-sm font-semibold mb-1"
-                  style={{ color: "var(--color-dark)" }}
-                >
-                  التاريخ
-                </label>
-                <input
+                <Input
+                  label="التاريخ"
                   type="date"
                   value={formData.date}
                   onChange={(e) =>
                     setFormData({ ...formData, date: e.target.value })
                   }
-                  className="w-full px-4 py-3 rounded-2xl transition-all"
-                  style={{
-                    backgroundColor: "var(--color-bg)",
-                    borderColor: "var(--color-border)",
-                    borderWidth: "1px",
-                    borderStyle: "solid",
-                    color: "var(--color-dark)",
-                  }}
+                  variant="filled"
                 />
               </div>
             </div>
             <div>
-              <label
-                className="block text-sm font-semibold mb-1"
-                style={{ color: "var(--color-dark)" }}
-              >
-                وصف (اختياري)
-              </label>
-              <input
+              <Input
+                label="وصف (اختياري)"
                 type="text"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                className="w-full px-4 py-3 rounded-2xl transition-all"
-                style={{
-                  backgroundColor: "var(--color-bg)",
-                  borderColor: "var(--color-border)",
-                  borderWidth: "1px",
-                  borderStyle: "solid",
-                  color: "var(--color-dark)",
-                }}
                 placeholder="مثال: دفعة شهر يناير"
+                variant="filled"
               />
             </div>
             <div className="flex gap-3">

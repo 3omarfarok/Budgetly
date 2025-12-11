@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import api from "../utils/api";
 import Loader from "../components/Loader";
-import Toast from "../components/Toast";
-import { Home, Users, Plus, LogIn } from "lucide-react";
+import Input from "../components/Input";
+import { Home, Users, Plus, LogIn, Lock, Building } from "lucide-react";
 
 const HouseSelection = () => {
   const [houses, setHouses] = useState([]);
@@ -18,6 +19,7 @@ const HouseSelection = () => {
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const { user, createHouse, joinHouse } = useAuth();
+  const toast = useToast();
 
   useEffect(() => {
     // If user already has a house, redirect to dashboard
@@ -34,6 +36,7 @@ const HouseSelection = () => {
       setHouses(data);
     } catch (err) {
       setError("فشل تحميل البيوت المتاحة");
+      toast.error("فشل تحميل البيوت المتاحة");
     } finally {
       setLoading(false);
     }
@@ -43,11 +46,13 @@ const HouseSelection = () => {
     e.preventDefault();
     if (!newHouseName.trim()) {
       setError("يرجى إدخال اسم البيت");
+      toast.warning("يرجى إدخال اسم البيت");
       return;
     }
 
     if (!newHousePassword || newHousePassword.length < 4) {
       setError("كلمة المرور يجب أن تكون 4 أحرف على الأقل");
+      toast.warning("كلمة المرور يجب أن تكون 4 أحرف على الأقل");
       return;
     }
 
@@ -55,9 +60,12 @@ const HouseSelection = () => {
     setError("");
     try {
       await createHouse(newHouseName.trim(), newHousePassword);
+      toast.success("تم إنشاء البيت بنجاح!");
       navigate("/");
     } catch (err) {
-      setError(err.response?.data?.message || "فشل إنشاء البيت");
+      const errorMsg = err.response?.data?.message || "فشل إنشاء البيت";
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setSubmitting(false);
     }
@@ -72,6 +80,7 @@ const HouseSelection = () => {
     e.preventDefault();
     if (!joinPassword) {
       setError("يرجى إدخال كلمة المرور");
+      toast.warning("يرجى إدخال كلمة المرور");
       return;
     }
 
@@ -79,9 +88,12 @@ const HouseSelection = () => {
     setError("");
     try {
       await joinHouse(selectedHouse, joinPassword);
+      toast.success("تم الانضمام للبيت بنجاح!");
       navigate("/");
     } catch (err) {
-      setError(err.response?.data?.message || "فشل الانضمام للبيت");
+      const errorMsg = err.response?.data?.message || "فشل الانضمام للبيت";
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setSubmitting(false);
       setSelectedHouse(null);
@@ -122,7 +134,12 @@ const HouseSelection = () => {
         </div>
 
         {error && (
-          <Toast message={error} type="error" onClose={() => setError("")} />
+          <div
+            className="bg-ios-error/10 text-ios-error p-4 rounded-2xl mb-6 text-sm text-center border border-ios-error/20"
+            role="alert"
+          >
+            {error}
+          </div>
         )}
 
         <div
@@ -158,34 +175,24 @@ const HouseSelection = () => {
               >
                 إنشاء بيت جديد
               </h3>
-              <div className="space-y-3">
-                <input
+              <div className="space-y-4">
+                <Input
                   type="text"
                   value={newHouseName}
                   onChange={(e) => setNewHouseName(e.target.value)}
                   placeholder="اسم البيت (مثال: عائلة أحمد)"
-                  className="w-full px-4 py-3 rounded-xl border focus:ring-2 focus:border-transparent text-sm sm:text-base"
-                  style={{
-                    backgroundColor: "var(--color-bg)",
-                    borderColor: "var(--color-border)",
-                    color: "var(--color-dark)",
-                  }}
+                  icon={Building}
                   disabled={submitting}
-                  autoFocus
+                  size="md"
                 />
-                <input
+                <Input
                   type="password"
                   value={newHousePassword}
                   onChange={(e) => setNewHousePassword(e.target.value)}
                   placeholder="كلمة المرور (4 أحرف على الأقل)"
-                  className="w-full px-4 py-3 rounded-xl border focus:ring-2 focus:border-transparent text-sm sm:text-base"
-                  style={{
-                    backgroundColor: "var(--color-bg)",
-                    borderColor: "var(--color-border)",
-                    color: "var(--color-dark)",
-                  }}
+                  icon={Lock}
                   disabled={submitting}
-                  minLength={4}
+                  hint="سيحتاجها الأعضاء للانضمام"
                 />
               </div>
               <div className="flex flex-col sm:flex-row gap-3 mt-4">
@@ -285,20 +292,17 @@ const HouseSelection = () => {
                         style={{ borderColor: "var(--color-border)" }}
                       >
                         <div className="flex flex-col sm:flex-row gap-2">
-                          <input
-                            type="password"
-                            value={joinPassword}
-                            onChange={(e) => setJoinPassword(e.target.value)}
-                            placeholder="ادخل كلمة المرور"
-                            className="flex-1 px-4 py-2.5 sm:py-2 rounded-xl border focus:ring-2 text-sm sm:text-base"
-                            style={{
-                              backgroundColor: "var(--color-bg)",
-                              borderColor: "var(--color-border)",
-                              color: "var(--color-dark)",
-                            }}
-                            disabled={submitting}
-                            autoFocus
-                          />
+                          <div className="flex-1">
+                            <Input
+                              type="password"
+                              value={joinPassword}
+                              onChange={(e) => setJoinPassword(e.target.value)}
+                              placeholder="ادخل كلمة المرور"
+                              icon={Lock}
+                              disabled={submitting}
+                              size="sm"
+                            />
+                          </div>
                           <div className="flex gap-2">
                             <button
                               type="submit"

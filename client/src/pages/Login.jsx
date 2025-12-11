@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import { Lock, AlertCircle } from "lucide-react";
+import { User, Lock, AlertCircle } from "lucide-react";
 import Loader from "../components/Loader";
+import Input from "../components/Input";
 
 // صفحة تسجيل الدخول - محسّنة للإتاحة
 const Login = () => {
@@ -44,11 +45,11 @@ const Login = () => {
         </div>
 
         <p className="text-ios-secondary text-center mb-8">
-          ادخل عشان تتابع فلوسك
+          اسهل طريقة عشان تتابع فيها مصاريف السكن
         </p>
 
         {loading ? (
-          <Loader text="بندخلك..." />
+          <Loader text="بندخلك اهو اصبر شوية..." />
         ) : (
           <>
             {error && (
@@ -63,45 +64,29 @@ const Login = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label
-                  htmlFor="username"
-                  className="block text-sm font-semibold text-ios-dark mb-2"
-                >
-                  اسم المستخدم
-                </label>
-                <input
-                  id="username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-5 py-3.5 bg-ios-bg border border-ios-border rounded-2xl text-ios-dark placeholder-ios-secondary/50 transition-all"
-                  required
-                  autoComplete="username"
-                  aria-required="true"
-                  aria-invalid={error ? "true" : "false"}
-                />
-              </div>
+              <Input
+                id="username"
+                label="اسم المستخدم"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                icon={User}
+                required
+                autoComplete="username"
+                error={error ? " " : ""}
+              />
 
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-semibold text-ios-dark mb-2"
-                >
-                  الباسورد
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-5 py-3.5 bg-ios-bg border border-ios-border rounded-2xl text-ios-dark placeholder-ios-secondary/50 transition-all"
-                  required
-                  autoComplete="current-password"
-                  aria-required="true"
-                  aria-invalid={error ? "true" : "false"}
-                />
-              </div>
+              <Input
+                id="password"
+                label="الباسورد"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                icon={Lock}
+                required
+                autoComplete="current-password"
+                error={error ? " " : ""}
+              />
 
               <button
                 type="submit"
@@ -115,7 +100,7 @@ const Login = () => {
             {/* Registration Link */}
             <div className="mt-6 text-center">
               <p className="text-ios-secondary">
-                مش عندك حساب؟{" "}
+                معندكش حساب؟{" "}
                 <Link
                   to="/register"
                   className="text-ios-primary hover:underline font-semibold transition-colors"

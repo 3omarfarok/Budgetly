@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import api from "../utils/api";
-import { PlusCircle, Check } from "lucide-react";
+import { PlusCircle, Check, FileText, Coins } from "lucide-react";
 
 import Loader from "../components/Loader";
+import Input from "../components/Input";
+import Select from "../components/Select";
 
 // صفحة إضافة مصروف - تصميم iOS
 const AddExpense = () => {
@@ -132,48 +134,27 @@ const AddExpense = () => {
           border: "1px solid var(--color-border)",
         }}
       >
-        <div>
-          <label
-            className="block text-sm font-semibold mb-2"
-            style={{ color: "var(--color-dark)" }}
-          >
-            وصف المصروف
-          </label>
-          <input
-            type="text"
-            value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
-            className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2"
-            style={{
-              backgroundColor: "var(--color-bg)",
-              border: "1px solid var(--color-border)",
-              color: "var(--color-dark)",
-            }}
-            required
-          />
-        </div>
+        <Input
+          label="وصف المصروف"
+          type="text"
+          value={formData.description}
+          onChange={(e) =>
+            setFormData({ ...formData, description: e.target.value })
+          }
+          icon={FileText}
+          placeholder="مثال: فاتورة الكهرباء"
+          required
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label
-              className="block text-sm font-semibold mb-2"
-              style={{ color: "var(--color-dark)" }}
-            >
-              النوع
-            </label>
-            <select
+            <Select
+              label="النوع"
               value={formData.category}
               onChange={(e) =>
                 setFormData({ ...formData, category: e.target.value })
               }
-              className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2 appearance-none  "
-              style={{
-                backgroundColor: "var(--color-bg)",
-                border: "1px solid var(--color-border)",
-                color: "var(--color-dark)",
-              }}
+              variant="filled"
             >
               <option value="General">عام</option>
               <option value="Food">أكل وشرب</option>
@@ -182,54 +163,33 @@ const AddExpense = () => {
               <option value="Entertainment">ترفيه</option>
               <option value="Housing">سكن</option>
               <option value="Other">حاجات تانية</option>
-            </select>
+            </Select>
           </div>
 
-          <div>
-            <label
-              className="block text-sm font-semibold mb-2"
-              style={{ color: "var(--color-dark)" }}
-            >
-              الفلوس (جنيه)
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              value={formData.totalAmount}
-              onChange={(e) =>
-                setFormData({ ...formData, totalAmount: e.target.value })
-              }
-              className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2 appearance-none"
-              style={{
-                backgroundColor: "var(--color-bg)",
-                border: "1px solid var(--color-border)",
-                color: "var(--color-dark)",
-              }}
-              required
-            />
-          </div>
+          <Input
+            label="الفلوس (جنيه)"
+            type="number"
+            step="0.01"
+            value={formData.totalAmount}
+            onChange={(e) =>
+              setFormData({ ...formData, totalAmount: e.target.value })
+            }
+            icon={Coins}
+            placeholder="0.00"
+            required
+          />
         </div>
 
         <div>
-          <label
-            className="block text-sm font-semibold mb-2"
-            style={{ color: "var(--color-dark)" }}
-          >
-            هنقسمها إزاي
-          </label>
-          <select
+          <Select
+            label="هنقسمها إزاي"
             value={formData.splitType}
             onChange={handleSplitTypeChange}
-            className="w-full px-5 py-3.5 rounded-2xl transition-all focus:outline-none focus:ring-2 appearance-none"
-            style={{
-              backgroundColor: "var(--color-bg)",
-              border: "1px solid var(--color-border)",
-              color: "var(--color-dark)",
-            }}
+            variant="filled"
           >
             <option value="equal">قسّمها على الكل</option>
             <option value="specific">قسّمها على ناس معينة</option>
-          </select>
+          </Select>
         </div>
 
         {formData.splitType === "specific" && (

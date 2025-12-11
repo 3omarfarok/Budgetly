@@ -14,6 +14,7 @@ import {
   Edit,
 } from "lucide-react";
 import Loader from "../components/Loader";
+import Input from "../components/Input";
 
 // Available profile pictures
 const availableAvatars = [
@@ -273,24 +274,21 @@ const Profile = () => {
             {/* Editable Name */}
             <div className="flex items-center gap-2 mb-1">
               {editingName ? (
-                <div className="flex items-center gap-2">
-                  <input
+                <div className="flex items-center gap-2 flex-1">
+                  <Input
                     type="text"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
-                    className="px-2 py-1 rounded-lg text-xl font-bold border"
-                    style={{
-                      backgroundColor: "var(--color-bg)",
-                      borderColor: "var(--color-border)",
-                      color: "var(--color-dark)",
-                    }}
                     placeholder="الاسم"
                     disabled={savingName}
+                    variant="filled"
+                    size="sm"
+                    wrapperClassName="flex-1"
                   />
                   <button
                     onClick={handleSaveName}
                     disabled={savingName}
-                    className="px-3 py-1 rounded-lg text-xs font-semibold transition-all"
+                    className="px-3 py-1 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
                     style={{
                       backgroundColor: "var(--color-success)",
                       color: "white",
@@ -336,24 +334,21 @@ const Profile = () => {
             <div className="flex items-center gap-2 mb-2">
               <Mail size={16} style={{ color: "var(--color-secondary)" }} />
               {editingUsername ? (
-                <div className="flex items-center gap-2">
-                  <input
+                <div className="flex items-center gap-2 flex-1">
+                  <Input
                     type="text"
                     value={newUsername}
                     onChange={(e) => setNewUsername(e.target.value)}
-                    className="px-2 py-1 rounded-lg text-sm border"
-                    style={{
-                      backgroundColor: "var(--color-bg)",
-                      borderColor: "var(--color-border)",
-                      color: "var(--color-dark)",
-                    }}
                     placeholder="اليوزرنيم"
                     disabled={savingUsername}
+                    variant="filled"
+                    size="sm"
+                    wrapperClassName="flex-1"
                   />
                   <button
                     onClick={handleSaveUsername}
                     disabled={savingUsername}
-                    className="px-3 py-1 rounded-lg text-xs font-semibold transition-all"
+                    className="px-3 py-1 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
                     style={{
                       backgroundColor: "var(--color-success)",
                       color: "white",

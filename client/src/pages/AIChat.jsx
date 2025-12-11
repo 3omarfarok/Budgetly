@@ -4,6 +4,7 @@ import { useToast } from "../context/ToastContext";
 import api from "../utils/api";
 import { Send, Trash2, Plus, MessageCircle } from "lucide-react";
 import Loader from "../components/Loader";
+import Input from "../components/Input";
 
 const AIChat = () => {
   const { user } = useAuth();
@@ -217,7 +218,7 @@ const AIChat = () => {
                       : "bg-ios-card text-ios-text rounded-bl-none border border-ios-border"
                   }`}
                 >
-                  <p className="text-sm break-words">{msg.content}</p>
+                  <p className="text-sm wrap-break-word">{msg.content}</p>
                   <p
                     className={`text-xs mt-1 opacity-70 ${
                       msg.role === "user" ? "text-white" : "text-ios-secondary"
@@ -242,13 +243,13 @@ const AIChat = () => {
         {/* Input */}
         <div className="bg-ios-card border-t border-ios-border p-4">
           <form onSubmit={sendMessage} className="flex gap-2">
-            <input
-              type="text"
+            <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="اكتب رسالتك..."
               disabled={loading}
-              className="flex-1 bg-ios-bg border border-ios-border rounded-lg px-4 py-2 text-ios-text placeholder-ios-secondary focus:outline-none focus:border-ios-primary transition disabled:opacity-50"
+              variant="filled"
+              wrapperClassName="flex-1"
             />
             <button
               type="submit"

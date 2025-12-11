@@ -13,6 +13,7 @@ import {
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import Input from "../components/Input";
 
 const AIPage = () => {
   const [messages, setMessages] = useState([
@@ -356,13 +357,13 @@ const AIPage = () => {
       {/* Input Area */}
       <div className="p-4 bg-ios-surface border-t border-ios-border shrink-0 z-10">
         <form onSubmit={handleSubmit} className="flex gap-2">
-          <input
-            type="text"
+          <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="اسألني عن أي حسابات أو نصايح..."
-            className="flex-1 bg-ios-bg border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-ios-primary text-ios-text placeholder:text-ios-secondary"
             disabled={isLoading}
+            variant="filled"
+            wrapperClassName="flex-1"
           />
           <button
             type="submit"
