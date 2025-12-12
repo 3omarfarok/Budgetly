@@ -2,7 +2,14 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import api from "../utils/api";
-import { Trash2, Send, StickyNote } from "lucide-react";
+import {
+  Trash2,
+  Send,
+  StickyNote,
+  MessageCircle,
+  Search,
+  Filter,
+} from "lucide-react";
 
 export default function NotesPage() {
   const [notes, setNotes] = useState([]);
@@ -11,10 +18,30 @@ export default function NotesPage() {
   const [submitting, setSubmitting] = useState(false);
   const { user } = useAuth();
   const toast = useToast();
+  const [searchText, setSearchText] = useState("");
+  const [selectedUser, setSelectedUser] = useState("");
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyContent, setReplyContent] = useState("");
 
   useEffect(() => {
     fetchNotes();
   }, []);
+
+  const uniqueUsers = [
+    ...new Set(notes.map((note) => note.createdBy?.name).filter(Boolean)),
+  ];
+
+  const filteredNotes = notes.filter((note) => {
+    const matchesSearch =
+      note.content.toLowerCase().includes(searchText.toLowerCase()) ||
+      note.replies?.some((r) =>
+        r.content.toLowerCase().includes(searchText.toLowerCase())
+      );
+    const matchesUser = selectedUser
+      ? note.createdBy?.name === selectedUser
+      : true;
+    return matchesSearch && matchesUser;
+  });
 
   const fetchNotes = async () => {
     try {
@@ -66,6 +93,23 @@ export default function NotesPage() {
     }
   };
 
+  const handleAddReply = async (noteId) => {
+    if (!replyContent.trim()) return;
+
+    try {
+      const { data } = await api.post(`/notes/${noteId}/reply`, {
+        content: replyContent,
+      });
+      setNotes(notes.map((n) => (n._id === noteId ? data : n)));
+      setReplyContent("");
+      setReplyingTo(null);
+      toast.success("تم إضافة الرد");
+    } catch (error) {
+      console.error("Error adding reply:", error);
+      toast.error("فشل في إضافة الرد");
+    }
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("ar-EG", {
       day: "numeric",
@@ -85,6 +129,35 @@ export default function NotesPage() {
         <p className="text-(--color-muted)">
           شارك أفكارك وملاحظاتك مع أهل البيت
         </p>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="relative flex-1">
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-(--color-muted) w-5 h-5" />
+          <input
+            type="text"
+            placeholder="بحث في الملاحظات..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="w-full bg-(--color-surface) border border-(--color-border) rounded-xl py-3 pr-10 pl-4 focus:outline-none focus:ring-2 focus:ring-(--color-primary) transition-all"
+          />
+        </div>
+        <div className="relative min-w-[200px]">
+          <Filter className="absolute right-3 top-1/2 -translate-y-1/2 text-(--color-muted) w-5 h-5 pointer-events-none" />
+          <select
+            value={selectedUser}
+            onChange={(e) => setSelectedUser(e.target.value)}
+            className="w-full bg-(--color-surface) border border-(--color-border) rounded-xl py-3 pr-10 pl-4 focus:outline-none focus:ring-2 focus:ring-(--color-primary) appearance-none cursor-pointer transition-all"
+          >
+            <option value="">كل العائلة</option>
+            {uniqueUsers.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Add Note Form */}
@@ -121,13 +194,17 @@ export default function NotesPage() {
             <div className="w-8 h-8 border-4 border-(--color-primary) border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-(--color-muted)">جاري تحميل الملاحظات...</p>
           </div>
-        ) : notes.length === 0 ? (
+        ) : filteredNotes.length === 0 ? (
           <div className="text-center py-10 bg-(--color-surface) rounded-2xl border border-dashed border-(--color-border)">
             <StickyNote className="w-12 h-12 text-(--color-border) mx-auto mb-3" />
-            <p className="text-(--color-muted)">مفيش ملاحظات لسه</p>
+            <p className="text-(--color-muted)">
+              {searchText || selectedUser
+                ? "مفيش ملاحظات بتطابق البحث ده"
+                : "مفيش ملاحظات لسه"}
+            </p>
           </div>
         ) : (
-          notes.map((note) => (
+          filteredNotes.map((note) => (
             <div
               key={note._id}
               className="bg-(--color-surface) rounded-2xl p-5 shadow-sm border border-(--color-border) hover:shadow-md transition-all group"
@@ -156,9 +233,76 @@ export default function NotesPage() {
                   </button>
                 )}
               </div>
-              <p className="text-(--color-text) whitespace-pre-wrap leading-relaxed">
+              <p className="text-(--color-text) whitespace-pre-wrap leading-relaxed mb-4">
                 {note.content}
               </p>
+
+              {/* Replies Section */}
+              <div className="mt-4 pt-4 border-t border-(--color-border)">
+                {note.replies?.length > 0 && (
+                  <div className="space-y-3 mb-4 pl-4 border-l-2 border-(--color-border)">
+                    {note.replies.map((reply) => (
+                      <div key={reply._id} className="text-sm">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-(--color-text)">
+                            {reply.createdBy?.name}
+                          </span>
+                          <span className="text-xs text-(--color-muted)">
+                            {formatDate(reply.createdAt)}
+                          </span>
+                        </div>
+                        <p className="text-(--color-muted) whitespace-pre-wrap">
+                          {reply.content}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Reply Input */}
+                {replyingTo === note._id ? (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={replyContent}
+                      onChange={(e) => setReplyContent(e.target.value)}
+                      placeholder="اكتب ردك هنا..."
+                      autoFocus
+                      className="flex-1 bg-(--color-bg) border border-(--color-border) rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-(--color-primary)"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleAddReply(note._id);
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={() => handleAddReply(note._id)}
+                      disabled={!replyContent.trim()}
+                      className="p-2 bg-(--color-primary) text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      <Send size={16} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setReplyingTo(null);
+                        setReplyContent("");
+                      }}
+                      className="p-2 text-(--color-muted) hover:bg-(--color-bg) rounded-lg"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setReplyingTo(note._id)}
+                    className="flex items-center gap-2 text-sm text-(--color-muted) hover:text-(--color-primary) transition-colors"
+                  >
+                    <MessageCircle size={16} />
+                    <span>رد على الملاحظة</span>
+                  </button>
+                )}
+              </div>
             </div>
           ))
         )}

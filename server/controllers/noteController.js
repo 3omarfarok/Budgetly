@@ -13,6 +13,7 @@ export const getNotes = async (req, res) => {
 
     const notes = await Note.find({ house: user.house })
       .populate("createdBy", "name username")
+      .populate("replies.createdBy", "name username")
       .sort({ date: -1 });
 
     res.json(notes);
@@ -40,10 +41,9 @@ export const createNote = async (req, res) => {
       house: user.house,
     });
 
-    const populatedNote = await Note.findById(note._id).populate(
-      "createdBy",
-      "name username"
-    );
+    const populatedNote = await Note.findById(note._id)
+      .populate("createdBy", "name username")
+      .populate("replies.createdBy", "name username");
 
     res.status(201).json(populatedNote);
   } catch (error) {
@@ -73,6 +73,35 @@ export const deleteNote = async (req, res) => {
     res.json({ message: "Note deleted" });
   } catch (error) {
     console.error("Delete note error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Add a reply to a note
+export const addReply = async (req, res) => {
+  try {
+    const { content } = req.body;
+    const note = await Note.findById(req.params.id);
+
+    if (!note) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+
+    const reply = {
+      content,
+      createdBy: req.user.id,
+    };
+
+    note.replies.push(reply);
+    await note.save();
+
+    const populatedNote = await Note.findById(note._id)
+      .populate("createdBy", "name username")
+      .populate("replies.createdBy", "name username");
+
+    res.json(populatedNote);
+  } catch (error) {
+    console.error("Add reply error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
