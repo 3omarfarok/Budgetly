@@ -10,6 +10,8 @@ import {
   Coins,
   FileText,
   Calendar,
+  ArrowDownCircle,
+  ArrowUpCircle,
 } from "lucide-react";
 
 import Loader from "../components/Loader";
@@ -22,6 +24,7 @@ const AddPayment = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [balances, setBalances] = useState([]);
+  const [transactionType, setTransactionType] = useState("payment"); // "payment" or "received"
   const [formData, setFormData] = useState({
     user: "",
     amount: "",
@@ -79,8 +82,12 @@ const AddPayment = () => {
 
     try {
       setIsSubmitting(true);
-      await api.post("/payments", formData);
-      toast.success("تم تسجيل الدفعة بنجاح!");
+      await api.post("/payments", { ...formData, transactionType });
+      toast.success(
+        transactionType === "payment"
+          ? "تم تسجيل الدفعة بنجاح!"
+          : "تم تسجيل الاستلام بنجاح!"
+      );
       navigate("/payments");
     } catch (error) {
       console.error("غلط في تسجيل الدفعة:", error);
@@ -120,6 +127,52 @@ const AddPayment = () => {
         >
           سجّل دفعة جديدة
         </h1>
+      </div>
+
+      {/* Transaction Type Toggle */}
+      <div
+        className="flex rounded-2xl p-1 mb-6"
+        style={{
+          backgroundColor: "var(--color-bg)",
+          border: "1px solid var(--color-border)",
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setTransactionType("payment")}
+          className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2`}
+          style={{
+            backgroundColor:
+              transactionType === "payment"
+                ? "var(--color-error)"
+                : "transparent",
+            color:
+              transactionType === "payment"
+                ? "white"
+                : "var(--color-secondary)",
+          }}
+        >
+          <ArrowUpCircle size={20} />
+          دفعت
+        </button>
+        <button
+          type="button"
+          onClick={() => setTransactionType("received")}
+          className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2`}
+          style={{
+            backgroundColor:
+              transactionType === "received"
+                ? "var(--color-success)"
+                : "transparent",
+            color:
+              transactionType === "received"
+                ? "white"
+                : "var(--color-secondary)",
+          }}
+        >
+          <ArrowDownCircle size={20} />
+          استلمت
+        </button>
       </div>
 
       {error && (
@@ -203,17 +256,26 @@ const AddPayment = () => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className={`w-full py-4 px-4 cursor-pointer text-white hover:bg-[--color-dark] hover:text-[--color-primary] font-bold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl mt-4 flex items-center justify-center gap-2 ${
+          className={`w-full py-4 px-4 cursor-pointer text-white font-bold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl mt-4 flex items-center justify-center gap-2 ${
             isSubmitting ? "opacity-70 cursor-not-allowed" : ""
           }`}
-          style={{ backgroundColor: "var(--color-primary)" }}
+          style={{
+            backgroundColor:
+              transactionType === "received"
+                ? "var(--color-success)"
+                : "var(--color-primary)",
+          }}
         >
           {isSubmitting ? (
             "جاري التسجيل..."
           ) : (
             <>
-              <PlusCircle size={20} />
-              سجّل الدفعة
+              {transactionType === "payment" ? (
+                <ArrowUpCircle size={20} />
+              ) : (
+                <ArrowDownCircle size={20} />
+              )}
+              {transactionType === "payment" ? "سجّل الدفعة" : "سجّل الاستلام"}
             </>
           )}
         </button>

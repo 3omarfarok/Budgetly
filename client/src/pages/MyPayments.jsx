@@ -11,6 +11,8 @@ import {
   XCircle,
   Edit2,
   Trash2,
+  ArrowUpCircle,
+  ArrowDownCircle,
 } from "lucide-react";
 
 import Loader from "../components/Loader";
@@ -34,6 +36,7 @@ const MyPayments = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletingPaymentId, setDeletingPaymentId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [transactionType, setTransactionType] = useState("payment");
 
   useEffect(() => {
     fetchMyPayments();
@@ -82,6 +85,7 @@ const MyPayments = () => {
           amount: formData.amount,
           description: formData.description,
           date: formData.date,
+          transactionType,
         });
         toast.success("تم تعديل الدفعة بنجاح!");
       } else {
@@ -91,8 +95,13 @@ const MyPayments = () => {
           amount: formData.amount,
           description: formData.description,
           date: formData.date,
+          transactionType,
         });
-        toast.success("تم تسجيل الدفعة بنجاح!");
+        toast.success(
+          transactionType === "payment"
+            ? "تم تسجيل الدفعة بنجاح!"
+            : "تم تسجيل الاستلام بنجاح!"
+        );
       }
 
       // إعادة تعيين الفورم
@@ -101,6 +110,7 @@ const MyPayments = () => {
         description: "",
         date: new Date().toISOString().split("T")[0],
       });
+      setTransactionType("payment");
       setShowAddForm(false);
       setEditingPayment(null);
       fetchMyPayments();
@@ -117,6 +127,7 @@ const MyPayments = () => {
 
   const handleEdit = (payment) => {
     setEditingPayment(payment);
+    setTransactionType(payment.transactionType || "payment");
     setFormData({
       amount: payment.amount,
       description: payment.description || "",
@@ -151,6 +162,7 @@ const MyPayments = () => {
 
   const handleCancelEdit = () => {
     setEditingPayment(null);
+    setTransactionType("payment");
     setFormData({
       amount: "",
       description: "",
@@ -200,7 +212,15 @@ const MyPayments = () => {
 
   // حساب المجموع
   const totalPaid = payments
-    .filter((p) => p.status === "approved")
+    .filter(
+      (p) =>
+        p.status === "approved" &&
+        (!p.transactionType || p.transactionType === "payment")
+    )
+    .reduce((sum, p) => sum + (p.amount || 0), 0);
+
+  const totalReceived = payments
+    .filter((p) => p.status === "approved" && p.transactionType === "received")
     .reduce((sum, p) => sum + (p.amount || 0), 0);
 
   const pendingAmount = payments
@@ -296,15 +316,39 @@ const MyPayments = () => {
               className="text-sm mb-1"
               style={{ color: "var(--color-status-approved)" }}
             >
-              الموافق عليه
+              إجمالي المستلم
             </p>
             <p
               className="text-2xl font-bold"
               style={{ color: "var(--color-success)" }}
             >
+              {totalReceived.toFixed(2)} <span className="text-sm">جنيه</span>
+            </p>
+          </div>
+
+          <div
+            className="p-4 rounded-2xl"
+            style={{
+              backgroundColor: "var(--color-status-rejected-bg)",
+              borderColor: "var(--color-status-rejected-border)",
+              borderWidth: "1px",
+              borderStyle: "solid",
+            }}
+          >
+            <p
+              className="text-sm mb-1"
+              style={{ color: "var(--color-status-rejected)" }}
+            >
+              إجمالي المدفوع
+            </p>
+            <p
+              className="text-2xl font-bold"
+              style={{ color: "var(--color-error)" }}
+            >
               {totalPaid.toFixed(2)} <span className="text-sm">جنيه</span>
             </p>
           </div>
+
           <div
             className="p-4 rounded-2xl"
             style={{
@@ -325,22 +369,6 @@ const MyPayments = () => {
               style={{ color: "var(--color-warning)" }}
             >
               {pendingAmount.toFixed(2)} <span className="text-sm">جنيه</span>
-            </p>
-          </div>
-          <div
-            className="p-4 rounded-2xl"
-            style={{
-              backgroundColor: "var(--color-primary-bg)",
-              borderColor: "var(--color-primary-border)",
-              borderWidth: "1px",
-              borderStyle: "solid",
-            }}
-          >
-            <p className="text-sm mb-1 text-(--color-primary)">
-              إجمالي المدفوعات
-            </p>
-            <p className="text-2xl font-bold text-(--color-primary)">
-              {payments.length}
             </p>
           </div>
         </div>
@@ -403,6 +431,53 @@ const MyPayments = () => {
               {error}
             </div>
           )}
+
+          {/* Transaction Type Toggle */}
+          <div
+            className="flex rounded-2xl p-1 mb-6"
+            style={{
+              backgroundColor: "var(--color-bg)",
+              border: "1px solid var(--color-border)",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setTransactionType("payment")}
+              className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2`}
+              style={{
+                backgroundColor:
+                  transactionType === "payment"
+                    ? "var(--color-error)"
+                    : "transparent",
+                color:
+                  transactionType === "payment"
+                    ? "white"
+                    : "var(--color-secondary)",
+              }}
+            >
+              <ArrowUpCircle size={20} />
+              دفعت
+            </button>
+            <button
+              type="button"
+              onClick={() => setTransactionType("received")}
+              className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2`}
+              style={{
+                backgroundColor:
+                  transactionType === "received"
+                    ? "var(--color-success)"
+                    : "transparent",
+                color:
+                  transactionType === "received"
+                    ? "white"
+                    : "var(--color-secondary)",
+              }}
+            >
+              <ArrowDownCircle size={20} />
+              استلمت
+            </button>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -448,7 +523,12 @@ const MyPayments = () => {
                 className={`flex-1 py-3 px-4 text-white font-bold rounded-2xl transition-all shadow-lg ${
                   isSubmitting ? "opacity-70 cursor-not-allowed" : ""
                 }`}
-                style={{ backgroundColor: "var(--color-primary)" }}
+                style={{
+                  backgroundColor:
+                    transactionType === "received"
+                      ? "var(--color-success)"
+                      : "var(--color-primary)",
+                }}
               >
                 {isSubmitting
                   ? "جاري الحفظ..."
@@ -504,10 +584,42 @@ const MyPayments = () => {
                     </span>
                   </div>
                   <div className="text-right">
+                    <div className="flex items-center gap-1.5 justify-end mb-1">
+                      {payment.transactionType === "received" ? (
+                        <ArrowDownCircle
+                          size={14}
+                          style={{ color: "var(--color-success)" }}
+                        />
+                      ) : (
+                        <ArrowUpCircle
+                          size={14}
+                          style={{ color: "var(--color-error)" }}
+                        />
+                      )}
+                      <span
+                        className="text-xs font-semibold"
+                        style={{
+                          color:
+                            payment.transactionType === "received"
+                              ? "var(--color-success)"
+                              : "var(--color-error)",
+                        }}
+                      >
+                        {payment.transactionType === "received"
+                          ? "استلام"
+                          : "دفع"}
+                      </span>
+                    </div>
                     <span
                       className="block text-xl font-bold"
-                      style={{ color: "var(--color-dark)" }}
+                      style={{
+                        color:
+                          payment.transactionType === "received"
+                            ? "var(--color-success)"
+                            : "var(--color-dark)",
+                      }}
                     >
+                      {payment.transactionType === "received" ? "+" : "-"}
                       {payment.amount?.toFixed(2) || "0.00"}
                       <span
                         className="text-xs font-normal mr-1"

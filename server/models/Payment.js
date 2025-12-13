@@ -7,6 +7,11 @@ const paymentSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    transactionType: {
+      type: String,
+      enum: ["payment", "received"],
+      default: "payment", // Default ensures existing records work without migration
+    },
     amount: {
       type: Number,
       required: true,

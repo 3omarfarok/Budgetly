@@ -41,17 +41,21 @@ export const getBalances = async (req, res) => {
           return sum + (userSplit ? userSplit.amount : 0);
         }, 0);
 
-        // Calculate total paid by user
+        // Calculate total paid by user (only "payment" type transactions)
         const userPayments = payments.filter(
           (payment) => payment.user.toString() === user._id.toString()
         );
 
-        const totalPaid = userPayments.reduce(
-          (sum, payment) => sum + payment.amount,
-          0
-        );
+        // Payments reduce debt, Received adds income
+        const totalPaid = userPayments
+          .filter((p) => !p.transactionType || p.transactionType === "payment")
+          .reduce((sum, payment) => sum + payment.amount, 0);
 
-        // Calculate balance
+        const totalReceived = userPayments
+          .filter((p) => p.transactionType === "received")
+          .reduce((sum, payment) => sum + payment.amount, 0);
+
+        // Calculate balance (paid reduces owed, received is separate income)
         const balance = totalPaid - totalOwed;
 
         return {
@@ -60,6 +64,7 @@ export const getBalances = async (req, res) => {
           name: user.name,
           totalOwed,
           totalPaid,
+          totalReceived, // Track received money separately
           balance, // positive = they paid extra, negative = they owe money
         };
       })
@@ -102,7 +107,7 @@ export const getUserStats = async (req, res) => {
       .populate("recordedBy", "name username")
       .sort({ date: -1 });
 
-    // Calculate totals
+    // Calculate totals - only count "payment" type for totalPaid
     const totalOwed = expenses.reduce((sum, expense) => {
       const userSplit = expense.splits.find(
         (split) => split.user._id.toString() === userId
@@ -110,10 +115,13 @@ export const getUserStats = async (req, res) => {
       return sum + (userSplit ? userSplit.amount : 0);
     }, 0);
 
-    const totalPaid = payments.reduce(
-      (sum, payment) => sum + payment.amount,
-      0
-    );
+    const totalPaid = payments
+      .filter((p) => !p.transactionType || p.transactionType === "payment")
+      .reduce((sum, payment) => sum + payment.amount, 0);
+
+    const totalReceived = payments
+      .filter((p) => p.transactionType === "received")
+      .reduce((sum, payment) => sum + payment.amount, 0);
 
     const balance = totalPaid - totalOwed;
 
@@ -136,6 +144,7 @@ export const getUserStats = async (req, res) => {
     res.json({
       totalOwed,
       totalPaid,
+      totalReceived, // Track received money separately
       balance,
       expenseCount: expenses.length,
       paymentCount: payments.length,
@@ -221,10 +230,10 @@ export const getAdminDashboard = async (req, res) => {
           (payment) => payment.user.toString() === user._id.toString()
         );
 
-        const totalPaid = userPayments.reduce(
-          (sum, payment) => sum + payment.amount,
-          0
-        );
+        // Only count "payment" type for balance calculation
+        const totalPaid = userPayments
+          .filter((p) => !p.transactionType || p.transactionType === "payment")
+          .reduce((sum, payment) => sum + payment.amount, 0);
 
         const balance = totalPaid - totalOwed;
 

@@ -34,7 +34,7 @@ export const getUserPayments = async (req, res) => {
 // Create payment
 export const createPayment = async (req, res) => {
   try {
-    const { user, amount, description, date } = req.body;
+    const { user, amount, description, date, transactionType } = req.body;
 
     // Validation
     if (!user) {
@@ -57,6 +57,7 @@ export const createPayment = async (req, res) => {
       amount,
       description,
       date,
+      transactionType: transactionType || "payment", // Default to "payment" for backwards compatibility
       recordedBy: req.user.id,
       house: recordingUser.house,
       status: "pending",
@@ -79,7 +80,7 @@ export const createPayment = async (req, res) => {
 // Update payment (only if pending)
 export const updatePayment = async (req, res) => {
   try {
-    const { amount, description, date } = req.body;
+    const { amount, description, date, transactionType } = req.body;
 
     const payment = await Payment.findById(req.params.id);
 
@@ -101,6 +102,7 @@ export const updatePayment = async (req, res) => {
     payment.amount = amount || payment.amount;
     payment.description = description || payment.description;
     payment.date = date || payment.date;
+    payment.transactionType = transactionType || payment.transactionType;
 
     await payment.save();
 
@@ -176,8 +178,8 @@ export const deletePayment = async (req, res) => {
       return res.status(404).json({ message: "Payment not found" });
     }
 
-    // Only allow deletion if pending and user is the owner or admin
-    if (payment.status !== "pending") {
+    // Only allow deletion if pending (unless admin)
+    if (payment.status !== "pending" && req.user.role !== "admin") {
       return res
         .status(403)
         .json({ message: "Can only delete pending payments" });
