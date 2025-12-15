@@ -102,7 +102,7 @@ export const getUserStats = async (req, res) => {
     const payments = await Payment.find({
       user: userId,
       status: "approved",
-      house: currentUseييييييr.house,
+      house: currentUser.house,
     })
       .populate("recordedBy", "name username")
       .sort({ date: -1 });
