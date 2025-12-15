@@ -55,8 +55,8 @@ export const getBalances = async (req, res) => {
           .filter((p) => p.transactionType === "received")
           .reduce((sum, payment) => sum + payment.amount, 0);
 
-        // Calculate balance (paid reduces owed, received is separate income)
-        const balance = totalPaid - totalOwed;
+        // Calculate balance (paid reduces owed, received increases debt/reduces credit)
+        const balance = totalPaid - totalReceived - totalOwed;
 
         return {
           userId: user._id,
@@ -102,7 +102,7 @@ export const getUserStats = async (req, res) => {
     const payments = await Payment.find({
       user: userId,
       status: "approved",
-      house: currentUser.house,
+      house: currentUseييييييr.house,
     })
       .populate("recordedBy", "name username")
       .sort({ date: -1 });
@@ -123,7 +123,7 @@ export const getUserStats = async (req, res) => {
       .filter((p) => p.transactionType === "received")
       .reduce((sum, payment) => sum + payment.amount, 0);
 
-    const balance = totalPaid - totalOwed;
+    const balance = totalPaid - totalReceived - totalOwed;
 
     // Get expense categories breakdown
     const categoryBreakdown = expenses.reduce((acc, expense) => {
@@ -235,7 +235,11 @@ export const getAdminDashboard = async (req, res) => {
           .filter((p) => !p.transactionType || p.transactionType === "payment")
           .reduce((sum, payment) => sum + payment.amount, 0);
 
-        const balance = totalPaid - totalOwed;
+        const totalReceived = userPayments
+          .filter((p) => p.transactionType === "received")
+          .reduce((sum, payment) => sum + payment.amount, 0);
+
+        const balance = totalPaid - totalReceived - totalOwed;
 
         return {
           userId: user._id,

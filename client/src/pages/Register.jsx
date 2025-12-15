@@ -68,7 +68,7 @@ const Register = () => {
         <div className="bg-ios-surface backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-ios-border">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-ios-dark mb-2 font-headings">
+            <h1 className="text-3xl font-bold text-ios-dark mb-2 ">
               إنشاء حساب جديد
             </h1>
             <p className="text-ios-secondary">

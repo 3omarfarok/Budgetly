@@ -121,8 +121,8 @@ const Payments = () => {
                 }}
                 className={`px-4 py-2.5 font-semibold rounded-2xl transition-all shadow-lg flex items-center gap-2 ${
                   isSelectionMode
-                    ? "bg-[var(--color-secondary)] text-white"
-                    : "bg-[var(--color-surface)] text-[var(--color-dark)] border border-[var(--color-border)]"
+                    ? "bg-(--color-secondary) text-white"
+                    : "bg-(--color-surface) text-(--color-dark) border border-(--color-border)"
                 }`}
               >
                 <CheckSquare size={18} />
@@ -135,7 +135,7 @@ const Payments = () => {
               {isSelectionMode && (
                 <button
                   onClick={toggleSelectAll}
-                  className="px-4 py-2.5 font-semibold rounded-2xl transition-all shadow-lg flex items-center gap-2 bg-[var(--color-surface)] text-[var(--color-primary)] border border-[var(--color-primary)]"
+                  className="px-4 py-2.5 font-semibold rounded-2xl transition-all shadow-lg flex items-center gap-2 bg-(--color-surface) text-(--color-primary) border border-(--color-primary)"
                 >
                   {selectedPayments.length === paginatedPayments.length &&
                   paginatedPayments.length > 0 ? (
@@ -149,8 +149,7 @@ const Payments = () => {
 
               <button
                 onClick={() => navigate("/add-payment")}
-                className="px-4 py-2.5 text-white font-semibold rounded-2xl transition-all shadow-lg flex items-center gap-2 justify-center"
-                style={{ backgroundColor: "var(--color-primary)" }}
+                className="px-4 py-2.5 text-white font-semibold rounded-2xl transition-all shadow-lg flex items-center gap-2 justify-center bg-(--color-primary)"
               >
                 <PlusCircle size={18} />
                 <span className="hidden sm:inline">سجّل دفعة</span>
@@ -164,8 +163,8 @@ const Payments = () => {
       <div
         className="p-4 rounded-3xl shadow-sm mb-6 space-y-4"
         style={{
-          backgroundColor: "var(--color-surface)",
-          border: "1px solid var(--color-border)",
+          backgroundColor: "--color-surface",
+          border: "1px solid --color-border",
         }}
       >
         <div className="flex flex-col md:flex-row gap-4">
@@ -181,9 +180,9 @@ const Payments = () => {
             <select
               className="p-3 rounded-xl outline-none transition-all cursor-pointer font-medium text-sm appearance-none"
               style={{
-                backgroundColor: "var(--color-bg)",
-                border: "1px solid var(--color-border)",
-                color: "var(--color-dark)",
+                backgroundColor: "--color-bg",
+                border: "1px solid --color-border",
+                color: "--color-dark",
               }}
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
@@ -242,7 +241,7 @@ const Payments = () => {
                   isSelectionMode ? "cursor-pointer" : ""
                 } ${
                   isSelected
-                    ? "ring-2 ring-[var(--color-primary)] bg-[var(--color-primary-light)]"
+                    ? "ring-2 ring-(--color-primary) bg-(--color-primary-light)"
                     : ""
                 }`}
                 style={{
@@ -359,7 +358,7 @@ const Payments = () => {
 
                 {payment.description && (
                   <p
-                    className="mb-4 text-sm break-words"
+                    className="mb-4 text-sm wrap-words"
                     style={{ color: "var(--color-secondary)" }}
                   >
                     {payment.description}
@@ -470,7 +469,7 @@ const Payments = () => {
       {/* Bulk Actions Floating Bar */}
       {selectedPayments.length > 0 && (
         <div
-          className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-[var(--color-dark)] text-white px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-4 z-50 animate-bounce-in"
+          className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-[--color-dark] text-white px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-4 z-50 animate-bounce-in"
           style={{ maxWidth: "90%" }}
         >
           <span className="font-bold text-lg">
@@ -479,14 +478,14 @@ const Payments = () => {
           <div className="h-6 w-[1px] bg-gray-600"></div>
           <button
             onClick={handleBulkApprove}
-            className="flex items-center gap-2 hover:text-[var(--color-success)] transition-colors"
+            className="flex items-center gap-2 hover:text-(--color-success) transition-colors"
           >
             <CheckCircle size={20} />
             <span className="hidden sm:inline">موافقة</span>
           </button>
           <button
             onClick={handleBulkDeleteClick}
-            className="flex items-center gap-2 hover:text-[var(--color-error)] transition-colors"
+            className="flex items-center gap-2 hover:text-(--color-error) transition-colors"
           >
             <Trash2 size={20} />
             <span className="hidden sm:inline">حذف</span>
