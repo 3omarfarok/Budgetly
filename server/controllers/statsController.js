@@ -110,7 +110,7 @@ export const getUserStats = async (req, res) => {
     // Calculate totals - only count "payment" type for totalPaid
     const totalOwed = expenses.reduce((sum, expense) => {
       const userSplit = expense.splits.find(
-        (split) => split.user._id.toString() === userId
+        (split) => split.user && split.user._id.toString() === userId
       );
       return sum + (userSplit ? userSplit.amount : 0);
     }, 0);
@@ -128,7 +128,7 @@ export const getUserStats = async (req, res) => {
     // Get expense categories breakdown
     const categoryBreakdown = expenses.reduce((acc, expense) => {
       const userSplit = expense.splits.find(
-        (split) => split.user._id.toString() === userId
+        (split) => split.user && split.user._id.toString() === userId
       );
 
       if (userSplit) {
@@ -152,7 +152,7 @@ export const getUserStats = async (req, res) => {
       // Include userShare in each expense for display
       recentExpenses: expenses.slice(0, 5).map((expense) => {
         const userSplit = expense.splits.find(
-          (split) => split.user._id.toString() === userId
+          (split) => split.user && split.user._id.toString() === userId
         );
         return {
           _id: expense._id,
