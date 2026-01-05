@@ -36,6 +36,10 @@ const paymentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    linkedExpense: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Expense",
+    },
     date: { type: Date, default: Date.now },
     house: {
       type: mongoose.Schema.Types.ObjectId,

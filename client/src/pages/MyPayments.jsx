@@ -1,7 +1,3 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
-import { useToast } from "../context/ToastContext";
-import api from "../utils/api";
 import {
   Banknote,
   PlusCircle,
@@ -18,158 +14,34 @@ import {
 import Loader from "../components/Loader";
 import ConfirmModal from "../components/ConfirmModal";
 import Input from "../components/Input";
+import { useMyPayments } from "../hooks/useMyPayments";
 
 const MyPayments = () => {
-  const { user } = useAuth();
-  const toast = useToast();
-  const [payments, setPayments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [editingPayment, setEditingPayment] = useState(null);
-  const [userBalance, setUserBalance] = useState(0);
-  const [formData, setFormData] = useState({
-    amount: "",
-    description: "",
-    date: new Date().toISOString().split("T")[0], // التاريخ الحالي افتراضي
-  });
-  const [error, setError] = useState("");
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deletingPaymentId, setDeletingPaymentId] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [transactionType, setTransactionType] = useState("payment");
-
-  useEffect(() => {
-    fetchMyPayments();
-    fetchUserBalance();
-  }, []);
-
-  const fetchMyPayments = async () => {
-    try {
-      setLoading(true);
-      const { data } = await api.get(`/payments/user/${user.id}`);
-      setPayments(data);
-    } catch (error) {
-      console.error("غلط في تحميل مدفوعاتي:", error);
-      toast.error("فيه مشكلة في تحميل مدفوعاتك");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchUserBalance = async () => {
-    try {
-      const { data } = await api.get(`/stats/user/${user.id}`);
-      setUserBalance(data.balance || 0);
-    } catch (error) {
-      console.error("غلط في تحميل الرصيد:", error);
-      toast.error("فيه مشكلة في تحميل الرصيد");
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    if (!formData.amount) {
-      const errorMsg = "لازم تكتب المبلغ";
-      setError(errorMsg);
-      toast.warning(errorMsg);
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      if (editingPayment) {
-        // تعديل دفعة موجودة
-        await api.put(`/payments/${editingPayment._id}`, {
-          amount: formData.amount,
-          description: formData.description,
-          date: formData.date,
-          transactionType,
-        });
-        toast.success("تم تعديل الدفعة بنجاح!");
-      } else {
-        // إضافة دفعة جديدة
-        await api.post("/payments", {
-          user: user.id,
-          amount: formData.amount,
-          description: formData.description,
-          date: formData.date,
-          transactionType,
-        });
-        toast.success(
-          transactionType === "payment"
-            ? "تم تسجيل الدفعة بنجاح!"
-            : "تم تسجيل الاستلام بنجاح!"
-        );
-      }
-
-      // إعادة تعيين الفورم
-      setFormData({
-        amount: "",
-        description: "",
-        date: new Date().toISOString().split("T")[0],
-      });
-      setTransactionType("payment");
-      setShowAddForm(false);
-      setEditingPayment(null);
-      fetchMyPayments();
-      fetchUserBalance(); // تحديث الرصيد
-    } catch (error) {
-      console.error("غلط في تسجيل الدفعة:", error);
-      const errorMsg = "فيه مشكلة في تسجيل الدفعة";
-      setError(errorMsg);
-      toast.error(errorMsg);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleEdit = (payment) => {
-    setEditingPayment(payment);
-    setTransactionType(payment.transactionType || "payment");
-    setFormData({
-      amount: payment.amount,
-      description: payment.description || "",
-      date: payment.date
-        ? new Date(payment.date).toISOString().split("T")[0]
-        : new Date().toISOString().split("T")[0],
-    });
-    setShowAddForm(true);
-  };
-
-  const handleDelete = (paymentId) => {
-    setDeletingPaymentId(paymentId);
-    setShowDeleteModal(true);
-  };
-
-  const confirmDelete = async () => {
-    try {
-      setIsSubmitting(true);
-      await api.delete(`/payments/${deletingPaymentId}`);
-      toast.success("تم حذف الدفعة بنجاح");
-      fetchMyPayments();
-      fetchUserBalance();
-      setShowDeleteModal(false);
-      setDeletingPaymentId(null);
-    } catch (error) {
-      console.error("غلط في مسح الدفعة:", error);
-      toast.error("فيه مشكلة في حذف الدفعة");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setEditingPayment(null);
-    setTransactionType("payment");
-    setFormData({
-      amount: "",
-      description: "",
-      date: new Date().toISOString().split("T")[0],
-    });
-    setShowAddForm(false);
-  };
+  const {
+    payments,
+    loading,
+    showAddForm,
+    setShowAddForm,
+    editingPayment,
+    userBalance,
+    formData,
+    setFormData,
+    error,
+    showDeleteModal,
+    setShowDeleteModal,
+    deletingPaymentId,
+    setDeletingPaymentId,
+    isSubmitting,
+    handleSubmit,
+    handleEdit,
+    handleDelete,
+    confirmDelete,
+    handleCancelEdit,
+    totalPaid,
+    totalReceived,
+    pendingAmount,
+    amountOwed,
+  } = useMyPayments();
 
   const getStatusStyle = (status) => {
     const styles = {
@@ -209,26 +81,6 @@ const MyPayments = () => {
     };
     return badges[status] || badges.pending;
   };
-
-  // حساب المجموع
-  const totalPaid = payments
-    .filter(
-      (p) =>
-        p.status === "approved" &&
-        (!p.transactionType || p.transactionType === "payment")
-    )
-    .reduce((sum, p) => sum + (p.amount || 0), 0);
-
-  const totalReceived = payments
-    .filter((p) => p.status === "approved" && p.transactionType === "received")
-    .reduce((sum, p) => sum + (p.amount || 0), 0);
-
-  const pendingAmount = payments
-    .filter((p) => p.status === "pending")
-    .reduce((sum, p) => sum + (p.amount || 0), 0);
-
-  // المبلغ المطلوب (إذا كان سالب يعني عليه فلوس)
-  const amountOwed = userBalance < 0 ? Math.abs(userBalance) : 0;
 
   if (loading) return <Loader text="بنحمّل مدفوعاتك..." />;
 
@@ -432,51 +284,7 @@ const MyPayments = () => {
             </div>
           )}
 
-          {/* Transaction Type Toggle */}
-          <div
-            className="flex rounded-2xl p-1 mb-6"
-            style={{
-              backgroundColor: "var(--color-bg)",
-              border: "1px solid var(--color-border)",
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setTransactionType("payment")}
-              className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2`}
-              style={{
-                backgroundColor:
-                  transactionType === "payment"
-                    ? "var(--color-error)"
-                    : "transparent",
-                color:
-                  transactionType === "payment"
-                    ? "white"
-                    : "var(--color-secondary)",
-              }}
-            >
-              <ArrowUpCircle size={20} />
-              دفعت
-            </button>
-            <button
-              type="button"
-              onClick={() => setTransactionType("received")}
-              className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2`}
-              style={{
-                backgroundColor:
-                  transactionType === "received"
-                    ? "var(--color-success)"
-                    : "transparent",
-                color:
-                  transactionType === "received"
-                    ? "white"
-                    : "var(--color-secondary)",
-              }}
-            >
-              <ArrowDownCircle size={20} />
-              استلمت
-            </button>
-          </div>
+          {/* removed transaction type toggle */}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -524,10 +332,7 @@ const MyPayments = () => {
                   isSubmitting ? "opacity-70 cursor-not-allowed" : ""
                 }`}
                 style={{
-                  backgroundColor:
-                    transactionType === "received"
-                      ? "var(--color-success)"
-                      : "var(--color-primary)",
+                  backgroundColor: "var(--color-primary)",
                 }}
               >
                 {isSubmitting

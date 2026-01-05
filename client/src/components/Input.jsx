@@ -29,6 +29,7 @@ const Input = forwardRef(
       variant = "default",
       className = "",
       containerClassName = "",
+      wrapperClassName = "",
       labelClassName = "",
       fullWidth = true,
       id,
@@ -132,7 +133,7 @@ const Input = forwardRef(
       <div
         className={`${
           fullWidth ? "w-full" : "inline-block"
-        } ${containerClassName}`}
+        } ${containerClassName} ${wrapperClassName}`}
       >
         {/* Label */}
         {label && (

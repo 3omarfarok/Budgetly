@@ -1,5 +1,6 @@
 import Payment from "../models/Payment.js";
 import User from "../models/User.js";
+import Expense from "../models/Expense.js";
 
 // Get all payments
 export const getPayments = async (req, res) => {
@@ -120,23 +121,62 @@ export const updatePayment = async (req, res) => {
 // Approve payment (Admin only)
 export const approvePayment = async (req, res) => {
   try {
-    const payment = await Payment.findByIdAndUpdate(
-      req.params.id,
-      {
-        status: "approved",
-        approvedBy: req.user.id,
-      },
-      { new: true }
-    )
-      .populate("user", "name username")
-      .populate("recordedBy", "name username")
-      .populate("approvedBy", "name username");
+    const payment = await Payment.findById(req.params.id);
 
     if (!payment) {
       return res.status(404).json({ message: "Payment not found" });
     }
 
-    res.json(payment);
+    if (payment.status === "approved") {
+      return res.status(400).json({ message: "Payment already approved" });
+    }
+
+    // 1. Get all active users in the house for default splitting
+    const users = await User.find({
+      house: payment.house,
+      isActive: true,
+    });
+
+    if (users.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "No active users found to split expense" });
+    }
+
+    // 2. Create the Split (Equal Split)
+    const splitAmount = payment.amount / users.length;
+    const splits = users.map((u) => ({
+      user: u._id,
+      amount: splitAmount,
+    }));
+
+    // 3. Create the Expense
+    // Payer (createdBy) = The User who made the payment
+    const expense = await Expense.create({
+      description: payment.description || "Payment Approved",
+      category: "General", // Default category
+      totalAmount: payment.amount,
+      splitType: "equal",
+      splits: splits,
+      createdBy: payment.user, // IMPORTANT: The user paid!
+      house: payment.house,
+      generatedFromPayment: payment._id,
+      date: payment.date,
+    });
+
+    // 4. Update Payment to Approved and Link Expense
+    payment.status = "approved";
+    payment.approvedBy = req.user.id;
+    payment.linkedExpense = expense._id;
+    await payment.save();
+
+    // Return populated payment
+    const updatedPayment = await Payment.findById(payment._id)
+      .populate("user", "name username")
+      .populate("recordedBy", "name username")
+      .populate("approvedBy", "name username");
+
+    res.json(updatedPayment);
   } catch (error) {
     console.error("Approve payment error:", error);
     res.status(500).json({ message: "Server error" });

@@ -9,7 +9,7 @@ const AIButton = () => {
 
   return (
     <>
-      <div className="fixed bottom-6 right-6 z-50 hidden lg:flex flex-col items-end gap-2">
+      <div className="fixed bottom-6 left-6 z-50 hidden lg:flex flex-col items-end gap-2">
         {/* Button */}
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -37,15 +37,6 @@ const AIButton = () => {
           </div>
 
           {/* Sparkle decoration */}
-          {!isOpen && (
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-              className="absolute -top-1 -right-1"
-            >
-              <Sparkles className="w-4 h-4 text-yellow-300 drop-shadow-sm" />
-            </motion.div>
-          )}
         </motion.button>
       </div>
 

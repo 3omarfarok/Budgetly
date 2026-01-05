@@ -5,6 +5,8 @@ import {
   createExpense,
   updateExpense,
   deleteExpense,
+  approveExpense,
+  rejectExpense,
 } from "../controllers/expenseController.js";
 
 const router = express.Router();
@@ -12,11 +14,17 @@ const router = express.Router();
 // Get all expenses
 router.get("/", authenticate, getExpenses);
 
-// Create expense (Admin only)
-router.post("/", authenticate, isAdmin, createExpense);
+// Create expense (Authenticated users can create pending expenses, Admins create approved ones)
+router.post("/", authenticate, createExpense);
 
 // Update expense (Admin only)
 router.put("/:id", authenticate, isAdmin, updateExpense);
+
+// Approve expense (Admin only)
+router.put("/:id/approve", authenticate, isAdmin, approveExpense);
+
+// Reject expense (Admin only)
+router.put("/:id/reject", authenticate, isAdmin, rejectExpense);
 
 // Delete expense (Admin only)
 router.delete("/:id", authenticate, isAdmin, deleteExpense);

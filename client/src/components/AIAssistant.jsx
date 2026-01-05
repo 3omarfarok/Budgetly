@@ -180,7 +180,7 @@ const AIAssistant = ({ isOpen, onClose }) => {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
           transition={{ duration: 0.2 }}
-          className="fixed bottom-24 right-4 w-[90vw] sm:w-[400px] h-[600px] max-h-[80vh] bg-ios-surface rounded-2xl shadow-2xl border border-ios-border flex flex-col z-50 overflow-hidden"
+          className="fixed bottom-24 left-4 w-[90vw] sm:w-[400px] h-[600px] max-h-[80vh] bg-ios-surface rounded-2xl shadow-2xl border border-ios-border flex flex-col z-50 overflow-hidden"
         >
           {/* Header */}
           <div className="p-4 flex items-center justify-between text-(--color-primary) shadow-md shrink-0 border-b border-(--color-muted) ">

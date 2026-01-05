@@ -440,3 +440,9 @@ input[type="number"]::-webkit-outer-spin-button {
 html {
   scroll-behavior: smooth;
 }
+
+select {
+  -webkit-appearance: none; /* Chrome, Safari, Edge */
+  -moz-appearance: none; /* Firefox */
+  appearance: none;
+}

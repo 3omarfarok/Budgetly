@@ -12,6 +12,11 @@ const expenseSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    status: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
     totalAmount: {
       type: Number,
       required: true,
@@ -41,6 +46,10 @@ const expenseSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+    generatedFromPayment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Payment",
     },
     date: { type: Date, default: Date.now },
     house: {

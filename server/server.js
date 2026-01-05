@@ -13,6 +13,7 @@ import analyticsRoutes from "./routes/analytics.js";
 import noteRoutes from "./routes/notes.js";
 import housesRoutes from "./routes/houses.js";
 import aiRoutes from "./routes/ai.js";
+import invoiceRoutes from "./routes/invoices.js";
 
 import { rateLimiter } from "./middleware/rateLimiter.js";
 
@@ -57,6 +58,8 @@ app.use("/api/stats", statsRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/notes", noteRoutes);
 app.use("/api/ai", aiRoutes);
+console.log("Mounting Invoice Routes...");
+app.use("/api/invoices", invoiceRoutes);
 
 // Health check
 app.get("/", (req, res) => {

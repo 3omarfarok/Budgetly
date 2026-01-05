@@ -1,103 +1,29 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { useToast } from "../context/ToastContext";
-import api from "../utils/api";
 import {
   Banknote,
-  PlusCircle,
   User as UserIcon,
   Coins,
   FileText,
   Calendar,
   ArrowDownCircle,
-  ArrowUpCircle,
 } from "lucide-react";
 
 import Loader from "../components/Loader";
 import Input from "../components/Input";
 import Select from "../components/Select";
+import { useAddPayment } from "../hooks/useAddPayment";
 
 const AddPayment = () => {
-  const { user } = useAuth();
-  const toast = useToast();
-  const navigate = useNavigate();
-  const [users, setUsers] = useState([]);
-  const [balances, setBalances] = useState([]);
-  const [transactionType, setTransactionType] = useState("payment"); // "payment" or "received"
-  const [formData, setFormData] = useState({
-    user: "",
-    amount: "",
-    description: "",
-  });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const [usersRes, balancesRes] = await Promise.all([
-        api.get("/users"),
-        api.get("/stats/balances"),
-      ]);
-
-      const activeUsers = usersRes.data.filter((u) => u.isActive);
-      const balancesMap = new Map(
-        balancesRes.data.map((b) => [b.userId.toString(), b])
-      );
-
-      // Merge users with their balance info
-      const usersWithBalance = activeUsers.map((u) => ({
-        ...u,
-        balance: balancesMap.get(u._id.toString())?.balance || 0,
-        totalOwed: balancesMap.get(u._id.toString())?.totalOwed || 0,
-        totalPaid: balancesMap.get(u._id.toString())?.totalPaid || 0,
-      }));
-
-      setUsers(usersWithBalance);
-      setBalances(balancesRes.data);
-    } catch (error) {
-      console.error("غلط في تحميل الأعضاء:", error);
-      toast.error("فيه مشكلة في تحميل الأعضاء");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    if (!formData.user || !formData.amount) {
-      const errorMsg = "لازم تختار العضو والمبلغ";
-      setError(errorMsg);
-      toast.warning(errorMsg);
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      await api.post("/payments", { ...formData, transactionType });
-      toast.success(
-        transactionType === "payment"
-          ? "تم تسجيل الدفعة بنجاح!"
-          : "تم تسجيل الاستلام بنجاح!"
-      );
-      navigate("/payments");
-    } catch (error) {
-      console.error("غلط في تسجيل الدفعة:", error);
-      const errorMsg = "فيه مشكلة في تسجيل الدفعة";
-      setError(errorMsg);
-      toast.error(errorMsg);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    users,
+    loading,
+    formData,
+    handleChange,
+    handleUserChange,
+    handleSubmit,
+    error,
+    isSubmitting,
+    user,
+  } = useAddPayment();
 
   // لازم يكون أدمن
   if (user.role !== "admin") {
@@ -125,54 +51,8 @@ const AddPayment = () => {
           className="text-3xl font-bold"
           style={{ color: "var(--color-dark)" }}
         >
-          سجّل دفعة جديدة
+          استلام دفعة
         </h1>
-      </div>
-
-      {/* Transaction Type Toggle */}
-      <div
-        className="flex rounded-2xl p-1 mb-6"
-        style={{
-          backgroundColor: "var(--color-bg)",
-          border: "1px solid var(--color-border)",
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => setTransactionType("payment")}
-          className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2`}
-          style={{
-            backgroundColor:
-              transactionType === "payment"
-                ? "var(--color-error)"
-                : "transparent",
-            color:
-              transactionType === "payment"
-                ? "white"
-                : "var(--color-secondary)",
-          }}
-        >
-          <ArrowUpCircle size={20} />
-          دفعت
-        </button>
-        <button
-          type="button"
-          onClick={() => setTransactionType("received")}
-          className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2`}
-          style={{
-            backgroundColor:
-              transactionType === "received"
-                ? "var(--color-success)"
-                : "transparent",
-            color:
-              transactionType === "received"
-                ? "white"
-                : "var(--color-secondary)",
-          }}
-        >
-          <ArrowDownCircle size={20} />
-          استلمت
-        </button>
       </div>
 
       {error && (
@@ -198,16 +78,12 @@ const AddPayment = () => {
       >
         <div>
           <Select
-            label="اختار العضو"
+            label="استلمت من مين؟"
+            name="user"
             value={formData.user}
-            onChange={(e) => setFormData({ ...formData, user: e.target.value })}
+            onChange={(e) => handleUserChange(e.target.value)}
             required
-            variant="filled" // matches other inputs in form which used filled (actually they used Input default which is 'default' variant, but AddPayment inputs used 'filled' look via manual styles previously?)
-            // Wait, in previous step I didn't specify variant='filled' for AddPayment inputs, so they are default.
-            // But AddPayment previously used manual styles with bg-ios-bg...
-            // Let's verify what variant implies. Default is bg-ios-bg border border-ios-border.
-            // Manual styles: bg-ios-bg border-ios-border. So 'default' variant is correct.
-            // EXCEPT, I might want to use icon UserIcon.
+            variant="default"
             icon={UserIcon}
           >
             <option value="">-- اختار عضو --</option>
@@ -221,34 +97,33 @@ const AddPayment = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Input
-            label="المبلغ (جنيه)"
+            label="المبلغ المستلم (جنيه)"
+            name="amount"
             type="number"
             step="0.01"
             value={formData.amount}
-            onChange={(e) =>
-              setFormData({ ...formData, amount: e.target.value })
-            }
+            onChange={handleChange}
             icon={Coins}
             placeholder="0.00"
             required
           />
 
           <Input
-            label="التاريخ"
+            label="تاريخ الاستلام"
+            name="date"
             type="date"
-            value={formData.date || new Date().toISOString().split("T")[0]}
-            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+            value={formData.date}
+            onChange={handleChange}
             icon={Calendar}
           />
         </div>
 
         <Input
           label="وصف (اختياري)"
+          name="description"
           type="text"
           value={formData.description}
-          onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
-          }
+          onChange={handleChange}
           icon={FileText}
           placeholder="أي ملاحظات..."
         />
@@ -260,22 +135,15 @@ const AddPayment = () => {
             isSubmitting ? "opacity-70 cursor-not-allowed" : ""
           }`}
           style={{
-            backgroundColor:
-              transactionType === "received"
-                ? "var(--color-success)"
-                : "var(--color-primary)",
+            backgroundColor: "var(--color-primary)",
           }}
         >
           {isSubmitting ? (
             "جاري التسجيل..."
           ) : (
             <>
-              {transactionType === "payment" ? (
-                <ArrowUpCircle size={20} />
-              ) : (
-                <ArrowDownCircle size={20} />
-              )}
-              {transactionType === "payment" ? "سجّل الدفعة" : "سجّل الاستلام"}
+              <ArrowDownCircle size={20} />
+              تسجيل استلام الدفعة
             </>
           )}
         </button>
@@ -311,7 +179,7 @@ const AddPayment = () => {
               onMouseLeave={(e) =>
                 (e.currentTarget.style.borderColor = "var(--color-border)")
               }
-              onClick={() => setFormData({ ...formData, user: u._id })}
+              onClick={() => handleUserChange(u._id)}
             >
               <p
                 className="font-semibold"

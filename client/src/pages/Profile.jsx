@@ -75,7 +75,7 @@ const Profile = () => {
 
       // Filter user's payments
       const userPayments = paymentsRes.data.filter(
-        (p) => p.user._id === user.id
+        (p) => p.user && p.user._id === user.id
       );
 
       // Filter expenses that include this user
@@ -85,7 +85,7 @@ const Profile = () => {
         : expensesRes.data.expenses || [];
 
       const userExpenses = allExpenses.filter((e) =>
-        e.splits.some((s) => s.user._id === user.id)
+        e.splits.some((s) => s.user && s.user._id === user.id)
       );
 
       setStats({

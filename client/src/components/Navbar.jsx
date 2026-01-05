@@ -59,7 +59,7 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className="backdrop-blur-xl border-b px-4 sm:px-6 py-3 sticky top-0 z-50 shadow-sm font-primary"
+        className="md:hidden backdrop-blur-xl border-b px-4 sm:px-6 py-3 sticky top-0 z-50 shadow-sm font-primary"
         style={{
           backgroundColor: "var(--color-surface)",
           borderColor: "var(--color-border)",
@@ -143,16 +143,16 @@ const Navbar = () => {
               </Link>
             )}
             <Link
-              to={user.role === "admin" ? "/payments" : "/my-payments"}
+              to={user.role === "admin" ? "/all-invoices" : "/my-invoices"}
               className={navLinkClass(
-                user.role === "admin" ? "/payments" : "/my-payments"
+                user.role === "admin" ? "/all-invoices" : "/my-invoices"
               )}
               style={navLinkStyle(
-                user.role === "admin" ? "/payments" : "/my-payments"
+                user.role === "admin" ? "/all-invoices" : "/my-invoices"
               )}
               role="menuitem"
               aria-current={
-                isActive("/payments") || isActive("/my-payments")
+                isActive("/all-invoices") || isActive("/my-invoices")
                   ? "page"
                   : undefined
               }
@@ -160,7 +160,7 @@ const Navbar = () => {
               {...(isLocked && { pointerEvents: "none" })}
             >
               <Banknote size={18} aria-hidden="true" />
-              <span>المدفوعات</span>
+              <span>الفواتير</span>
             </Link>
             <Link
               to="/profile"
@@ -348,7 +348,7 @@ const Navbar = () => {
             </Link>
 
             <Link
-              to={user.role === "admin" ? "/payments" : "/my-payments"}
+              to={user.role === "admin" ? "/all-invoices" : "/my-invoices"}
               onClick={handleLockedLinkClick}
               {...(isLocked && { pointerEvents: "none" })}
               className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
@@ -356,24 +356,24 @@ const Navbar = () => {
               }`}
               style={{
                 color:
-                  isActive("/payments") || isActive("/my-payments")
+                  isActive("/all-invoices") || isActive("/my-invoices")
                     ? "var(--color-primary)"
                     : "var(--color-secondary)",
                 backgroundColor:
-                  isActive("/payments") || isActive("/my-payments")
+                  isActive("/all-invoices") || isActive("/my-invoices")
                     ? "var(--color-hover)"
                     : "transparent",
               }}
-              aria-label="المدفوعات"
+              aria-label="الفواتير"
               aria-current={
-                isActive("/payments") || isActive("/my-payments")
+                isActive("/all-invoices") || isActive("/my-invoices")
                   ? "page"
                   : undefined
               }
               role="menuitem"
             >
               <Banknote size={22} aria-hidden="true" />
-              <span className="text-xs font-medium">الفلوس</span>
+              <span className="text-xs font-medium">الفواتير</span>
             </Link>
             <Link
               to="/profile"
@@ -418,50 +418,6 @@ const Navbar = () => {
             >
               <Home size={22} aria-hidden="true" />
               <span className="text-xs font-medium">البيت</span>
-            </Link>
-            <Link
-              to="/notes"
-              onClick={handleLockedLinkClick}
-              {...(isLocked && { pointerEvents: "none" })}
-              className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
-                isLocked ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              style={{
-                color: isActive("/notes")
-                  ? "var(--color-primary)"
-                  : "var(--color-secondary)",
-                backgroundColor: isActive("/notes")
-                  ? "var(--color-hover)"
-                  : "transparent",
-              }}
-              aria-label="الملاحظات"
-              aria-current={isActive("/notes") ? "page" : undefined}
-              role="menuitem"
-            >
-              <StickyNote size={22} aria-hidden="true" />
-              <span className="text-xs font-medium">ملاحظات</span>
-            </Link>
-            <Link
-              to="/ai"
-              onClick={handleLockedLinkClick}
-              {...(isLocked && { pointerEvents: "none" })}
-              className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
-                isLocked ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              style={{
-                color: isActive("/ai")
-                  ? "var(--color-primary)"
-                  : "var(--color-secondary)",
-                backgroundColor: isActive("/ai")
-                  ? "var(--color-hover)"
-                  : "transparent",
-              }}
-              aria-label="المساعد"
-              aria-current={isActive("/ai") ? "page" : undefined}
-              role="menuitem"
-            >
-              <Bot size={22} aria-hidden="true" />
-              <span className="text-xs font-medium">AI</span>
             </Link>
           </div>
         </div>
