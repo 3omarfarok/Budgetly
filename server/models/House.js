@@ -8,6 +8,12 @@ const houseSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+    houseId: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+    },
     admin: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

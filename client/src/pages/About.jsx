@@ -65,14 +65,14 @@ const About = () => {
                   className="font-semibold mb-1"
                   style={{ color: "var(--color-dark)" }}
                 >
-                  تسجيل المصاريف
+                  تسجيل وتقسيم المصاريف
                 </h3>
                 <p
                   className="text-sm"
                   style={{ color: "var(--color-secondary)" }}
                 >
-                  سجل أي مصروف بسهولة ووزعه على الناس اللي معاك، سواء بالتساوي
-                  أو حسب كل واحد.
+                  سجل أي مصروف، حدد مين دفع ومين عليه، والتطبيق هيقسم المبلغ
+                  تلقائياً سواء بالتساوي أو بنسب مختلفة.
                 </p>
               </div>
             </div>
@@ -86,13 +86,14 @@ const About = () => {
                   className="font-semibold mb-1"
                   style={{ color: "var(--color-dark)" }}
                 >
-                  إدارة الأعضاء
+                  إدارة أعضاء البيت
                 </h3>
                 <p
                   className="text-sm"
                   style={{ color: "var(--color-secondary)" }}
                 >
-                  ضيف أصدقائك أو أفراد عيلتك، وتابع مصاريف كل واحد ومدفوعاته.
+                  ضيف كل اللي معاك في البيت، وكل واحد هيكون ليه حسابه الخاص عشان
+                  يتابع مصاريفه ومدفوعاته.
                 </p>
               </div>
             </div>
@@ -109,14 +110,56 @@ const About = () => {
                   className="font-semibold mb-1"
                   style={{ color: "var(--color-dark)" }}
                 >
-                  تحليلات شاملة
+                  نظام الفواتير والمدفوعات
                 </h3>
                 <p
                   className="text-sm"
                   style={{ color: "var(--color-secondary)" }}
                 >
-                  شوف تحليلات مفصلة عن مصاريفك الشهرية وفلوسك عشان تعرف فين
-                  بتصرف أكتر.
+                  تابع الفواتير المستحقة، سجل الدفعات لما حد يسدد، وشوف كشف حساب
+                  كامل لكل عضو.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-xl bg-(--color-surface) border border-(--color-border)">
+                <Users size={20} style={{ color: "var(--color-primary)" }} />
+              </div>
+              <div>
+                <h3
+                  className="font-semibold mb-1"
+                  style={{ color: "var(--color-dark)" }}
+                >
+                  المساعد الذكي (AI)
+                </h3>
+                <p
+                  className="text-sm"
+                  style={{ color: "var(--color-secondary)" }}
+                >
+                  اسأل مساعد Budgetly الذكي عن أي نصيحة مالية، أو خليه يحللك
+                  مصاريفك ويقترح عليك طرق للتوفير.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-xl bg-(--color-surface) border border-(--color-border)">
+                <Users size={20} style={{ color: "var(--color-primary)" }} />
+              </div>
+              <div>
+                <h3
+                  className="font-semibold mb-1"
+                  style={{ color: "var(--color-dark)" }}
+                >
+                  الملاحظات المشتركة
+                </h3>
+                <p
+                  className="text-sm"
+                  style={{ color: "var(--color-secondary)" }}
+                >
+                  اكتب طلبات البيت، مواعيد الصيانة، أو أي ملاحظات تهم الكل في
+                  مكان واحد مشترك.
                 </p>
               </div>
             </div>
@@ -268,16 +311,6 @@ const About = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <a
-              href="mailto:budgetly.app@example.com"
-              className="flex-1 px-6 py-3 rounded-2xl text-center font-semibold transition-all"
-              style={{
-                backgroundColor: "var(--color-primary)",
-                color: "white",
-              }}
-            >
-              📧 ابعتلنا إيميل
-            </a>
-            <a
               href="https://wa.me/201005291205"
               target="_blank"
               rel="noopener noreferrer"
@@ -296,41 +329,6 @@ const About = () => {
           >
             هنرد عليك في أسرع وقت ممكن
           </p>
-        </div>
-
-        {/* Social Media / Contact */}
-        <div
-          className="p-6 rounded-3xl shadow-sm text-center"
-          style={{
-            backgroundColor: "var(--color-surface)",
-            border: "1px solid var(--color-border)",
-          }}
-        >
-          <h2
-            className="text-xl font-bold mb-4"
-            style={{ color: "var(--color-dark)" }}
-          >
-            تابعنا
-          </h2>
-          <p
-            className="text-sm mb-4"
-            style={{ color: "var(--color-secondary)" }}
-          >
-            ابقى متابع لآخر الأخبار والتحديثات
-          </p>
-          <a
-            href="https://facebook.com/yourpage"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl transition-all hover:opacity-80"
-            style={{
-              backgroundColor: "#1877F2",
-              color: "white",
-            }}
-          >
-            <Facebook size={24} />
-            <span className="font-semibold">تابعنا على فيسبوك</span>
-          </a>
         </div>
       </div>
     </div>

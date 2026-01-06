@@ -36,67 +36,86 @@ const Sidebar = () => {
   const isActive = (path) => location.pathname === path;
   const isLocked = !user.house; // Check if user has no house
 
-  const navItems = [
+  const navGroups = [
     {
-      path: "/",
-      label: "المشرف",
-      icon: LayoutDashboard,
-      roles: ["admin", "user"],
+      title: "الرئيسية",
+      items: [
+        {
+          path: "/",
+          label: "لوحة التحكم",
+          icon: LayoutDashboard,
+          roles: ["admin", "user"],
+        },
+        {
+          path: "/house-details",
+          label: "تفاصيل البيت",
+          icon: Home,
+          roles: ["admin", "user"],
+        },
+      ],
     },
     {
-      path: "/expenses",
-      label: "المصاريف",
-      icon: Receipt,
-      roles: ["admin", "user"],
+      title: "المالية",
+      items: [
+        {
+          path: "/expenses",
+          label: "المصاريف",
+          icon: Receipt,
+          roles: ["admin", "user"],
+        },
+        {
+          path: user.role === "admin" ? "/all-invoices" : "/my-invoices",
+          label: "الفواتير",
+          icon: Banknote,
+          roles: ["admin", "user"],
+        },
+        {
+          path: "/analytics",
+          label: "التقارير والإحصائيات",
+          icon: BarChart3,
+          roles: ["admin"],
+        },
+      ],
     },
     {
-      path: user.role === "admin" ? "/all-invoices" : "/my-invoices",
-      label: "الفواتير",
-      icon: Banknote,
-      roles: ["admin", "user"],
-    },
-
-    {
-      path: "/analytics",
-      label: "التقارير",
-      icon: BarChart3,
-      roles: ["admin"],
-    },
-    {
-      path: "/ai",
-      label: "المساعد الذكي",
-      icon: Bot,
-      roles: ["admin", "user"],
+      title: "الأدوات",
+      items: [
+        {
+          path: "/ai",
+          label: "المساعد الذكي",
+          icon: Bot,
+          roles: ["admin", "user"],
+        },
+        {
+          path: "/notes",
+          label: "الملاحظات",
+          icon: StickyNote,
+          roles: ["admin", "user"],
+        },
+      ],
     },
     {
-      path: "/notes",
-      label: "الملاحظات",
-      icon: StickyNote,
-      roles: ["admin", "user"],
-    },
-    {
-      path: "/house-details",
-      label: "البيت",
-      icon: Home,
-      roles: ["admin", "user"],
-    },
-    {
-      path: "/profile",
-      label: "الملف الشخصي",
-      icon: User,
-      roles: ["admin", "user"],
-    },
-    {
-      path: "/contact",
-      label: "تواصل مع المطور",
-      icon: Mail,
-      roles: ["admin", "user"],
-    },
-    {
-      path: "/about",
-      label: "عن التطبيق",
-      icon: Info,
-      roles: ["admin", "user"],
+      title: "الحساب",
+      items: [
+        {
+          path: "/profile",
+          label: "الملف الشخصي",
+          icon: User,
+          roles: ["admin", "user"],
+        },
+        {
+          path: "/contact",
+          label: "تواصل معنا",
+          icon: Mail,
+          roles: ["admin", "user"],
+        },
+        {
+          path: "/about",
+          label: "عن التطبيق",
+          icon: Info,
+          roles: ["admin", "user"],
+        },
+      ],
     },
   ];
 
@@ -138,8 +157,7 @@ const Sidebar = () => {
         </button>
       </div>
 
-      {/* Navigation Links */}
-      <div className="flex-1 overflow-hidden py-4 px-3 space-y-2 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto py-4 px-3 custom-scrollbar space-y-6">
         {isLocked && !collapsed && (
           <div
             className="mb-4 px-3 py-2 rounded-lg flex items-center gap-2 text-xs"
@@ -154,65 +172,78 @@ const Sidebar = () => {
           </div>
         )}
 
-        {navItems.map((item) => {
-          if (item.roles && !item.roles.includes(user.role)) return null;
+        {navGroups.map((group, groupIndex) => (
+          <div key={groupIndex}>
+            {!collapsed && (
+              <h3
+                className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider opacity-50"
+                style={{ color: "var(--color-secondary)" }}
+              >
+                {group.title}
+              </h3>
+            )}
+            <div className="space-y-1">
+              {group.items.map((item) => {
+                if (item.roles && !item.roles.includes(user.role)) return null;
 
-          const active = isActive(item.path);
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative ${
-                isLocked &&
-                item.path !== "/profile" &&
-                item.path !== "/house-selection"
-                  ? "opacity-50 cursor-not-allowed"
-                  : ""
-              }`}
-              style={{
-                backgroundColor: active
-                  ? "var(--color-primary)"
-                  : "transparent",
-                color: active ? "white" : "var(--color-secondary)",
-              }}
-              onClick={(e) => {
-                if (
-                  isLocked &&
-                  item.path !== "/profile" &&
-                  item.path !== "/house-selection"
-                ) {
-                  e.preventDefault();
-                }
-              }}
-            >
-              <item.icon
-                size={22}
-                className={`${
-                  active
-                    ? "text-white"
-                    : "text-[var(--color-secondary)] group-hover:text-[var(--color-primary)]"
-                } transition-colors`}
-              />
+                const active = isActive(item.path);
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative ${
+                      isLocked &&
+                      item.path !== "/profile" &&
+                      item.path !== "/house-selection"
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
+                    style={{
+                      backgroundColor: active
+                        ? "var(--color-primary)"
+                        : "transparent",
+                      color: active ? "white" : "var(--color-secondary)",
+                    }}
+                    onClick={(e) => {
+                      if (
+                        isLocked &&
+                        item.path !== "/profile" &&
+                        item.path !== "/house-selection"
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
+                  >
+                    <item.icon
+                      size={20}
+                      className={`${
+                        active
+                          ? "text-white"
+                          : "text-(--color-secondary) group-hover:text-(--color-primary)"
+                      } transition-colors`}
+                    />
 
-              {!collapsed && (
-                <span
-                  className={`font-medium ${
-                    active ? "text-white" : "text-[var(--color-dark)]"
-                  }`}
-                >
-                  {item.label}
-                </span>
-              )}
+                    {!collapsed && (
+                      <span
+                        className={`font-medium text-sm ${
+                          active ? "text-white" : "text-(--color-dark)"
+                        }`}
+                      >
+                        {item.label}
+                      </span>
+                    )}
 
-              {/* Tooltip for collapsed state */}
-              {collapsed && (
-                <div className="absolute right-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none mr-2">
-                  {item.label}
-                </div>
-              )}
-            </Link>
-          );
-        })}
+                    {collapsed && (
+                      <div className="absolute right-full top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none mr-2 shadow-lg">
+                        {item.label}
+                      </div>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Footer / User Tools */}
@@ -231,12 +262,12 @@ const Sidebar = () => {
           <div className="relative">
             <button
               onClick={() => setShowThemeMenu(!showThemeMenu)}
-              className="p-2 rounded-lg hover:bg-[var(--color-bg)] transition-colors text-[var(--color-secondary)]"
+              className="p-2 rounded-lg hover:bg-(--color-bg) transition-colors text-(--color-secondary)"
               title="تغيير المظهر"
             >
               <BiColorFill size={22} />
               {collapsed && showThemeMenu && (
-                <div className="fixed right-16 bottom-20 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-xl p-2 z-50 min-w-[150px]">
+                <div className="fixed right-16 bottom-20 bg-(--color-surface) border border-(--color-border) rounded-xl shadow-xl p-2 z-50 min-w-[150px]">
                   {availableThemes.map((theme) => (
                     <div
                       key={theme.key}
@@ -245,11 +276,11 @@ const Sidebar = () => {
                         changeTheme(theme.key);
                         setShowThemeMenu(false);
                       }}
-                      className="px-3 py-2 hover:bg-[var(--color-bg)] rounded cursor-pointer text-sm text-[var(--color-dark)] flex items-center justify-between"
+                      className="px-3 py-2 hover:bg-(--color-bg) rounded cursor-pointer text-sm text-(--color-dark) flex items-center justify-between"
                     >
                       {theme.name}
                       {currentTheme === theme.key && (
-                        <div className="w-2 h-2 rounded-full bg-[var(--color-primary)]"></div>
+                        <div className="w-2 h-2 rounded-full bg-(--color-primary)"></div>
                       )}
                     </div>
                   ))}
@@ -259,7 +290,7 @@ const Sidebar = () => {
 
             {/* Desktop expanded theme menu */}
             {!collapsed && showThemeMenu && (
-              <div className="absolute bottom-full right-0 mb-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-xl p-2 z-50 min-w-[200px]">
+              <div className="absolute bottom-full right-0 mb-2 bg-(--color-surface) border border-(--color-border) rounded-xl shadow-xl p-2 z-50 min-w-[200px]">
                 {availableThemes.map((theme) => (
                   <button
                     key={theme.key}
@@ -267,11 +298,11 @@ const Sidebar = () => {
                       changeTheme(theme.key);
                       setShowThemeMenu(false);
                     }}
-                    className="w-full px-3 py-2 hover:bg-[var(--color-bg)] rounded cursor-pointer text-sm text-[var(--color-dark)] flex items-center justify-between text-right"
+                    className="w-full px-3 py-2 hover:bg-(--color-bg) rounded cursor-pointer text-sm text-(--color-dark) flex items-center justify-between text-right"
                   >
                     {theme.name}
                     {currentTheme === theme.key && (
-                      <div className="w-2 h-2 rounded-full bg-[var(--color-primary)]"></div>
+                      <div className="w-2 h-2 rounded-full bg-(--color-primary)"></div>
                     )}
                   </button>
                 ))}
@@ -282,10 +313,10 @@ const Sidebar = () => {
           {/* User Info (Expanded only) */}
           {!collapsed && (
             <div className="flex flex-col items-end">
-              <span className="text-sm font-semibold text-[var(--color-dark)]">
+              <span className="text-sm font-semibold text-(--color-dark)">
                 {user.name}
               </span>
-              <span className="text-xs text-[var(--color-secondary)]">
+              <span className="text-xs text-(--color-secondary)">
                 {user.role === "admin" ? "مشرف" : "عضو"}
               </span>
             </div>
@@ -294,7 +325,7 @@ const Sidebar = () => {
           {/* Logout */}
           <button
             onClick={handleLogout}
-            className="p-2 rounded-lg hover:bg-red-50 text-[var(--color-error)] transition-colors"
+            className="p-2 rounded-lg hover:bg-red-50 text-(--color-error) transition-colors"
             title="تسجيل الخروج"
           >
             <LogOut size={22} />

@@ -21,7 +21,6 @@ import Expenses from "./pages/Expenses";
 import AddExpense from "./pages/AddExpense";
 import Payments from "./pages/Payments";
 import AddPayment from "./pages/AddPayment";
-import MyPayments from "./pages/MyPayments";
 import Analytics from "./pages/Analytics";
 import Profile from "./pages/Profile";
 import About from "./pages/About";
@@ -33,8 +32,6 @@ import AllInvoices from "./pages/AllInvoices";
 import AIButton from "./components/AIButton";
 import GuidePage from "./pages/GuidePage";
 import NotesPage from "./pages/NotesPage";
-import IncomePage from "./pages/IncomePage";
-import BudgetPage from "./pages/BudgetPage";
 import ContactDeveloper from "./pages/ContactDeveloper";
 
 // مكون الحماية للصفحات
@@ -52,7 +49,7 @@ const ProtectedRoute = ({ children, requireHouse = true }) => {
   return (
     <>
       {children}
-      {requireHouse && location.pathname !== "/ai" && <AIButton />}
+      {requireHouse && location.pathname !== "/ai"}
     </>
   );
 };

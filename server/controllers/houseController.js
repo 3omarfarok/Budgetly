@@ -8,7 +8,7 @@ export const getHouses = async (req, res) => {
   try {
     const houses = await House.find()
       .populate("admin", "name username")
-      .select("name admin members createdAt"); // Exclude password
+      .select("name houseId admin members createdAt"); // Exclude password
 
     // Add member count to response
     const housesWithCount = houses.map((house) => ({
@@ -245,6 +245,85 @@ export const updateHouseName = async (req, res) => {
     res.json(populatedHouse);
   } catch (error) {
     console.error("Update house name error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Update house password (admin only)
+export const updateHousePassword = async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    if (!password || password.length < 4) {
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 4 characters" });
+    }
+
+    const house = await House.findById(req.params.id);
+    if (!house) {
+      return res.status(404).json({ message: "House not found" });
+    }
+
+    // Check if user is admin of this house
+    if (house.admin.toString() !== req.user.id) {
+      return res
+        .status(403)
+        .json({ message: "Only the house admin can change the password" });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    house.password = hashedPassword;
+    await house.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Update house password error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Update house ID (admin only)
+export const updateHouseId = async (req, res) => {
+  try {
+    const { houseId } = req.body;
+
+    if (!houseId) {
+      return res.status(400).json({ message: "House ID is required" });
+    }
+
+    const house = await House.findById(req.params.id);
+    if (!house) {
+      return res.status(404).json({ message: "House not found" });
+    }
+
+    // Check if user is admin of this house
+    if (house.admin.toString() !== req.user.id) {
+      return res
+        .status(403)
+        .json({ message: "Only the house admin can change the house ID" });
+    }
+
+    // Check if new ID already exists
+    const existingHouse = await House.findOne({
+      houseId,
+      _id: { $ne: req.params.id },
+    });
+    if (existingHouse) {
+      return res.status(400).json({ message: "House ID already exists" });
+    }
+
+    house.houseId = houseId;
+    await house.save();
+
+    const populatedHouse = await House.findById(house._id)
+      .populate("admin", "name username profilePicture")
+      .populate("members", "name username profilePicture");
+
+    res.json(populatedHouse);
+  } catch (error) {
+    console.error("Update house ID error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

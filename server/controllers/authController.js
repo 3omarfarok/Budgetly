@@ -159,13 +159,67 @@ export const forgotPassword = async (req, res) => {
 
     // Assuming client runs on port 5173 default for Vite
     const frontendUrl = process.env.CLIENT_URL || "http://localhost:5173";
-    const message = `لقد طلبت إعادة تعيين كلمة المرور. يرجى الدخول على الرابط التالي لإعادة تعيينها:\n\n${frontendUrl}/reset-password/${resetToken}`;
+
+    // Create HTML Email Template
+    const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
+
+    const htmlMessage = `
+    <!DOCTYPE html>
+    <html dir="rtl" lang="ar">
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-top: 40px; margin-bottom: 40px; border: 1px solid #e2e8f0; }
+        .header { background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%); padding: 40px 20px; text-align: center; }
+        .header h1 { color: #ffffff; margin: 0; font-size: 32px; font-weight: bold; letter-spacing: 1px; }
+        .content { padding: 40px 30px; text-align: center; color: #334155; }
+        .content h2 { color: #0f172a; font-size: 24px; margin-bottom: 16px; font-weight: bold; }
+        .content p { font-size: 16px; line-height: 1.8; margin-bottom: 32px; color: #475569; }
+        .button { display: inline-block; background-color: #1d4ed8; color: #ffffff !important; text-decoration: none; padding: 16px 40px; border-radius: 12px; font-weight: bold; font-size: 16px; transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(29, 78, 216, 0.3); }
+        .button:hover { background-color: #1e40af; transform: translateY(-2px); box-shadow: 0 6px 8px -1px rgba(29, 78, 216, 0.4); }
+        .footer { background-color: #f8fafc; padding: 24px; text-align: center; color: #94a3b8; font-size: 13px; border-top: 1px solid #e2e8f0; }
+        .link-text { margin-top: 40px; padding-top: 20px; border-top: 1px solid #f1f5f9; font-size: 13px; color: #94a3b8; word-break: break-all; text-align: left; direction: ltr; }
+      </style>
+    </head>
+    <body style="background-color: #f8fafc; margin: 0; padding: 20px;">
+      <div class="container">
+        <div class="header">
+          <h1>Budgetly</h1>
+        </div>
+        <div class="content">
+          <h2>إعادة تعيين كلمة المرور</h2>
+          <p>
+            أهلاً بك،<br>
+            لقد تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بحسابك.
+            اضغط على الزر أدناه لتغيير كلمة المرور الخاصة بك.
+          </p>
+          <a href="${resetUrl}" class="button">تغيير كلمة المرور</a>
+          <p style="margin-top: 32px; font-size: 14px; color: #64748b;">
+            إذا لم تقم بطلب هذا التغيير، يمكنك تجاهل هذا البريد الإلكتروني بأمان.
+            الرابط صالح لمدة 10 دقائق فقط.
+          </p>
+          <div class="link-text">
+            If the button doesn't work, copy and paste this link:<br>
+            ${resetUrl}
+          </div>
+        </div>
+        <div class="footer">
+          <p>&copy; ${new Date().getFullYear()} Budgetly. جميع الحقوق محفوظة.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    `;
+
+    const message = `لقد طلبت إعادة تعيين كلمة المرور. يرجى الدخول على الرابط التالي لإعادة تعيينها:\n\n${resetUrl}`;
 
     try {
       await sendEmail({
         email: user.email,
         subject: "إعادة تعيين كلمة المرور - Budgetly",
-        message,
+        message, // Fallback plain text
+        html: htmlMessage, // HTML version
       });
 
       res.status(200).json({ success: true, data: "Email sent" });

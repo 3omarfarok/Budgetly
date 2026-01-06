@@ -6,6 +6,8 @@ import {
   createHouse,
   joinHouse,
   updateHouseName,
+  updateHouseId,
+  updateHousePassword,
   leaveHouse,
   removeMember,
   deleteHouse,
@@ -27,6 +29,12 @@ router.post("/:id/join", authenticate, joinHouse);
 
 // Update house name (admin only)
 router.patch("/:id/name", authenticate, updateHouseName);
+
+// Update house ID (admin only)
+router.patch("/:id/houseId", authenticate, updateHouseId);
+
+// Update house password (admin only)
+router.patch("/:id/password", authenticate, updateHousePassword);
 
 // Leave house
 router.post("/:id/leave", authenticate, leaveHouse);

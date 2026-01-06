@@ -27,8 +27,14 @@ const HouseDetails = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  // Removed isEditingId and newHouseId as per user request to remove House ID update field
   const [newHouseName, setNewHouseName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+
+  const houseId = user?.house?._id || user?.house;
 
   // Modal State
   const [modalConfig, setModalConfig] = useState({
@@ -40,16 +46,16 @@ const HouseDetails = () => {
   });
 
   useEffect(() => {
-    if (!user?.house) {
+    if (!houseId) {
       navigate("/house-selection");
       return;
     }
     fetchHouseDetails();
-  }, [user, navigate]);
+  }, [houseId, navigate]);
 
   const fetchHouseDetails = async () => {
     try {
-      const { data } = await api.get(`/houses/${user.house._id}`);
+      const { data } = await api.get(`/houses/${houseId}`);
       setHouseData(data);
       setNewHouseName(data.name);
     } catch (err) {
@@ -70,7 +76,7 @@ const HouseDetails = () => {
     setError("");
     setSuccess("");
     try {
-      await api.patch(`/houses/${user.house._id}/name`, {
+      await api.patch(`/houses/${houseId}/name`, {
         name: newHouseName.trim(),
       });
       setSuccess("تم تحديث اسم البيت بنجاح");
@@ -81,6 +87,32 @@ const HouseDetails = () => {
       updateUser(userData);
     } catch (err) {
       setError(err.response?.data?.message || "فشل تحديث اسم البيت");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // handleUpdateHouseId removed as per user request
+
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    if (!newPassword || newPassword.length < 4) {
+      setError("كلمة المرور يجب أن تكون 4 أحرف على الأقل");
+      return;
+    }
+
+    setSubmitting(true);
+    setError("");
+    setSuccess("");
+    try {
+      await api.patch(`/houses/${houseId}/password`, {
+        password: newPassword,
+      });
+      setSuccess("تم تحديث كلمة المرور بنجاح");
+      setIsEditingPassword(false);
+      setNewPassword("");
+    } catch (err) {
+      setError(err.response?.data?.message || "فشل تحديث كلمة المرور");
     } finally {
       setSubmitting(false);
     }
@@ -108,7 +140,7 @@ const HouseDetails = () => {
         setError("");
         setSuccess("");
         try {
-          await api.delete(`/houses/${user.house._id}/members/${memberId}`);
+          await api.delete(`/houses/${houseId}/members/${memberId}`);
           setSuccess(`تم إزالة ${memberName} من البيت بنجاح`);
           await fetchHouseDetails();
         } catch (err) {
@@ -128,7 +160,7 @@ const HouseDetails = () => {
         setSubmitting(true);
         setError("");
         try {
-          await api.post(`/houses/${user.house._id}/leave`);
+          await api.post(`/houses/${houseId}/leave`);
           setSuccess("تم الخروج من البيت بنجاح");
           // Refresh user data and redirect
           const { data: userData } = await api.get("/auth/me");
@@ -153,7 +185,7 @@ const HouseDetails = () => {
         setSubmitting(true);
         setError("");
         try {
-          await api.delete(`/houses/${user.house._id}`);
+          await api.delete(`/houses/${houseId}`);
           setSuccess("تم حذف البيت بنجاح");
           // Refresh user data and redirect
           const { data: userData } = await api.get("/auth/me");
@@ -201,7 +233,7 @@ const HouseDetails = () => {
             />
           </div>
           <h1
-            className="text-3xl font-bold font-headings"
+            className="text-3xl font-bold "
             style={{ color: "var(--color-dark)" }}
           >
             تفاصيل البيت
@@ -242,14 +274,16 @@ const HouseDetails = () => {
               اسم البيت
             </h2>
             {isAdmin && !isEditing && (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="flex items-center gap-2 transition-colors"
-                style={{ color: "var(--color-primary)" }}
-              >
-                <Edit2 className="w-4 h-4" />
-                تعديل
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="flex items-center gap-2 transition-colors"
+                  style={{ color: "var(--color-primary)" }}
+                >
+                  <Edit2 className="w-4 h-4" />
+                  تعديل الاسم
+                </button>
+              </div>
             )}
           </div>
 
@@ -299,6 +333,96 @@ const HouseDetails = () => {
             >
               {houseData.name}
             </p>
+          )}
+        </div>
+
+        {/* House Password Card */}
+        <div
+          className="rounded-2xl shadow-lg p-6"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            borderColor: "var(--color-border)",
+            borderWidth: "1px",
+            borderStyle: "solid",
+          }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h2
+              className="text-xl font-semibold"
+              style={{ color: "var(--color-dark)" }}
+            >
+              كلمة مرور البيت
+            </h2>
+          </div>
+
+          {isEditingPassword ? (
+            <form onSubmit={handleUpdatePassword} className="flex gap-3">
+              <Input
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                disabled={submitting}
+                autoFocus
+                variant="filled"
+                wrapperClassName="flex-1"
+                placeholder="أدخل كلمة المرور الجديدة"
+                dir="ltr"
+              />
+              <button
+                type="submit"
+                disabled={submitting}
+                className="px-6 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                style={{
+                  backgroundColor: "var(--color-primary)",
+                  color: "white",
+                }}
+              >
+                <Save className="w-5 h-5" />
+                حفظ
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsEditingPassword(false);
+                  setNewPassword("");
+                }}
+                disabled={submitting}
+                className="px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"
+                style={{
+                  backgroundColor: "var(--color-light)",
+                  color: "var(--color-dark)",
+                }}
+              >
+                <X className="w-5 h-5" />
+                إلغاء
+              </button>
+            </form>
+          ) : (
+            <div className="flex items-center justify-between bg-(--color-input-bg) p-2 rounded-xl border border-(--color-border)">
+              <div className="flex items-center gap-2">
+                <p
+                  className="text-xl sm:text-2xl font-bold font-mono px-2 tracking-wider"
+                  style={{
+                    color: "var(--color-dark)",
+                    minWidth: "120px",
+                  }}
+                >
+                  ••••••••
+                </p>
+              </div>
+
+              <div className="flex items-center gap-1">
+                {isAdmin && (
+                  <button
+                    onClick={() => setIsEditingPassword(true)}
+                    className="p-2 rounded-lg transition-colors hover:bg-(--color-bg)"
+                    style={{ color: "var(--color-primary)" }}
+                    title="تغيير كلمة المرور"
+                  >
+                    <Edit2 size={18} />
+                  </button>
+                )}
+              </div>
+            </div>
           )}
         </div>
 
