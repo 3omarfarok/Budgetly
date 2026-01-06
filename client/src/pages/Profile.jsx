@@ -55,6 +55,9 @@ const Profile = () => {
   const [editingName, setEditingName] = useState(false);
   const [newName, setNewName] = useState(user.name || "");
   const [savingName, setSavingName] = useState(false);
+  const [editingEmail, setEditingEmail] = useState(false);
+  const [newEmail, setNewEmail] = useState(user.email || "");
+  const [savingEmail, setSavingEmail] = useState(false);
 
   useEffect(() => {
     fetchUserStats();
@@ -210,6 +213,49 @@ const Profile = () => {
     setEditingName(false);
   };
 
+  const handleSaveEmail = async () => {
+    // Validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!newEmail || !emailRegex.test(newEmail)) {
+      toast.warning("من فضلك أدخل بريد إلكتروني صحيح");
+      return;
+    }
+
+    if (newEmail.trim() === user.email) {
+      setEditingEmail(false);
+      return;
+    }
+
+    try {
+      setSavingEmail(true);
+      const response = await api.patch("/users/me/profile", {
+        email: newEmail.trim(),
+      });
+
+      // Update user in auth context
+      if (updateUser) {
+        updateUser(response.data.user); // Assuming response structure { success: true, user: {...} }
+      }
+
+      toast.success("تم تحديث البريد الإلكتروني بنجاح!");
+      setEditingEmail(false);
+    } catch (error) {
+      console.error("خطأ في تحديث البريد الإلكتروني:", error);
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("فيه مشكلة في تحديث البريد الإلكتروني");
+      }
+    } finally {
+      setSavingEmail(false);
+    }
+  };
+
+  const handleCancelEmailEdit = () => {
+    setNewEmail(user.email || "");
+    setEditingEmail(false);
+  };
+
   if (loading) return <Loader text="بنحمّل بياناتك..." />;
 
   // Safely handle missing stats
@@ -338,9 +384,74 @@ const Profile = () => {
                 </div>
               )}
             </div>
-            {/* Editable Username */}
+            {/* Editable Email */}
             <div className="flex items-center gap-2 mb-2">
               <Mail size={16} style={{ color: "var(--color-secondary)" }} />
+              {editingEmail ? (
+                <div className="flex items-center gap-2 flex-1">
+                  <Input
+                    type="email"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    placeholder="example@mail.com"
+                    disabled={savingEmail}
+                    variant="filled"
+                    size="sm"
+                    wrapperClassName="flex-1"
+                    className="dir-ltr text-left"
+                  />
+                  <button
+                    onClick={handleSaveEmail}
+                    disabled={savingEmail}
+                    className="px-3 py-1 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
+                    style={{
+                      backgroundColor: "var(--color-success)",
+                      color: "white",
+                      opacity: savingEmail ? 0.6 : 1,
+                    }}
+                  >
+                    {savingEmail ? "..." : "حفظ"}
+                  </button>
+                  <button
+                    onClick={handleCancelEmailEdit}
+                    disabled={savingEmail}
+                    className="px-3 py-1 rounded-lg text-xs font-semibold transition-all"
+                    style={{
+                      backgroundColor: "var(--color-muted-bg)",
+                      color: "var(--color-secondary)",
+                    }}
+                  >
+                    إلغاء
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span
+                    style={{
+                      color: user.email
+                        ? "var(--color-secondary)"
+                        : "var(--color-error)",
+                    }}
+                    className={!user.email ? "italic" : ""}
+                  >
+                    {user.email || "أضف بريدك الإلكتروني لاسترجاع الباسورد"}
+                  </span>
+                  <button
+                    onClick={() => setEditingEmail(true)}
+                    className="p-1 rounded-lg hover:bg-opacity-10 transition-all"
+                    style={{
+                      color: "var(--color-primary)",
+                    }}
+                    title="تعديل البريد الإلكتروني"
+                  >
+                    <Edit size={14} className="cursor-pointer" />
+                  </button>
+                </div>
+              )}
+            </div>
+            {/* Editable Username */}
+            <div className="flex items-center gap-2 mb-2">
+              <User size={16} style={{ color: "var(--color-secondary)" }} />
               {editingUsername ? (
                 <div className="flex items-center gap-2 flex-1">
                   <Input

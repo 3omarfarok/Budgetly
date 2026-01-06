@@ -61,6 +61,15 @@ const Login = () => {
           error={error ? " " : ""}
         />
 
+        <div className="flex justify-end">
+          <Link
+            to="/forgot-password"
+            className="text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-primary)]/80 transition-colors"
+          >
+            نسيت كلمة المرور؟
+          </Link>
+        </div>
+
         <button
           type="submit"
           className="w-full py-4 px-4 bg-ios-primary hover:bg-ios-primary/90 text-white font-bold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl focus:ring-4 focus:ring-ios-primary/20"

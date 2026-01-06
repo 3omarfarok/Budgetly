@@ -12,6 +12,8 @@ import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import HouseSelection from "./pages/HouseSelection";
 import HouseDetails from "./pages/HouseDetails";
 import Dashboard from "./pages/Dashboard";
@@ -69,6 +71,14 @@ function App() {
                   <Routes>
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
+                    <Route
+                      path="/forgot-password"
+                      element={<ForgotPassword />}
+                    />
+                    <Route
+                      path="/reset-password/:token"
+                      element={<ResetPassword />}
+                    />
                     <Route
                       path="/house-selection"
                       element={
@@ -186,14 +196,6 @@ function App() {
                       element={
                         <ProtectedRoute>
                           <GuidePage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/notes"
-                      element={
-                        <ProtectedRoute>
-                          <NotesPage />
                         </ProtectedRoute>
                       }
                     />

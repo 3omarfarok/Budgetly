@@ -10,6 +10,7 @@ import {
   updateUsername,
   updateName,
 } from "../controllers/userController.js";
+import { updateProfile } from "../controllers/authController.js";
 
 const router = express.Router();
 
@@ -36,5 +37,8 @@ router.patch("/me/username", authenticate, updateUsername);
 
 // Update own name (Any authenticated user)
 router.patch("/me/name", authenticate, updateName);
+
+// Update profile (email/name)
+router.patch("/me/profile", authenticate, updateProfile);
 
 export default router;
