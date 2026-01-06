@@ -33,6 +33,7 @@ import GuidePage from "./pages/GuidePage";
 import NotesPage from "./pages/NotesPage";
 import IncomePage from "./pages/IncomePage";
 import BudgetPage from "./pages/BudgetPage";
+import ContactDeveloper from "./pages/ContactDeveloper";
 
 // مكون الحماية للصفحات
 const ProtectedRoute = ({ children, requireHouse = true }) => {
@@ -153,6 +154,14 @@ function App() {
                       element={
                         <ProtectedRoute>
                           <About />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/contact"
+                      element={
+                        <ProtectedRoute>
+                          <ContactDeveloper />
                         </ProtectedRoute>
                       }
                     />

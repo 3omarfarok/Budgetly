@@ -20,6 +20,7 @@ import {
   CreditCard,
   Settings,
   Bot,
+  Mail,
 } from "lucide-react";
 import { BiColorFill } from "react-icons/bi";
 
@@ -83,6 +84,12 @@ const Sidebar = () => {
       path: "/profile",
       label: "الملف الشخصي",
       icon: User,
+      roles: ["admin", "user"],
+    },
+    {
+      path: "/contact",
+      label: "تواصل مع المطور",
+      icon: Mail,
       roles: ["admin", "user"],
     },
     {

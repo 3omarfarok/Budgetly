@@ -9,6 +9,7 @@ import {
   Calculator,
   History,
   Trash2,
+  Lock,
 } from "lucide-react";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
@@ -20,7 +21,7 @@ const AIPage = () => {
     {
       role: "assistant",
       content:
-        "أهلاً يا باشا! 👋 أنا مساعدك الذكي في Budgetly. \nمعاك في أي حسابات، تظبيط ميزانية، أو حتى لو عايز تفضفض عن المصاريف. \nقولي أقدر أساعدك إزاي النهاردة؟ 💸",
+        "أهلاً يا يغالي!  أنا مساعدك الذكي في Budgetly. \nمعاك في أي حسابات، تظبيط ميزانية،\nقولي أقدر أساعدك إزاي النهاردة؟ ",
     },
   ]);
   const [input, setInput] = useState("");
@@ -381,6 +382,20 @@ const AIPage = () => {
           <p className="text-[10px] text-ios-secondary flex items-center justify-center gap-1">
             <Calculator className="w-3 h-3" />
             Powered by Gemini AI • Can make mistakes
+          </p>
+        </div>
+      </div>
+
+      {/* Under Construction Overlay */}
+      <div className="absolute inset-0 bg-ios-surface/60 backdrop-blur-md z-50 flex flex-col items-center justify-center p-6 text-center">
+        <div className="bg-ios-card p-8 rounded-3xl shadow-xl border border-ios-border max-w-sm transform  transition-transform duration-300">
+          <div className="w-16 h-16 bg-ios-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Lock className="w-8 h-8 text-ios-primary" />
+          </div>
+          <h2 className="text-2xl font-bold text-ios-text mb-3">تحت الصيانة</h2>
+          <p className="text-ios-secondary leading-relaxed">
+            مساعد بادجتلي الذكي بيتم تحديثه دلوقتي عشان يكون أذكى وأسرع.
+            <br />
           </p>
         </div>
       </div>
