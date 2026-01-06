@@ -1,6 +1,6 @@
 import Payment from "../models/Payment.js";
 import User from "../models/User.js";
-import Expense from "../models/Expense.js";
+  import Expense from "../models/Expense.js";
 
 // Get all payments
 export const getPayments = async (req, res) => {

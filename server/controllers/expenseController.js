@@ -56,6 +56,7 @@ export const createExpense = async (req, res) => {
       splits,
       selectedUsers,
       customSplits,
+      payer,
     } = req.body;
 
     const user = await User.findById(req.user.id);
@@ -67,6 +68,7 @@ export const createExpense = async (req, res) => {
 
     const isAdmin = user.role === "admin";
     const status = isAdmin ? "approved" : "pending";
+    const payerId = isAdmin && payer ? payer : req.user.id;
 
     let finalSplits = [];
 
@@ -98,7 +100,7 @@ export const createExpense = async (req, res) => {
       totalAmount,
       splitType,
       splits: finalSplits,
-      createdBy: req.user.id,
+      createdBy: payerId,
       house: user.house,
       status,
     });
@@ -106,7 +108,7 @@ export const createExpense = async (req, res) => {
     // Only generate Invoices if Admin (Approved immediately)
     if (status === "approved") {
       const invoicePromises = finalSplits.map((split) => {
-        const isPayer = split.user.toString() === req.user.id;
+        const isPayer = split.user.toString() === payerId.toString();
         return Invoice.create({
           user: split.user,
           expense: expense._id,

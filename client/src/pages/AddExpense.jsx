@@ -1,4 +1,4 @@
-import { PlusCircle, Check, FileText, Coins } from "lucide-react";
+import { PlusCircle, Check, FileText, Coins, User } from "lucide-react";
 import Loader from "../components/Loader";
 import Input from "../components/Input";
 import Select from "../components/Select";
@@ -52,6 +52,20 @@ const AddExpense = () => {
           placeholder="مثال: فاتورة الكهرباء"
           required
         />
+
+        {user?.role === "admin" && (
+          <Select
+            label="مين اللي دفع؟"
+            value={formData.payer}
+            onChange={(e) => handleInputChange("payer", e.target.value)}
+          >
+            {users.map((u) => (
+              <option key={u._id} value={u._id}>
+                {u.name}
+              </option>
+            ))}
+          </Select>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>

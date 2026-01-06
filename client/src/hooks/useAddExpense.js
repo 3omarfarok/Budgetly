@@ -14,6 +14,7 @@ export function useAddExpense() {
     category: "General",
     totalAmount: "",
     splitType: "equal",
+    payer: user?._id || "",
   });
   const [error, setError] = useState("");
   const [users, setUsers] = useState([]);
@@ -23,6 +24,9 @@ export function useAddExpense() {
 
   useEffect(() => {
     fetchUsers();
+    if (user && !formData.payer) {
+      setFormData((prev) => ({ ...prev, payer: user._id }));
+    }
   }, [user]);
 
   const fetchUsers = async () => {
