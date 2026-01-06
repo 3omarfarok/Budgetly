@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { User, AtSign, Lock } from "lucide-react";
+import { User, AtSign, Lock, Mail } from "lucide-react";
 import Input from "../components/Input";
 import AuthCard from "../components/auth/AuthCard";
 import { useRegister } from "../hooks/useRegister";
@@ -74,6 +74,19 @@ const RegisterComponent = () => {
           onChange={handleChange}
           icon={User}
           placeholder="أدخل اسمك الكامل"
+          disabled={loading}
+          required
+        />
+
+        <Input
+          id="email"
+          name="email"
+          label="البريد الإلكتروني"
+          type="email"
+          value={formData.email}
+          onChange={handleChange}
+          icon={Mail}
+          placeholder="example@email.com"
           disabled={loading}
           required
         />

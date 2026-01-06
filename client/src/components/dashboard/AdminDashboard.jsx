@@ -8,7 +8,7 @@ export default function AdminDashboard({ stats }) {
         <h2 id="overview-heading" className="sr-only">
           نظرة عامة
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <StatCard
             title="إجمالي المصاريف"
             value={`${stats.overview.totalExpenseAmount.toFixed(2)} جنيه`}

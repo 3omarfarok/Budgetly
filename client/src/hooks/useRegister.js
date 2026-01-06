@@ -5,10 +5,11 @@ import { useToast } from "../context/ToastContext";
 
 export function useRegister() {
   const [formData, setFormData] = useState({
+    name: "",
+    email: "",
     username: "",
     password: "",
     confirmPassword: "",
-    name: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,7 +29,12 @@ export function useRegister() {
     setError("");
 
     // Validation
-    if (!formData.username || !formData.password || !formData.name) {
+    if (
+      !formData.username ||
+      !formData.password ||
+      !formData.name ||
+      !formData.email
+    ) {
       setError("جميع الحقول مطلوبة");
       toast.warning("جميع الحقول مطلوبة");
       return;
@@ -48,7 +54,12 @@ export function useRegister() {
 
     setLoading(true);
     try {
-      await register(formData.username, formData.password, formData.name);
+      await register(
+        formData.username,
+        formData.password,
+        formData.name,
+        formData.email
+      );
       toast.success("تم إنشاء الحساب بنجاح!");
       navigate("/house-selection");
     } catch (err) {

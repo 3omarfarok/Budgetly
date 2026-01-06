@@ -26,11 +26,12 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const register = async (username, password, name) => {
+  const register = async (username, password, name, email) => {
     const { data } = await api.post("/auth/register", {
       username,
       password,
       name,
+      email,
     });
     localStorage.setItem("token", data.token);
     setUser(data.user);
