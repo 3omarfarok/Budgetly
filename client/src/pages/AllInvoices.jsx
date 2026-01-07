@@ -26,12 +26,10 @@ import { useAllInvoices } from "../hooks/useAllInvoices";
 
 const StatusBadge = ({ status }) => {
   const styles = {
-    pending:
-      "bg-(--color-status-pending-bg) text-(--color-status-pending)",
+    pending: "bg-(--color-status-pending-bg) text-(--color-status-pending)",
     awaiting_approval: "bg-(--color-info-bg) text-(--color-info)",
     paid: "bg-(--color-status-approved-bg) text-(--color-status-approved)",
-    rejected:
-      "bg-(--color-status-rejected-bg) text-(--color-status-rejected)",
+    rejected: "bg-(--color-status-rejected-bg) text-(--color-status-rejected)",
   };
 
   const labels = {
@@ -299,9 +297,7 @@ const RequestDetailsModal = ({ isOpen, onClose, request }) => {
           {/* Main Info */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-(--color-bg) p-4 rounded-xl border border-(--color-border)">
-              <p className="text-xs text-(--color-secondary) mb-1">
-                الوصف
-              </p>
+              <p className="text-xs text-(--color-secondary) mb-1">الوصف</p>
               <p className="font-semibold text-(--color-dark)">
                 {request.description}
               </p>
@@ -315,17 +311,13 @@ const RequestDetailsModal = ({ isOpen, onClose, request }) => {
               </p>
             </div>
             <div className="bg-(--color-bg) p-4 rounded-xl border border-(--color-border)">
-              <p className="text-xs text-(--color-secondary) mb-1">
-                التاريخ
-              </p>
+              <p className="text-xs text-(--color-secondary) mb-1">التاريخ</p>
               <p className="font-medium text-(--color-dark)">
                 {format(new Date(request.createdAt), "MMM d, yyyy")}
               </p>
             </div>
             <div className="bg-(--color-bg) p-4 rounded-xl border border-(--color-border)">
-              <p className="text-xs text-(--color-secondary) mb-1">
-                الفئة
-              </p>
+              <p className="text-xs text-(--color-secondary) mb-1">الفئة</p>
               <p className="font-medium text-(--color-dark)">
                 {request.category || "عام"}
               </p>
@@ -510,8 +502,8 @@ export default function AllInvoices() {
             }
             className={`cursor-pointer rounded-xl p-4 border transition-all duration-200 relative overflow-hidden group ${
               selectedUserId === u._id
-                ? " text-white border-(--color-primary) shadow-lg transform scale-[1.02] bg-(--color-primary/0.50)"
-                : " border-(--color-border) hover:border-(--color-primary) hover:shadow-md"
+                ? " text-(--color-primary) border-(--color-primary) shadow-lg transform scale-[1.02] bg-(--color-primary)/20"
+                : " border-(--color-border) border hover:border-(--color-primary) hover:shadow-md"
             }`}
           >
             <div className="flex items-center gap-4 relative z-10">
@@ -552,7 +544,7 @@ export default function AllInvoices() {
                 <span
                   className={`px-2 py-0.5 rounded-md text-xs flex items-center gap-1 ${
                     selectedUserId === u._id
-                      ? "bg-white/20 text-white"
+                      ? " text-(--color-primary) font-bold shadow-sm bg-(--color-primary)/20"
                       : "bg-(--color-status-pending-bg) text-(--color-status-pending)"
                   }`}
                 >
@@ -563,7 +555,7 @@ export default function AllInvoices() {
                 <span
                   className={`px-2 py-0.5 rounded-md text-xs flex items-center gap-1 ${
                     selectedUserId === u._id
-                      ? "bg-white/20 text-white"
+                      ? "bg-white/90 text-(--color-primary) font-bold shadow-sm"
                       : "bg-(--color-info-bg) text-(--color-info)"
                   }`}
                 >
@@ -574,7 +566,7 @@ export default function AllInvoices() {
                 <span
                   className={`px-2 py-0.5 rounded-md text-xs flex items-center gap-1 ${
                     selectedUserId === u._id
-                      ? "bg-white/20 text-white"
+                      ? "bg-white/90 text-(--color-primary) font-bold shadow-sm"
                       : "bg-(--color-success-bg) text-(--color-success)"
                   }`}
                 >
@@ -641,6 +633,3 @@ export default function AllInvoices() {
     </div>
   );
 }
-
-
-

@@ -290,7 +290,7 @@ const HouseDetails = () => {
                 {isAdmin && member._id !== user.id && (
                   <button
                     onClick={() => setMemberToRemove(member)}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-2 text-(--color-error) hover:bg-(--color-error)/10 cursor-pointer rounded-lg transition-colors"
                     title="حذف العضو"
                   >
                     <UserX size={20} />
