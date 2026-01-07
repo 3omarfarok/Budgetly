@@ -1,7 +1,5 @@
-import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import api from "../utils/api";
 import {
   TrendingUp,
   TrendingDown,
@@ -11,31 +9,12 @@ import {
   PieChart,
 } from "lucide-react";
 import Loader from "../components/Loader";
+import useAnalytics from "../hooks/useAnalytics";
 
 const Analytics = () => {
   const { user } = useAuth();
-  const toast = useToast();
-  const [analytics, setAnalytics] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetchAnalytics();
-  }, []);
-
-  const fetchAnalytics = async () => {
-    try {
-      setLoading(true);
-      const { data } = await api.get("/analytics/monthly");
-      setAnalytics(data);
-    } catch (err) {
-      console.error("Error fetching analytics:", err);
-      setError(err.message);
-      toast.error("فيه مشكلة في تحميل التحليلات");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // useToast not strictly needed if errors handled in component, but kept just in case
+  const { analytics, loading, error } = useAnalytics();
 
   if (loading) return <Loader text="بنحمّل التحليلات..." />;
 
@@ -46,6 +25,9 @@ const Analytics = () => {
       </div>
     );
   }
+
+  // Handle case where data might be null/undefined even if not loading check passes
+  if (!analytics) return null;
 
   const { monthlyExpenses, categoryBreakdown, summary } = analytics;
 
@@ -89,57 +71,51 @@ const Analytics = () => {
           <BarChart3 className="text-ios-primary" size={28} />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-[var(--color-dark)]">
-            التحليلات
-          </h1>
-          <p className="text-[var(--color-muted)] text-sm">
-            تحليل شامل لمصاريفك
-          </p>
+          <h1 className="text-2xl font-bold text-(--color-dark)">التحليلات</h1>
+          <p className="text-(--color-muted) text-sm">تحليل شامل لمصاريفك</p>
         </div>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="bg-gradient-to-br from-[var(--color-ios-primary)]/5 to-[var(--color-ios-primary)]/10 p-5 rounded-2xl border border-[var(--color-ios-primary)]/20">
+        <div className="bg-linear-to-br from-ios-primary/5 to-ios-primary/10 p-5 rounded-2xl border border-ios-primary/20">
           <div className="flex items-center gap-2 mb-2">
-            <DollarSign size={20} className="text-[var(--color-ios-primary)]" />
-            <p className="text-sm text-[var(--color-ios-primary)]">
-              إجمالي المصاريف
-            </p>
+            <DollarSign size={20} className="text-ios-primary" />
+            <p className="text-sm text-ios-primary">إجمالي المصاريف</p>
           </div>
-          <p className="text-2xl font-bold text-[var(--color-dark)]">
+          <p className="text-2xl font-bold text-(--color-dark)">
             {summary.totalExpenses.toFixed(2)}
             <span className="text-sm font-normal"> جنيه</span>
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-[var(--color-success)]/5 to-[var(--color-success)]/10 p-5 rounded-2xl border border-[var(--color-success)]/20">
+        <div className="bg-linear-to-br from-(--color-success)/5 to-(--color-success)/10 p-5 rounded-2xl border border-(--color-success)/20">
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp size={20} className="text-[var(--color-success)]" />
-            <p className="text-sm text-[var(--color-success)]">متوسط شهري</p>
+            <TrendingUp size={20} className="text-(--color-success)" />
+            <p className="text-sm text-(--color-success)">متوسط شهري</p>
           </div>
-          <p className="text-2xl font-bold text-[var(--color-dark)]">
+          <p className="text-2xl font-bold text-(--color-dark)">
             {summary.avgMonthlyExpense}
             <span className="text-sm font-normal"> جنيه</span>
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-[var(--color-info)]/5 to-[var(--color-info)]/10 p-5 rounded-2xl border border-[var(--color-info)]/20">
+        <div className="bg-linear-to-br from-(--color-info)/5 to-(--color-info)/10 p-5 rounded-2xl border border-(--color-info)/20">
           <div className="flex items-center gap-2 mb-2">
-            <Calendar size={20} className="text-[var(--color-info)]" />
-            <p className="text-sm text-[var(--color-info)]">الأشهر المتتبعة</p>
+            <Calendar size={20} className="text-(--color-info)" />
+            <p className="text-sm text-(--color-info)">الأشهر المتتبعة</p>
           </div>
-          <p className="text-2xl font-bold text-[var(--color-dark)]">
+          <p className="text-2xl font-bold text-(--color-dark)">
             {summary.monthsTracked}
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-[var(--color-warning)]/5 to-[var(--color-warning)]/10 p-5 rounded-2xl border border-[var(--color-warning)]/20">
+        <div className="bg-linear-to-br from-(--color-warning)/5 to-(--color-warning)/10 p-5 rounded-2xl border border-(--color-warning)/20">
           <div className="flex items-center gap-2 mb-2">
-            <BarChart3 size={20} className="text-[var(--color-warning)]" />
-            <p className="text-sm text-[var(--color-warning)]">عدد المعاملات</p>
+            <BarChart3 size={20} className="text-(--color-warning)" />
+            <p className="text-sm text-(--color-warning)">عدد المعاملات</p>
           </div>
-          <p className="text-2xl font-bold text-[var(--color-dark)]">
+          <p className="text-2xl font-bold text-(--color-dark)">
             {summary.totalTransactions}
           </p>
         </div>
@@ -147,10 +123,10 @@ const Analytics = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Category Breakdown */}
-        <div className="bg-[var(--color-bg)] rounded-2xl p-6 shadow-sm border border-[var(--color-border)]">
+        <div className="bg-(--color-bg) rounded-2xl p-6 shadow-sm border border-(--color-border)">
           <div className="flex items-center gap-2 mb-5">
             <PieChart size={20} className="text-ios-primary" />
-            <h2 className="text-lg font-bold text-[var(--color-dark)]">
+            <h2 className="text-lg font-bold text-(--color-dark)">
               التوزيع حسب النوع
             </h2>
           </div>
@@ -161,14 +137,14 @@ const Analytics = () => {
               .map(([category, data]) => (
                 <div key={category}>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-[var(--color-secondary)]">
+                    <span className="text-sm font-medium text-(--color-secondary)">
                       {getCategoryName(category)}
                     </span>
-                    <span className="text-sm font-bold text-[var(--color-dark)]">
+                    <span className="text-sm font-bold text-(--color-dark)">
                       {data.amount.toFixed(2)} جنيه ({data.percentage}%)
                     </span>
                   </div>
-                  <div className="w-full bg-[var(--color-muted-bg)] rounded-full h-2.5">
+                  <div className="w-full bg-(--color-muted-bg) rounded-full h-2.5">
                     <div
                       className={`h-2.5 rounded-full ${getCategoryColor(
                         category
@@ -182,10 +158,10 @@ const Analytics = () => {
         </div>
 
         {/* Monthly Expenses */}
-        <div className="bg-[var(--color-bg)] rounded-2xl p-6 shadow-sm border border-[var(--color-border)]">
+        <div className="bg-(--color-bg) rounded-2xl p-6 shadow-sm border border-(--color-border)">
           <div className="flex items-center gap-2 mb-5">
             <TrendingUp size={20} className="text-ios-primary" />
-            <h2 className="text-lg font-bold text-[var(--color-dark)]">
+            <h2 className="text-lg font-bold text-(--color-dark)">
               آخر 6 شهور
             </h2>
           </div>
@@ -202,17 +178,17 @@ const Analytics = () => {
               return (
                 <div
                   key={month}
-                  className="flex justify-between items-center p-3 bg-[var(--color-surface)] rounded-xl hover:bg-[var(--color-hover)] transition-colors"
+                  className="flex justify-between items-center p-3 bg-(--color-surface) rounded-xl hover:bg-(--color-hover) transition-colors"
                 >
                   <div>
-                    <p className="font-semibold text-[var(--color-dark)]">
+                    <p className="font-semibold text-(--color-dark)">
                       {monthName}
                     </p>
-                    <p className="text-xs text-[var(--color-muted)]">
+                    <p className="text-xs text-(--color-muted)">
                       {data.count} معاملة
                     </p>
                   </div>
-                  <p className="text-lg font-bold text-[var(--color-dark)]">
+                  <p className="text-lg font-bold text-(--color-dark)">
                     {data.total.toFixed(2)}{" "}
                     <span className="text-sm">جنيه</span>
                   </p>
@@ -222,7 +198,7 @@ const Analytics = () => {
           </div>
 
           {monthlyData.length === 0 && (
-            <div className="text-center py-10 text-[var(--color-muted)]">
+            <div className="text-center py-10 text-(--color-muted)">
               <BarChart3 size={48} className="mx-auto mb-3 opacity-30" />
               <p>مفيش بيانات لسه</p>
             </div>
@@ -232,10 +208,10 @@ const Analytics = () => {
 
       {/* Top Categories This Month */}
       {monthlyData.length > 0 && (
-        <div className="bg-[var(--color-bg)] rounded-2xl p-6 shadow-sm border border-[var(--color-border)] mt-6">
+        <div className="bg-(--color-bg) rounded-2xl p-6 shadow-sm border border-(--color-border) mt-6">
           <div className="flex items-center gap-2 mb-5">
             <TrendingDown size={20} className="text-ios-primary" />
-            <h2 className="text-lg font-bold text-[var(--color-dark)]">
+            <h2 className="text-lg font-bold text-(--color-dark)">
               الشهر الحالي - حسب النوع
             </h2>
           </div>
@@ -245,15 +221,15 @@ const Analytics = () => {
               ([category, amount]) => (
                 <div
                   key={category}
-                  className="text-center p-4 bg-[var(--color-surface)] rounded-xl"
+                  className="text-center p-4 bg-(--color-surface) rounded-xl"
                 >
-                  <p className="text-xs text-[var(--color-muted)] mb-2">
+                  <p className="text-xs text-(--color-muted) mb-2">
                     {getCategoryName(category)}
                   </p>
-                  <p className="text-lg font-bold text-[var(--color-dark)]">
+                  <p className="text-lg font-bold text-(--color-dark)">
                     {amount.toFixed(0)}
                   </p>
-                  <p className="text-xs text-[var(--color-muted)]">جنيه</p>
+                  <p className="text-xs text-(--color-muted)">جنيه</p>
                 </div>
               )
             )}

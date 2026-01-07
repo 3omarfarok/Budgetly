@@ -1,38 +1,32 @@
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Send,
-  X,
   Bot,
-  Sparkles,
-  Loader2,
-  Calculator,
-  History,
+  User,
   Trash2,
-  Lock,
+  Sparkles,
+  MessageSquare,
+  Plus,
 } from "lucide-react";
-import api from "../utils/api";
-import { useAuth } from "../context/AuthContext";
-import { useToast } from "../context/ToastContext";
-import Input from "../components/Input";
+import { motion, AnimatePresence } from "framer-motion";
+import ReactMarkdown from "react-markdown";
+import Loader from "../components/Loader";
+import useAI from "../hooks/useAI";
 
 const AIPage = () => {
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content:
-        "أهلاً يا يغالي!  أنا مساعدك الذكي في Budgetly. \nمعاك في أي حسابات، تظبيط ميزانية،\nقولي أقدر أساعدك إزاي النهاردة؟ ",
-    },
-  ]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
-  const [chatHistory, setChatHistory] = useState([]);
+  const { chats, loadingChats, useChat, sendMessage, isSending, deleteChat } =
+    useAI();
+
   const [currentChatId, setCurrentChatId] = useState(null);
-  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [input, setInput] = useState("");
+
+  // Custom hook usage for the selected chat
+  const { data: currentChat } = useChat(currentChatId);
+
+  // Local state for optimistic updates or just to hold a temporary message list if needed.
+  // But we'll rely on the query data for simplicity, maybe with a loading indicator.
+
   const messagesEndRef = useRef(null);
-  const { user } = useAuth();
-  const toast = useToast();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -40,363 +34,191 @@ const AIPage = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
-
-  // Fetch chat history
-  const fetchChatHistory = async () => {
-    try {
-      setLoadingHistory(true);
-      const { data } = await api.get("/ai/chats");
-      setChatHistory(data.chats);
-    } catch (error) {
-      console.error("Error fetching chat history:", error);
-      toast.error("فيه مشكلة في تحميل السجل");
-    } finally {
-      setLoadingHistory(false);
-    }
-  };
-
-  // Load a previous chat
-  const loadPreviousChat = async (chatId) => {
-    try {
-      setIsLoading(true);
-      const { data } = await api.get(`/ai/chats/${chatId}`);
-      setMessages(data.chat.messages || []);
-      setCurrentChatId(chatId);
-      setShowHistory(false);
-    } catch (error) {
-      console.error("Error loading chat:", error);
-      toast.error("فيه مشكلة في تحميل المحادثة");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Delete a chat
-  const deleteChat = async (chatId, e) => {
-    e.stopPropagation();
-    try {
-      await api.delete(`/ai/chats/${chatId}`);
-      setChatHistory(chatHistory.filter((c) => c._id !== chatId));
-      if (currentChatId === chatId) {
-        setMessages([
-          {
-            role: "assistant",
-            content:
-              "أهلاً يا باشا! 👋 أنا مساعدك الذكي في Budgetly. \nمعاك في أي حسابات، تظبيط ميزانية، أو حتى لو عايز تفضفض عن المصاريف. \nقولي أقدر أساعدك إزاي النهاردة؟ 💸",
-          },
-        ]);
-        setCurrentChatId(null);
-      }
-      toast.success("تم حذف المحادثة");
-    } catch (error) {
-      console.error("Error deleting chat:", error);
-      toast.error("فيه مشكلة في حذف المحادثة");
-    }
-  };
-
-  // Start new chat
-  const startNewChat = () => {
-    setMessages([
-      {
-        role: "assistant",
-        content:
-          "أهلاً يا باشا! 👋 أنا مساعدك الذكي في Budgetly. \nمعاك في أي حسابات، تظبيط ميزانية، أو حتى لو عايز تفضفض عن المصاريف. \nقولي أقدر أساعدك إزاي النهاردة؟ 💸",
-      },
-    ]);
-    setCurrentChatId(null);
-    setShowHistory(false);
-  };
+  }, [currentChat, isSending]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isSending) return;
 
     const userMessage = input.trim();
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
-    setIsLoading(true);
 
     try {
-      const response = await api.post("/ai/chat", {
+      const response = await sendMessage({
         message: userMessage,
         chatId: currentChatId,
       });
-
-      if (response.data.success) {
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: response.data.response },
-        ]);
-        // Update current chat ID if it's a new chat
-        if (!currentChatId && response.data.chatId) {
-          setCurrentChatId(response.data.chatId);
-        }
+      // If we started a new chat, the response should contain the new chatId
+      if (!currentChatId && response?.data?.chatId) {
+        setCurrentChatId(response.data.chatId);
       }
-    } catch (error) {
-      console.error("Error sending message:", error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content:
-            "معلش يا ريس، حصلت مشكلة صغيرة وأنا بفكر. جرب تاني كده كمان شوية! 😅",
-          isError: true,
-        },
-      ]);
-    } finally {
-      setIsLoading(false);
+    } catch (err) {
+      setInput(userMessage); // Restore input on error
     }
   };
 
-  // Format message content to handle markdown-like bolding and lists
-  const formatMessage = (content) => {
-    return content.split("\n").map((line, i) => {
-      // Bold text handling (**text**)
-      const parts = line.split(/(\*\*.*?\*\*)/g);
-      return (
-        <div
-          key={i}
-          className={`${
-            line.trim().startsWith("-") || line.trim().match(/^\d+\./)
-              ? "pl-4"
-              : "min-h-[1.5em]"
-          }`}
-        >
-          {parts.map((part, j) => {
-            if (part.startsWith("**") && part.endsWith("**")) {
-              return <strong key={j}>{part.slice(2, -2)}</strong>;
-            }
-            return part;
-          })}
-        </div>
-      );
-    });
+  const handleNewChat = () => {
+    setCurrentChatId(null);
   };
 
+  // Determine messages to display
+  // If no chat selected (new chat state), show welcome message or empty
+  // If chat selected, show its messages
+  const displayMessages =
+    currentChatId && currentChat ? currentChat.messages : [];
+
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] bg-ios-surface rounded-2xl shadow-sm border border-ios-border overflow-hidden relative">
-      {/* Header */}
-      <div className="p-4 flex items-center justify-between text-ios-primary shadow-md shrink-0 border-b border-ios-border bg-ios-surface z-10">
-        <div className="flex items-center gap-2">
-          <div className="p-2 bg-ios-primary/10 rounded-lg backdrop-blur-sm">
-            <Bot className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="font-bold text-lg leading-tight text-ios-text">
-              Budgetly AI
-            </h3>
-            <p className="text-xs text-ios-secondary opacity-90">
-              Financial Assistant
-            </p>
-          </div>
-        </div>
-        <div className="flex gap-2 items-center">
+    <div className="h-[calc(100vh-100px)] flex gap-4 font-primary max-w-6xl mx-auto p-4">
+      {/* Sidebar - History */}
+      <div className="w-1/4 hidden md:flex flex-col bg-(--color-surface) rounded-2xl border border-(--color-border) overflow-hidden">
+        <div className="p-4 border-b border-(--color-border)">
           <button
-            onClick={() => {
-              setShowHistory(!showHistory);
-              if (!showHistory && chatHistory.length === 0) {
-                fetchChatHistory();
-              }
-            }}
-            className="p-2 hover:bg-ios-hover rounded-full transition-colors text-ios-secondary hover:text-ios-primary"
-            title="السجل"
+            onClick={handleNewChat}
+            className="w-full flex items-center justify-center gap-2 p-3 bg-(--color-primary) text-white rounded-xl hover:shadow-lg transition-all font-bold"
           >
-            <History className="w-5 h-5" />
+            <Plus size={20} />
+            محادثة جديدة
           </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-2 scrollbar-thin">
+          {loadingChats ? (
+            <div className="flex justify-center p-4">
+              <Loader size="xs" />
+            </div>
+          ) : chats?.length > 0 ? (
+            <div className="space-y-2">
+              {chats.map((chat) => (
+                <div
+                  key={chat._id}
+                  onClick={() => setCurrentChatId(chat._id)}
+                  className={`p-3 rounded-xl cursor-pointer transition-all flex items-center justify-between group ${
+                    currentChatId === chat._id
+                      ? "bg-(--color-bg) border-r-4 border-(--color-primary) font-bold"
+                      : "hover:bg-(--color-bg) text-(--color-muted)"
+                  }`}
+                >
+                  <div className="truncate flex-1 text-right text-sm">
+                    {chat.title || "محادثة جديدة"}
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteChat(chat._id);
+                      if (currentChatId === chat._id) setCurrentChatId(null);
+                    }}
+                    className="p-1 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-opacity"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center text-(--color-muted) flex flex-col items-center gap-2 mt-10">
+              <MessageSquare size={32} className="opacity-20" />
+              <p className="text-sm">مفيش محادثات سابقة</p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* History Panel */}
-      <AnimatePresence>
-        {showHistory && (
-          <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            className="absolute inset-0 top-[73px] bg-ios-surface z-40 flex flex-col border-r border-ios-border"
-          >
-            <div className="p-4 border-b border-ios-border flex items-center justify-between bg-ios-bg/50">
-              <h3 className="font-bold text-ios-text">سجل المحادثات</h3>
-              <button
-                onClick={() => setShowHistory(false)}
-                className="p-1 hover:bg-ios-hover rounded-lg transition-colors text-ios-secondary"
-              >
-                <X className="w-5 h-5" />
-              </button>
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col bg-(--color-surface) rounded-2xl border border-(--color-border) shadow-sm overflow-hidden relative">
+        {/* Mobile Header logic could go here if needed */}
+
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin">
+          {!currentChatId && displayMessages.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-(--color-muted) opacity-50">
+              <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mb-6">
+                <Sparkles size={40} className="text-purple-500" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">
+                أهلاً بيك في المساعد الذكي
+              </h2>
+              <p>أنا هنا عشان أساعدك تفهم مصاريفك وتظبط ميزانيتك</p>
             </div>
-
-            <div className="flex-1 overflow-y-auto p-3 space-y-2">
-              <button
-                onClick={startNewChat}
-                className="w-full p-3 text-left bg-ios-primary/10 text-ios-primary rounded-lg font-medium text-sm hover:bg-ios-primary/20 transition-colors mb-2 flex items-center gap-2"
-              >
-                <Sparkles className="w-4 h-4" />
-                محادثة جديدة
-              </button>
-
-              {loadingHistory ? (
-                <div className="text-center py-4">
-                  <Loader2 className="w-5 h-5 animate-spin mx-auto text-ios-secondary" />
-                </div>
-              ) : chatHistory.length === 0 ? (
-                <div className="text-center py-8 text-ios-secondary text-sm">
-                  لا توجد محادثات سابقة
-                </div>
-              ) : (
-                chatHistory.map((chat) => (
-                  <motion.button
-                    key={chat._id}
-                    whileHover={{ x: 2 }}
-                    onClick={() => loadPreviousChat(chat._id)}
-                    className={`w-full p-3 text-left rounded-lg transition-colors group border border-transparent hover:border-ios-border ${
-                      currentChatId === chat._id
-                        ? "bg-ios-primary/5 border-ios-primary/20"
-                        : "bg-ios-bg hover:bg-ios-hover"
+          ) : (
+            <AnimatePresence>
+              {displayMessages.map((msg, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`flex gap-3 ${
+                    msg.role === "user" ? "flex-row-reverse" : "flex-row"
+                  }`}
+                >
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                      msg.role === "user"
+                        ? "bg-(--color-primary) text-white"
+                        : "bg-purple-100 text-purple-600"
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p
-                          className={`font-medium text-sm truncate ${
-                            currentChatId === chat._id
-                              ? "text-ios-primary"
-                              : "text-ios-text"
-                          }`}
-                        >
-                          {chat.title}
-                        </p>
-                        <p className="text-xs text-ios-secondary">
-                          {new Date(chat.createdAt).toLocaleDateString(
-                            "ar-EG",
-                            {
-                              month: "short",
-                              day: "numeric",
-                            }
-                          )}
-                        </p>
-                      </div>
-                      <button
-                        onClick={(e) => deleteChat(chat._id, e)}
-                        className="p-1 opacity-0 group-hover:opacity-100 hover:bg-ios-error/10 text-ios-error rounded transition-all"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </motion.button>
-                ))
+                    {msg.role === "user" ? (
+                      <User size={16} />
+                    ) : (
+                      <Bot size={16} />
+                    )}
+                  </div>
+                  <div
+                    className={`max-w-[80%] p-4 rounded-2xl text-sm leading-relaxed ${
+                      msg.role === "user"
+                        ? "bg-(--color-primary) text-white rounded-tr-none"
+                        : "bg-(--color-bg) text-(--color-dark) rounded-tl-none border border-(--color-border)"
+                    }`}
+                  >
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
+                </motion.div>
+              ))}
+              {isSending && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex gap-3 flex-row"
+                >
+                  <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center shrink-0">
+                    <Loader size="xs" color="currentColor" />
+                  </div>
+                  <div className="bg-(--color-bg) text-(--color-muted) p-4 rounded-2xl rounded-tl-none border border-(--color-border) text-sm">
+                    جاري الكتابة...
+                  </div>
+                </motion.div>
               )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </AnimatePresence>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-ios-bg scrollbar-thin">
-        {messages.map((msg, idx) => (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            key={idx}
-            className={`flex ${
-              msg.role === "user" ? "justify-end" : "justify-start"
-            }`}
-          >
-            <div
-              className={`max-w-[85%] rounded-2xl p-3.5 shadow-sm ${
-                msg.role === "user"
-                  ? "bg-ios-primary text-white rounded-br-none"
-                  : msg.isError
-                  ? "bg-ios-error/10 text-ios-error border border-ios-error/30 rounded-bl-none"
-                  : "bg-ios-surface text-ios-text border border-ios-border rounded-bl-none"
-              }`}
+        {/* Input Area */}
+        <div className="p-4 bg-(--color-surface) border-t border-(--color-border)">
+          <form onSubmit={handleSubmit} className="relative">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="اكتب رسالتك هنا..."
+              disabled={isSending}
+              className="w-full p-4 pl-12 rounded-2xl bg-(--color-bg) border border-(--color-border) focus:border-(--color-primary) focus:ring-2 focus:ring-(--color-primary)/20 outline-none transition-all text-right disabled:opacity-75"
+            />
+            <button
+              type="submit"
+              disabled={!input.trim() || isSending}
+              className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-(--color-primary) text-white rounded-xl hover:shadow-lg disabled:opacity-50 disabled:shadow-none transition-all"
             >
-              {msg.role === "assistant" && !msg.isError && (
-                <div className="flex items-center gap-2 mb-2 text-xs font-medium text-ios-primary">
-                  <Sparkles className="w-3 h-3" />
-                  AI Assistant
+              <Send
+                size={20}
+                className={isSending ? "opacity-0" : "opacity-100"}
+              />
+              {isSending && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Loader size="xs" color="white" />
                 </div>
               )}
-              <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                {msg.role === "assistant"
-                  ? formatMessage(msg.content)
-                  : msg.content}
-              </div>
-            </div>
-          </motion.div>
-        ))}
-        {isLoading && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex justify-start"
-          >
-            <div className="bg-ios-surface rounded-2xl rounded-bl-none p-4 shadow-sm border border-ios-border">
-              <div className="flex gap-1.5">
-                <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ repeat: Infinity, duration: 1, delay: 0 }}
-                  className="w-2 h-2 bg-ios-primary rounded-full"
-                />
-                <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ repeat: Infinity, duration: 1, delay: 0.2 }}
-                  className="w-2 h-2 bg-ios-primary rounded-full"
-                />
-                <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ repeat: Infinity, duration: 1, delay: 0.4 }}
-                  className="w-2 h-2 bg-ios-primary rounded-full"
-                />
-              </div>
-            </div>
-          </motion.div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Input Area */}
-      <div className="p-4 bg-ios-surface border-t border-ios-border shrink-0 z-10">
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="اسألني عن أي حسابات أو نصايح..."
-            disabled={isLoading}
-            variant="filled"
-            wrapperClassName="flex-1"
-          />
-          <button
-            type="submit"
-            disabled={!input.trim() || isLoading}
-            className="bg-ios-primary hover:bg-ios-hover text-white p-3 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-12"
-          >
-            {isLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <Send className="w-5 h-5" />
-            )}
-          </button>
-        </form>
-        <div className="mt-2 text-center">
-          <p className="text-[10px] text-ios-secondary flex items-center justify-center gap-1">
-            <Calculator className="w-3 h-3" />
-            Powered by Gemini AI • Can make mistakes
-          </p>
-        </div>
-      </div>
-
-      {/* Under Construction Overlay */}
-      <div className="absolute inset-0 bg-ios-surface/60 backdrop-blur-md z-50 flex flex-col items-center justify-center p-6 text-center">
-        <div className="bg-ios-card p-8 rounded-3xl shadow-xl border border-ios-border max-w-sm transform  transition-transform duration-300">
-          <div className="w-16 h-16 bg-ios-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Lock className="w-8 h-8 text-ios-primary" />
-          </div>
-          <h2 className="text-2xl font-bold text-ios-text mb-3">تحت الصيانة</h2>
-          <p className="text-ios-secondary leading-relaxed">
-            مساعد بادجتلي الذكي بيتم تحديثه دلوقتي عشان يكون أذكى وأسرع.
-            <br />
-          </p>
+            </button>
+          </form>
         </div>
       </div>
     </div>

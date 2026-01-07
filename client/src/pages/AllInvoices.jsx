@@ -1,15 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
-import { useAuth } from "../context/AuthContext";
-import { useToast } from "../context/ToastContext";
-import api from "../utils/api";
+import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import {
   Search,
   RefreshCw,
   Check,
   X,
-  ChevronLeft,
-  ChevronRight,
   ArrowUpDown,
   User as UserIcon,
   CreditCard,
@@ -25,17 +20,18 @@ import {
   getPaginationRowModel,
   flexRender,
 } from "@tanstack/react-table";
+import { useAllInvoices } from "../hooks/useAllInvoices";
 
 // --- Components ---
 
 const StatusBadge = ({ status }) => {
   const styles = {
     pending:
-      "bg-[var(--color-status-pending-bg)] text-[var(--color-status-pending)]",
-    awaiting_approval: "bg-[var(--color-info-bg)] text-[var(--color-info)]",
-    paid: "bg-[var(--color-status-approved-bg)] text-[var(--color-status-approved)]",
+      "bg-(--color-status-pending-bg) text-(--color-status-pending)",
+    awaiting_approval: "bg-(--color-info-bg) text-(--color-info)",
+    paid: "bg-(--color-status-approved-bg) text-(--color-status-approved)",
     rejected:
-      "bg-[var(--color-status-rejected-bg)] text-[var(--color-status-rejected)]",
+      "bg-(--color-status-rejected-bg) text-(--color-status-rejected)",
   };
 
   const labels = {
@@ -72,7 +68,7 @@ const InvoicesTable = ({
         header: "التاريخ",
         accessorFn: (row) => row.createdAt,
         cell: (info) => (
-          <span className="text-sm text-[var(--color-secondary)]">
+          <span className="text-sm text-(--color-secondary)">
             {format(new Date(info.getValue()), "MMM d, yyyy")}
           </span>
         ),
@@ -81,7 +77,7 @@ const InvoicesTable = ({
         accessorKey: "description",
         header: "الوصف",
         cell: (info) => (
-          <span className="text-[var(--color-dark)] font-medium">
+          <span className="text-(--color-dark) font-medium">
             {info.getValue()}
           </span>
         ),
@@ -90,7 +86,7 @@ const InvoicesTable = ({
         accessorKey: "amount",
         header: "المبلغ",
         cell: (info) => (
-          <span className="font-bold text-[var(--color-dark)]">
+          <span className="font-bold text-(--color-dark)">
             {Number(info.getValue()).toFixed(2)} جنيه
           </span>
         ),
@@ -125,7 +121,7 @@ const InvoicesTable = ({
                   </button>
                 </>
               ) : (
-                <span className="text-[var(--color-secondary)] text-xs">-</span>
+                <span className="text-(--color-secondary) text-xs">-</span>
               )}
             </div>
           );
@@ -140,10 +136,10 @@ const InvoicesTable = ({
         accessorFn: (row) => row.user?.name,
         cell: (info) => (
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-[var(--color-primary-bg)] text-[var(--color-primary)] flex items-center justify-center text-xs font-bold">
+            <div className="w-6 h-6 rounded-full bg-(--color-primary-bg) text-(--color-primary) flex items-center justify-center text-xs font-bold">
               {info.getValue()?.charAt(0) || "?"}
             </div>
-            <span className="font-medium text-[var(--color-dark)] text-sm">
+            <span className="font-medium text-(--color-dark) text-sm">
               {info.getValue()}
             </span>
           </div>
@@ -172,26 +168,26 @@ const InvoicesTable = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 bg-[var(--color-bg)] p-2 rounded-lg border border-[var(--color-border)] w-full md:w-64">
-        <Search size={18} className="text-[var(--color-secondary)]" />
+      <div className="flex items-center gap-2 bg-(--color-bg) p-2 rounded-lg border border-(--color-border) w-full md:w-64">
+        <Search size={18} className="text-(--color-secondary)" />
         <input
           type="text"
           placeholder="بحث..."
-          className="bg-transparent border-none outline-none text-sm w-full text-[var(--color-dark)]"
+          className="bg-transparent border-none outline-none text-sm w-full text-(--color-dark)"
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
         />
       </div>
 
-      <div className="overflow-x-auto border border-[var(--color-border)] rounded-xl">
+      <div className="overflow-x-auto border border-(--color-border) rounded-xl">
         <table className="w-full text-left border-collapse">
-          <thead className="bg-[var(--color-bg)]">
+          <thead className="bg-(--color-bg)">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="py-3 px-4 text-xs font-semibold text-[var(--color-secondary)] uppercase border-b border-[var(--color-border)] cursor-pointer hover:text-[var(--color-primary)] transition-colors"
+                    className="py-3 px-4 text-xs font-semibold text-(--color-secondary) uppercase border-b border-(--color-border) cursor-pointer hover:text-(--color-primary) transition-colors"
                     onClick={header.column.getToggleSortingHandler()}
                   >
                     <div className="flex items-center gap-1">
@@ -208,18 +204,18 @@ const InvoicesTable = ({
               </tr>
             ))}
           </thead>
-          <tbody className="divide-y divide-[var(--color-border)] bg-[var(--color-surface)]">
+          <tbody className="divide-y divide-(--color-border) bg-(--color-surface)">
             {loading ? (
               <tr>
                 <td colSpan={columns.length} className="py-8 text-start">
-                  <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--color-primary)]"></div>
+                  <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-(--color-primary)"></div>
                 </td>
               </tr>
             ) : table.getRowModel().rows.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="py-8 text-center text-[var(--color-secondary)]"
+                  className="py-8 text-center text-(--color-secondary)"
                 >
                   لا توجد فواتير
                 </td>
@@ -228,7 +224,7 @@ const InvoicesTable = ({
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className="hover:bg-[var(--color-hover)] transition-colors"
+                  className="hover:bg-(--color-hover) transition-colors"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="py-3 px-4 text-sm text-start">
@@ -245,17 +241,17 @@ const InvoicesTable = ({
         </table>
       </div>
 
-      <div className="flex items-center justify-between text-xs text-[var(--color-secondary)]">
+      <div className="flex items-center justify-between text-xs text-(--color-secondary)">
         <div className="flex gap-2">
           <button
-            className="px-2 py-1 border rounded hover:bg-[var(--color-hover)] disabled:opacity-50"
+            className="px-2 py-1 border rounded hover:bg-(--color-hover) disabled:opacity-50"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
             السابق
           </button>
           <button
-            className="px-2 py-1 border rounded hover:bg-[var(--color-hover)] disabled:opacity-50"
+            className="px-2 py-1 border rounded hover:bg-(--color-hover) disabled:opacity-50"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
@@ -278,22 +274,22 @@ const RequestDetailsModal = ({ isOpen, onClose, request }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div
-        className="bg-[var(--color-surface)] rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-[var(--color-border)] transform transition-all scale-100"
+        className="bg-(--color-surface) rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-(--color-border) transform transition-all scale-100"
         dir="rtl"
       >
-        <div className="p-6 border-b border-[var(--color-border)] flex justify-between items-start">
+        <div className="p-6 border-b border-(--color-border) flex justify-between items-start">
           <div>
-            <h3 className="text-xl font-bold text-[var(--color-dark)] flex items-center gap-2">
-              <CreditCard className="text-[var(--color-primary)]" size={24} />
+            <h3 className="text-xl font-bold text-(--color-dark) flex items-center gap-2">
+              <CreditCard className="text-(--color-primary)" size={24} />
               تفاصيل الفاتورة
             </h3>
-            <p className="text-sm text-[var(--color-secondary)] mt-1">
+            <p className="text-sm text-(--color-secondary) mt-1">
               تم الإنشاء بواسطة {request.createdBy?.name}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-[var(--color-secondary)] hover:text-[var(--color-error)] transition-colors"
+            className="text-(--color-secondary) hover:text-(--color-error) transition-colors"
           >
             <X size={24} />
           </button>
@@ -302,35 +298,35 @@ const RequestDetailsModal = ({ isOpen, onClose, request }) => {
         <div className="p-6 space-y-6">
           {/* Main Info */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-[var(--color-bg)] p-4 rounded-xl border border-[var(--color-border)]">
-              <p className="text-xs text-[var(--color-secondary)] mb-1">
+            <div className="bg-(--color-bg) p-4 rounded-xl border border-(--color-border)">
+              <p className="text-xs text-(--color-secondary) mb-1">
                 الوصف
               </p>
-              <p className="font-semibold text-[var(--color-dark)]">
+              <p className="font-semibold text-(--color-dark)">
                 {request.description}
               </p>
             </div>
-            <div className="bg-[var(--color-bg)] p-4 rounded-xl border border-[var(--color-border)]">
-              <p className="text-xs text-[var(--color-secondary)] mb-1">
+            <div className="bg-(--color-bg) p-4 rounded-xl border border-(--color-border)">
+              <p className="text-xs text-(--color-secondary) mb-1">
                 المبلغ الكلي
               </p>
-              <p className="font-bold text-xl text-[var(--color-primary)]">
+              <p className="font-bold text-xl text-(--color-primary)">
                 {request.totalAmount} جنيه
               </p>
             </div>
-            <div className="bg-[var(--color-bg)] p-4 rounded-xl border border-[var(--color-border)]">
-              <p className="text-xs text-[var(--color-secondary)] mb-1">
+            <div className="bg-(--color-bg) p-4 rounded-xl border border-(--color-border)">
+              <p className="text-xs text-(--color-secondary) mb-1">
                 التاريخ
               </p>
-              <p className="font-medium text-[var(--color-dark)]">
+              <p className="font-medium text-(--color-dark)">
                 {format(new Date(request.createdAt), "MMM d, yyyy")}
               </p>
             </div>
-            <div className="bg-[var(--color-bg)] p-4 rounded-xl border border-[var(--color-border)]">
-              <p className="text-xs text-[var(--color-secondary)] mb-1">
+            <div className="bg-(--color-bg) p-4 rounded-xl border border-(--color-border)">
+              <p className="text-xs text-(--color-secondary) mb-1">
                 الفئة
               </p>
-              <p className="font-medium text-[var(--color-dark)]">
+              <p className="font-medium text-(--color-dark)">
                 {request.category || "عام"}
               </p>
             </div>
@@ -338,7 +334,7 @@ const RequestDetailsModal = ({ isOpen, onClose, request }) => {
 
           {/* Splits Details */}
           <div>
-            <h4 className="font-bold text-[var(--color-dark)] mb-3 flex items-center gap-2">
+            <h4 className="font-bold text-(--color-dark) mb-3 flex items-center gap-2">
               <UserIcon size={18} />
               المشاركون في الدفع
             </h4>
@@ -348,14 +344,14 @@ const RequestDetailsModal = ({ isOpen, onClose, request }) => {
                 return (
                   <div
                     key={index}
-                    className="flex justify-between items-center p-3 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)]"
+                    className="flex justify-between items-center p-3 rounded-lg bg-(--color-bg) border border-(--color-border)"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-sm font-bold text-[var(--color-primary)]">
+                      <div className="w-8 h-8 rounded-full bg-(--color-surface) border border-(--color-border) flex items-center justify-center text-sm font-bold text-(--color-primary)">
                         {split.user.name?.charAt(0)}
                       </div>
                       <div>
-                        <p className="font-medium text-[var(--color-dark)]">
+                        <p className="font-medium text-(--color-dark)">
                           {split.user.name}
                         </p>
                         {isPayer && (
@@ -365,7 +361,7 @@ const RequestDetailsModal = ({ isOpen, onClose, request }) => {
                         )}
                       </div>
                     </div>
-                    <span className="font-bold text-[var(--color-dark)]">
+                    <span className="font-bold text-(--color-dark)">
                       {split.amount.toFixed(2)} جنيه
                     </span>
                   </div>
@@ -375,10 +371,10 @@ const RequestDetailsModal = ({ isOpen, onClose, request }) => {
           </div>
         </div>
 
-        <div className="p-6 border-t border-[var(--color-border)] bg-[var(--color-bg)] flex justify-end">
+        <div className="p-6 border-t border-(--color-border) bg-(--color-bg) flex justify-end">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-dark)] rounded-xl hover:bg-[var(--color-hover)] font-medium transition-all"
+            className="px-6 py-2 bg-(--color-surface) border border-(--color-border) text-(--color-dark) rounded-xl hover:bg-(--color-hover) font-medium transition-all"
           >
             إغلاق
           </button>
@@ -391,156 +387,45 @@ const RequestDetailsModal = ({ isOpen, onClose, request }) => {
 // --- Main Page Component ---
 
 export default function AllInvoices() {
-  const { user: currentUser } = useAuth();
-  const { showToast } = useToast();
-  const [users, setUsers] = useState([]);
-  const [invoices, setInvoices] = useState([]);
-  const [pendingRequests, setPendingRequests] = useState([]);
-  const [selectedUserId, setSelectedUserId] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // Modal State
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const [usersRes, invoicesRes, pendingRes] = await Promise.all([
-        api.get("/users").catch((err) => {
-          console.error("Error fetching users", err);
-          return { data: [] };
-        }),
-        api.get("/invoices/all").catch((err) => {
-          console.error("Error fetching invoices", err);
-          return { data: [] };
-        }),
-        api.get("/expenses?status=pending").catch((err) => {
-          console.error("Error fetching pending requests", err);
-          return { data: { expenses: [] } };
-        }),
-      ]);
-      setUsers(usersRes.data);
-      setInvoices(invoicesRes.data);
-      setPendingRequests(pendingRes.data.expenses || []);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      showToast("فشل تحميل البيانات", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const handleApprove = async (invoiceId) => {
-    if (!window.confirm("هل أنت متأكد من الموافقة على الدفع؟")) return;
-    try {
-      await api.put(`/invoices/${invoiceId}/approve`);
-      showToast("تم الموافقة على الدفع", "success");
-      fetchData(); // Refresh all data
-    } catch (error) {
-      console.error("Approval error:", error);
-      showToast("فشل الموافقة على الدفع", "error");
-    }
-  };
-
-  const handleReject = async (invoiceId) => {
-    const reason = window.prompt("سبب الرفض:");
-    if (!reason) return;
-    try {
-      await api.put(`/invoices/${invoiceId}/reject`, { reason });
-      showToast("تم رفض الدفع", "info");
-      fetchData(); // Refresh all data
-    } catch (error) {
-      console.error("Rejection error:", error);
-      showToast("فشل رفض الدفع", "error");
-    }
-  };
-
-  const handleApproveRequest = async (expenseId) => {
-    if (!window.confirm("هل أنت متأكد من الموافقة على هذا الطلب؟")) return;
-    try {
-      await api.put(`/expenses/${expenseId}/approve`);
-      showToast("تم الموافقة على الطلب وإنشاء الفواتير", "success");
-      fetchData();
-    } catch (error) {
-      console.error("Approval error:", error);
-      showToast("فشل الموافقة على الطلب", "error");
-    }
-  };
-
-  const handleRejectRequest = async (expenseId) => {
-    const reason = window.prompt("سبب الرفض:");
-    if (!reason) return;
-    try {
-      await api.put(`/expenses/${expenseId}/reject`, { reason });
-      showToast("تم رفض الطلب", "info");
-      fetchData();
-    } catch (error) {
-      console.error("Rejection error:", error);
-      showToast("فشل رفض الطلب", "error");
-    }
-  };
+  const {
+    invoices,
+    pendingRequests,
+    loading,
+    refreshData,
+    selectedUserId,
+    setSelectedUserId,
+    userStats,
+    selectedUser,
+    selectedUserInvoices,
+    handleApprove,
+    handleReject,
+    handleApproveRequest,
+    handleRejectRequest,
+  } = useAllInvoices();
 
   const openRequestDetails = (request) => {
     setSelectedRequest(request);
     setIsDetailsModalOpen(true);
   };
 
-  // Derived Data
-  const userStats = useMemo(() => {
-    return users.map((u) => {
-      const uInvoices = invoices.filter(
-        (inv) => (inv.user?._id || inv.user) === u._id
-      );
-      const pendingCount = uInvoices.filter(
-        (inv) => inv.status === "pending"
-      ).length;
-      const awaitingCount = uInvoices.filter(
-        (inv) => inv.status === "awaiting_approval"
-      ).length;
-      return {
-        ...u,
-        pendingCount,
-        awaitingCount,
-        totalInvoices: uInvoices.length,
-      };
-    });
-  }, [users, invoices]);
-
-  const selectedUser = useMemo(
-    () => users.find((u) => u._id === selectedUserId),
-    [users, selectedUserId]
-  );
-
-  const selectedUserInvoices = useMemo(
-    () =>
-      selectedUserId
-        ? invoices.filter(
-            (inv) => (inv.user?._id || inv.user) === selectedUserId
-          )
-        : [],
-    [invoices, selectedUserId]
-  );
-
   return (
     <div className="space-y-8 pb-20 md:pb-0" dir="rtl">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--color-dark)]">
+          <h1 className="text-2xl font-bold text-(--color-dark)">
             إدارة الفواتير
           </h1>
-          <p className="text-[var(--color-secondary)]">
+          <p className="text-(--color-secondary)">
             متابعة الفواتير والمدفوعات لكل المستخدمين
           </p>
         </div>
         <button
-          onClick={fetchData}
-          className="p-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-full hover:bg-[var(--color-bg)] transition-colors text-[var(--color-dark)]"
+          onClick={refreshData}
+          className="p-2 bg-(--color-surface) border border-(--color-border) rounded-full hover:bg-(--color-bg) transition-colors text-(--color-dark)"
           title="تحديث البيانات"
         >
           <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
@@ -549,15 +434,15 @@ export default function AllInvoices() {
 
       {/* Pending Requests Section */}
       {pendingRequests.length > 0 && (
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 shadow-sm border-r-4 border-r-[var(--color-status-pending)]">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-[var(--color-dark)]">
-            <Clock className="text-[var(--color-status-pending)]" />
+        <div className="bg-(--color-surface) border border-(--color-border) rounded-2xl p-6 shadow-sm border-r-4 border-r-(--color-status-pending)">
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-(--color-dark)">
+            <Clock className="text-(--color-status-pending)" />
             طلبات معلقة ({pendingRequests.length})
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-[var(--color-bg)] text-xs uppercase text-[var(--color-secondary)]">
+                <tr className="bg-(--color-bg) text-xs uppercase text-(--color-secondary)">
                   <th className="py-3 px-4 text-start rounded-r-lg">التاريخ</th>
                   <th className="py-3 px-4 text-start">المستخدم</th>
                   <th className="py-3 px-4 text-start">الوصف</th>
@@ -565,31 +450,31 @@ export default function AllInvoices() {
                   <th className="py-3 px-4 text-start rounded-l-lg">إجراءات</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--color-border)]">
+              <tbody className="divide-y divide-(--color-border)">
                 {pendingRequests.map((req) => (
-                  <tr key={req._id} className="hover:bg-[var(--color-hover)]">
-                    <td className="py-3 px-4 text-sm text-[var(--color-secondary)] text-start">
+                  <tr key={req._id} className="hover:bg-(--color-hover)">
+                    <td className="py-3 px-4 text-sm text-(--color-secondary) text-start">
                       {format(new Date(req.createdAt), "MMM d, yyyy")}
                     </td>
-                    <td className="py-3 px-4 text-sm font-medium text-[var(--color-dark)] text-start">
+                    <td className="py-3 px-4 text-sm font-medium text-(--color-dark) text-start">
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-[var(--color-primary-bg)] text-[var(--color-primary)] flex items-center justify-center text-xs font-bold">
+                        <div className="w-6 h-6 rounded-full bg-(--color-primary-bg) text-(--color-primary) flex items-center justify-center text-xs font-bold">
                           {req.createdBy?.name?.charAt(0) || "?"}
                         </div>
                         {req.createdBy?.name}
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-sm text-[var(--color-dark)] text-start">
+                    <td className="py-3 px-4 text-sm text-(--color-dark) text-start">
                       {req.description}
                     </td>
-                    <td className="py-3 px-4 text-sm font-bold text-[var(--color-dark)] text-start">
+                    <td className="py-3 px-4 text-sm font-bold text-(--color-dark) text-start">
                       {req.totalAmount} جنيه
                     </td>
                     <td className="py-3 px-4 text-start">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => openRequestDetails(req)}
-                          className="px-3 py-1 bg-[var(--color-bg)] text-[var(--color-secondary)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-hover)] text-xs font-bold transition-colors"
+                          className="px-3 py-1 bg-(--color-bg) text-(--color-secondary) border border-(--color-border) rounded-lg hover:bg-(--color-hover) text-xs font-bold transition-colors"
                         >
                           تفاصيل
                         </button>
@@ -625,7 +510,7 @@ export default function AllInvoices() {
             }
             className={`cursor-pointer rounded-xl p-4 border transition-all duration-200 relative overflow-hidden group ${
               selectedUserId === u._id
-                ? " text-white border-(--color-primary) shadow-lg transform scale-[1.02] bg-[var(--color-primary)/0.50]"
+                ? " text-white border-(--color-primary) shadow-lg transform scale-[1.02] bg-(--color-primary/0.50)"
                 : " border-(--color-border) hover:border-(--color-primary) hover:shadow-md"
             }`}
           >
@@ -644,7 +529,7 @@ export default function AllInvoices() {
                   className={`font-bold ${
                     selectedUserId === u._id
                       ? "text-white"
-                      : "text-[var(--color-dark)]"
+                      : "text-(--color-dark)"
                   }`}
                 >
                   {u.name}
@@ -653,7 +538,7 @@ export default function AllInvoices() {
                   className={`text-xs ${
                     selectedUserId === u._id
                       ? "text-white/80"
-                      : "text-[var(--color-secondary)]"
+                      : "text-(--color-secondary)"
                   }`}
                 >
                   @{u.username}
@@ -668,7 +553,7 @@ export default function AllInvoices() {
                   className={`px-2 py-0.5 rounded-md text-xs flex items-center gap-1 ${
                     selectedUserId === u._id
                       ? "bg-white/20 text-white"
-                      : "bg-[var(--color-status-pending-bg)] text-[var(--color-status-pending)]"
+                      : "bg-(--color-status-pending-bg) text-(--color-status-pending)"
                   }`}
                 >
                   <AlertCircle size={10} /> {u.pendingCount} مطلوب
@@ -679,7 +564,7 @@ export default function AllInvoices() {
                   className={`px-2 py-0.5 rounded-md text-xs flex items-center gap-1 ${
                     selectedUserId === u._id
                       ? "bg-white/20 text-white"
-                      : "bg-[var(--color-info-bg)] text-[var(--color-info)]"
+                      : "bg-(--color-info-bg) text-(--color-info)"
                   }`}
                 >
                   <Clock size={10} /> {u.awaitingCount} انتظار
@@ -690,7 +575,7 @@ export default function AllInvoices() {
                   className={`px-2 py-0.5 rounded-md text-xs flex items-center gap-1 ${
                     selectedUserId === u._id
                       ? "bg-white/20 text-white"
-                      : "bg-[var(--color-success-bg)] text-[var(--color-success)]"
+                      : "bg-(--color-success-bg) text-(--color-success)"
                   }`}
                 >
                   <CheckCircle2 size={10} /> خالص
@@ -709,15 +594,15 @@ export default function AllInvoices() {
 
       {/* Selected User Details */}
       {selectedUser && (
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="bg-(--color-surface) border border-(--color-border) rounded-2xl p-6 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold flex items-center gap-2 text-[var(--color-dark)]">
-              <UserIcon className="text-[var(--color-primary)]" />
+            <h2 className="text-xl font-bold flex items-center gap-2 text-(--color-dark)">
+              <UserIcon className="text-(--color-primary)" />
               فواتير {selectedUser.name}
             </h2>
             <button
               onClick={() => setSelectedUserId(null)}
-              className="text-sm text-[var(--color-secondary)] hover:text-[var(--color-primary)] underline"
+              className="text-sm text-(--color-secondary) hover:text-(--color-primary) underline"
             >
               إغلاق
             </button>
@@ -734,9 +619,9 @@ export default function AllInvoices() {
       )}
 
       {/* All Invoices Table */}
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 shadow-sm">
-        <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-[var(--color-dark)]">
-          <CreditCard className="text-[var(--color-primary)]" />
+      <div className="bg-(--color-surface) border border-(--color-border) rounded-2xl p-6 shadow-sm">
+        <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-(--color-dark)">
+          <CreditCard className="text-(--color-primary)" />
           كل الفواتير
         </h2>
         <InvoicesTable
@@ -756,3 +641,6 @@ export default function AllInvoices() {
     </div>
   );
 }
+
+
+

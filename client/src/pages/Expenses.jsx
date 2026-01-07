@@ -37,7 +37,7 @@ const Expenses = () => {
         {user.role === "admin" && (
           <Link
             to="/add-expense"
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
+            className="flex items-center gap-2 px-4 py-2.5 bg-(--color-primary) text-white rounded-2xl hover:bg-(--color-primary)/80 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
           >
             <PlusCircle size={20} />
             <span>سجّل مصروف جديد</span>

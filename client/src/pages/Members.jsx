@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import api from "../utils/api";
@@ -24,11 +24,7 @@ const Members = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletingMemberId, setDeletingMemberId] = useState(null);
 
-  useEffect(() => {
-    fetchMembers();
-  }, []);
-
-  const fetchMembers = async () => {
+  const fetchMembers = useCallback(async () => {
     try {
       setLoading(true);
       const { data } = await api.get("/users");
@@ -39,7 +35,11 @@ const Members = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchMembers();
+  }, [fetchMembers]);
 
   const handleAddMember = async (e) => {
     e.preventDefault();

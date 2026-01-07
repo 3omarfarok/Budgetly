@@ -16,9 +16,10 @@ import {
   Home,
   Lock,
   Bot,
+  Sun,
+  Moon,
   StickyNote,
 } from "lucide-react";
-import { BiColorFill } from "react-icons/bi";
 
 import { useState } from "react";
 
@@ -27,11 +28,21 @@ import ConfirmModal from "./ConfirmModal";
 // مكون شريط التنقل - محسّن للإتاحة
 const Navbar = () => {
   const { user, logout } = useAuth();
-  const { currentTheme, changeTheme, availableThemes } = useTheme();
+  const {
+    themeMode,
+    changeThemeMode,
+    currentPalette,
+    changePalette,
+    palettes,
+  } = useTheme();
   const location = useLocation();
   const toast = useToast();
-  const [showThemeMenu, setShowThemeMenu] = useState(false);
+  const [showPaletteMenu, setShowPaletteMenu] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const toggleTheme = () => {
+    changeThemeMode(themeMode === "dark" ? "light" : "dark");
+  };
 
   if (!user) return null;
 
@@ -214,64 +225,98 @@ const Navbar = () => {
 
           {/* الأدوات */}
           <div className="flex items-center gap-3">
-            {/* قائمة الثيمات */}
-            <div className="relative">
+            {/* Theme & Palette */}
+            <div className="relative flex items-center gap-2">
               <button
-                onClick={() => setShowThemeMenu(!showThemeMenu)}
+                onClick={toggleTheme}
                 className="p-2.5 rounded-full transition-all"
-                style={{ color: "var(--color-primary)" }}
-                aria-label="غيّر الألوان"
-                aria-expanded={showThemeMenu}
-                aria-haspopup="true"
+                style={{ color: "var(--color-secondary)" }}
+                aria-label={
+                  themeMode === "dark" ? "الوضع النهاري" : "الوضع الليلي"
+                }
               >
-                <BiColorFill size={20} aria-hidden="true" />
+                {themeMode === "dark" ? <Sun size={20} /> : <Moon size={20} />}
               </button>
 
-              {showThemeMenu && (
-                <div
-                  className="absolute left-0 mt-2 rounded-2xl shadow-lg py-2 min-w-[140px] z-50"
-                  style={{
-                    backgroundColor: "var(--color-surface)",
-                    borderColor: "var(--color-border)",
-                    borderWidth: "1px",
-                    borderStyle: "solid",
-                  }}
-                  role="menu"
-                  aria-label="خيارات الثيم"
-                >
-                  {availableThemes.map((theme) => (
-                    <button
-                      key={theme.key}
-                      onClick={() => {
-                        changeTheme(theme.key);
-                        setShowThemeMenu(false);
-                      }}
-                      className="w-full px-4 py-2.5 text-right text-sm font-medium transition-colors flex items-center justify-between"
+              {themeMode === "dark" && (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowPaletteMenu(!showPaletteMenu)}
+                    className="p-2.5 rounded-full transition-all"
+                    style={{
+                      color: showPaletteMenu
+                        ? "var(--color-primary)"
+                        : "var(--color-secondary)",
+                    }}
+                    aria-label="تغيير ألوان الثيم"
+                  >
+                    <Palette size={20} aria-hidden="true" />
+                  </button>
+
+                  {showPaletteMenu && (
+                    <div
+                      className="absolute left-0 mt-2 rounded-2xl shadow-lg py-2 min-w-[160px] z-50 overflow-hidden"
                       style={{
-                        backgroundColor:
-                          currentTheme === theme.key
-                            ? "var(--color-primary-bg)"
-                            : "transparent",
-                        color:
-                          currentTheme === theme.key
-                            ? "var(--color-primary)"
-                            : "var(--color-dark)",
+                        backgroundColor: "var(--color-surface)",
+                        borderColor: "var(--color-border)",
+                        borderWidth: "1px",
+                        borderStyle: "solid",
                       }}
-                      role="menuitem"
-                      aria-current={
-                        currentTheme === theme.key ? "true" : undefined
-                      }
+                      role="menu"
                     >
-                      {theme.name}
-                      {currentTheme === theme.key && (
-                        <div
-                          className="w-2 h-2 rounded-full"
-                          style={{ backgroundColor: "var(--color-primary)" }}
-                          aria-label="محدد"
-                        ></div>
-                      )}
-                    </button>
-                  ))}
+                      <div className="px-4 py-2 text-xs font-bold text-(--color-muted) border-b border-(--color-border) mb-1">
+                        اختر الثيم
+                      </div>
+
+                      {/* Default Option */}
+                      <button
+                        onClick={() => {
+                          changePalette("default");
+                          setShowPaletteMenu(false);
+                        }}
+                        className="w-full px-4 py-2.5 text-right text-sm font-medium transition-colors flex items-center justify-between hover:bg-(--color-hover)"
+                        style={{
+                          color:
+                            currentPalette === "default"
+                              ? "var(--color-primary)"
+                              : "var(--color-dark)",
+                          fontWeight:
+                            currentPalette === "default" ? "bold" : "normal",
+                        }}
+                      >
+                        الافتراضي
+                        {currentPalette === "default" && (
+                          <div className="w-2 h-2 rounded-full bg-(--color-primary)"></div>
+                        )}
+                      </button>
+
+                      {palettes
+                        .filter((p) => p.id !== "default")
+                        .map((p) => (
+                          <button
+                            key={p.id}
+                            onClick={() => {
+                              changePalette(p.id);
+                              setShowPaletteMenu(false);
+                            }}
+                            className="w-full px-4 py-2.5 text-right text-sm font-medium transition-colors flex items-center justify-between hover:bg-(--color-hover)"
+                            style={{
+                              color:
+                                currentPalette === p.id
+                                  ? "var(--color-primary)"
+                                  : "var(--color-dark)",
+                              fontWeight:
+                                currentPalette === p.id ? "bold" : "normal",
+                            }}
+                          >
+                            {p.name}
+                            {currentPalette === p.id && (
+                              <div className="w-2 h-2 rounded-full bg-(--color-primary)"></div>
+                            )}
+                          </button>
+                        ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

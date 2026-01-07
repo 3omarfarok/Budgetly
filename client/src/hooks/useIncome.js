@@ -1,55 +1,49 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import { useQuery } from "@tanstack/react-query";
 import api from "../utils/api";
 
 export function useIncome() {
-  const { user } = useAuth();
-  const toast = useToast();
-  const [incomes, setIncomes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [filters, setFilters] = useState({
     startDate: "",
     endDate: "",
   });
 
-  useEffect(() => {
-    fetchIncomes();
-  }, [filters]);
-
   const fetchIncomes = async () => {
-    try {
-      setLoading(true);
-      // Fetching all payments for now and filtering for 'received'
-      // Ideally backend accepts a type query param
-      const { data } = await api.get("/payments");
-
-      let filteredData = data.filter(
-        (payment) => payment.transactionType === "received"
-      );
-
-      // Apply date filters if any
-      if (filters.startDate) {
-        filteredData = filteredData.filter(
-          (p) => new Date(p.date) >= new Date(filters.startDate)
-        );
-      }
-      if (filters.endDate) {
-        filteredData = filteredData.filter(
-          (p) => new Date(p.date) <= new Date(filters.endDate)
-        );
-      }
-
-      setIncomes(filteredData);
-    } catch (error) {
-      console.error("غلط في تحميل الدخل:", error);
-      toast.error("فيه مشكلة في تحميل بيانات الدخل");
-      setError("فشل تحميل البيانات");
-    } finally {
-      setLoading(false);
-    }
+    // Determine endpoint based on role to be safe, or stick to /payments if that's what backend expects for "all income" view
+    // Original code: await api.get("/payments")
+    const { data } = await api.get("/payments");
+    return data;
   };
+
+  const {
+    data: allPayments = [],
+    isLoading: loading,
+    error,
+    refetch: refreshIncome,
+  } = useQuery({
+    queryKey: ["allPaymentsForIncome"], // Distinct key? Or share with payments?
+    // "payments" key in usePayments uses role/id logic.
+    // If we use "payments" here without partial logic, we might conflict if we want shared cache.
+    // Let's use a unique key for now unless we are sure.
+    queryFn: fetchIncomes,
+  });
+
+  // Filter Logic
+  const incomes = allPayments.filter((payment) => {
+    if (payment.transactionType !== "received") return false;
+
+    if (
+      filters.startDate &&
+      new Date(payment.date) < new Date(filters.startDate)
+    )
+      return false;
+    if (filters.endDate && new Date(payment.date) > new Date(filters.endDate))
+      return false;
+
+    return true;
+  });
 
   const totalIncome = incomes.reduce(
     (sum, item) => sum + (item.amount || 0),
@@ -63,6 +57,6 @@ export function useIncome() {
     filters,
     setFilters,
     totalIncome,
-    refreshIncome: fetchIncomes,
+    refreshIncome,
   };
 }

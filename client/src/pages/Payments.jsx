@@ -48,10 +48,8 @@ const Payments = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pt-4 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--color-dark)]">
-            المدفوعات
-          </h1>
-          <p className="text-sm mt-1 text-[var(--color-secondary)]">
+          <h1 className="text-2xl font-bold text-(--color-dark)">المدفوعات</h1>
+          <p className="text-sm mt-1 text-(--color-secondary)">
             إدارة وتتبع كل المعاملات المالية
           </p>
         </div>
@@ -63,8 +61,8 @@ const Payments = () => {
                 onClick={() => setIsSelectionMode(!isSelectionMode)}
                 className={`px-4 py-2.5 font-semibold rounded-2xl transition-all shadow-lg flex items-center gap-2 ${
                   isSelectionMode
-                    ? "bg-[var(--color-secondary)] text-white"
-                    : "bg-[var(--color-surface)] text-[var(--color-dark)] border border-[var(--color-border)]"
+                    ? "bg-(--color-secondary) text-white"
+                    : "bg-(--color-surface) text-(--color-dark) border border-(--color-border)"
                 }`}
               >
                 <CheckSquare size={18} />
@@ -77,7 +75,7 @@ const Payments = () => {
               {isSelectionMode && (
                 <button
                   onClick={toggleSelectAll}
-                  className="px-4 py-2.5 font-semibold rounded-2xl transition-all shadow-lg flex items-center gap-2 bg-[var(--color-surface)] text-[var(--color-primary)] border border-[var(--color-primary)]"
+                  className="px-4 py-2.5 font-semibold rounded-2xl transition-all shadow-lg flex items-center gap-2 bg-(--color-surface) text-(--color-primary) border border-(--color-primary)"
                 >
                   {selectedPayments.length === paginatedPayments.length &&
                   paginatedPayments.length > 0 ? (
@@ -91,7 +89,7 @@ const Payments = () => {
 
               <button
                 onClick={() => navigate("/add-payment")}
-                className="px-4 py-2.5 text-white font-semibold rounded-2xl transition-all shadow-lg flex items-center gap-2 justify-center bg-[var(--color-primary)]"
+                className="px-4 py-2.5 text-white font-semibold rounded-2xl transition-all shadow-lg flex items-center gap-2 justify-center bg-(--color-primary)"
               >
                 <PlusCircle size={18} />
                 <span className="hidden sm:inline">سجّل دفعة</span>

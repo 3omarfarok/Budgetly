@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import api from "../utils/api";
 import {
   User,
   Mail,
@@ -15,6 +14,7 @@ import {
 } from "lucide-react";
 import Loader from "../components/Loader";
 import Input from "../components/Input";
+import useProfile from "../hooks/useProfile";
 
 // Available profile pictures
 const availableAvatars = [
@@ -43,90 +43,37 @@ const availableAvatars = [
 const Profile = () => {
   const { user, updateUser } = useAuth();
   const toast = useToast();
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
+
+  const {
+    stats,
+    loadingStats,
+    updateAvatar,
+    updateUsername,
+    updateName,
+    updateEmail,
+    // isUpdatingAvatar removed
+    isUpdatingUsername,
+    isUpdatingName,
+    isUpdatingEmail,
+  } = useProfile(user, updateUser);
+
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState(
     user.profilePicture || null
   );
+
   const [editingUsername, setEditingUsername] = useState(false);
   const [newUsername, setNewUsername] = useState(user.username || "");
-  const [savingUsername, setSavingUsername] = useState(false);
+
   const [editingName, setEditingName] = useState(false);
   const [newName, setNewName] = useState(user.name || "");
-  const [savingName, setSavingName] = useState(false);
+
   const [editingEmail, setEditingEmail] = useState(false);
   const [newEmail, setNewEmail] = useState(user.email || "");
-  const [savingEmail, setSavingEmail] = useState(false);
-
-  useEffect(() => {
-    fetchUserStats();
-  }, []);
-
-  const fetchUserStats = async () => {
-    try {
-      setLoading(true);
-      const [balancesRes, paymentsRes, expensesRes] = await Promise.all([
-        api.get("/stats/balances"),
-        api.get("/payments"),
-        api.get("/expenses?limit=1000"),
-      ]);
-
-      // Find current user's balance
-      const userBalance =
-        balancesRes.data.find((b) => b.userId.toString() === user.id) || {};
-
-      // Filter user's payments
-      const userPayments = paymentsRes.data.filter(
-        (p) => p.user && p.user._id === user.id
-      );
-
-      // Filter expenses that include this user
-      // Handle both paginated (object) and non-paginated (array) responses for backward compatibility
-      const allExpenses = Array.isArray(expensesRes.data)
-        ? expensesRes.data
-        : expensesRes.data.expenses || [];
-
-      const userExpenses = allExpenses.filter((e) =>
-        e.splits.some((s) => s.user && s.user._id === user.id)
-      );
-
-      setStats({
-        balance: userBalance.balance || 0,
-        totalOwed: userBalance.totalOwed || 0,
-        totalPaid: userBalance.totalPaid || 0,
-        paymentsCount: userPayments.length,
-        expensesCount: userExpenses.length,
-        pendingPayments: userPayments.filter((p) => p.status === "pending")
-          .length,
-        approvedPayments: userPayments.filter((p) => p.status === "approved")
-          .length,
-      });
-    } catch (error) {
-      console.error("خطأ في تحميل الإحصائيات:", error);
-      toast.error("فيه مشكلة في تحميل بياناتك");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSaveAvatar = async () => {
-    try {
-      const response = await api.patch("/users/me/profile-picture", {
-        profilePicture: selectedAvatar,
-      });
-
-      // Update user in auth context
-      if (updateUser) {
-        updateUser(response.data);
-      }
-
-      toast.success("تم حفظ صورة الملف الشخصي بنجاح!");
-      setShowAvatarModal(false);
-    } catch (error) {
-      console.error("خطأ في حفظ الصورة:", error);
-      toast.error("فيه مشكلة في حفظ الصورة");
-    }
+    await updateAvatar(selectedAvatar);
+    setShowAvatarModal(false);
   };
 
   const handleSaveUsername = async () => {
@@ -142,27 +89,10 @@ const Profile = () => {
     }
 
     try {
-      setSavingUsername(true);
-      const response = await api.patch("/users/me/username", {
-        username: newUsername.trim(),
-      });
-
-      // Update user in auth context
-      if (updateUser) {
-        updateUser(response.data);
-      }
-
-      toast.success("تم تغيير اليوزرنيم بنجاح!");
+      await updateUsername(newUsername.trim());
       setEditingUsername(false);
     } catch (error) {
-      console.error("خطأ في تغيير اليوزرنيم:", error);
-      if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error("فيه مشكلة في تغيير اليوزرنيم");
-      }
-    } finally {
-      setSavingUsername(false);
+      // Error handled in hook
     }
   };
 
@@ -184,27 +114,10 @@ const Profile = () => {
     }
 
     try {
-      setSavingName(true);
-      const response = await api.patch("/users/me/name", {
-        name: newName.trim(),
-      });
-
-      // Update user in auth context
-      if (updateUser) {
-        updateUser(response.data);
-      }
-
-      toast.success("تم تغيير الاسم بنجاح!");
+      await updateName(newName.trim());
       setEditingName(false);
     } catch (error) {
-      console.error("خطأ في تغيير الاسم:", error);
-      if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error("فيه مشكلة في تغيير الاسم");
-      }
-    } finally {
-      setSavingName(false);
+      // Error handled in hook
     }
   };
 
@@ -227,27 +140,10 @@ const Profile = () => {
     }
 
     try {
-      setSavingEmail(true);
-      const response = await api.patch("/users/me/profile", {
-        email: newEmail.trim(),
-      });
-
-      // Update user in auth context
-      if (updateUser) {
-        updateUser(response.data.user); // Assuming response structure { success: true, user: {...} }
-      }
-
-      toast.success("تم تحديث البريد الإلكتروني بنجاح!");
+      await updateEmail(newEmail.trim());
       setEditingEmail(false);
     } catch (error) {
-      console.error("خطأ في تحديث البريد الإلكتروني:", error);
-      if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error("فيه مشكلة في تحديث البريد الإلكتروني");
-      }
-    } finally {
-      setSavingEmail(false);
+      // Error handled in hook
     }
   };
 
@@ -256,7 +152,7 @@ const Profile = () => {
     setEditingEmail(false);
   };
 
-  if (loading) return <Loader text="بنحمّل بياناتك..." />;
+  if (loadingStats) return <Loader text="بنحمّل بياناتك..." />;
 
   // Safely handle missing stats
   if (!stats) return null;
@@ -334,26 +230,26 @@ const Profile = () => {
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     placeholder="الاسم"
-                    disabled={savingName}
+                    disabled={isUpdatingName}
                     variant="filled"
                     size="sm"
                     wrapperClassName="flex-1"
                   />
                   <button
                     onClick={handleSaveName}
-                    disabled={savingName}
+                    disabled={isUpdatingName}
                     className="px-3 py-1 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
                     style={{
                       backgroundColor: "var(--color-success)",
                       color: "white",
-                      opacity: savingName ? 0.6 : 1,
+                      opacity: isUpdatingName ? 0.6 : 1,
                     }}
                   >
-                    {savingName ? "..." : "حفظ"}
+                    {isUpdatingName ? "..." : "حفظ"}
                   </button>
                   <button
                     onClick={handleCancelNameEdit}
-                    disabled={savingName}
+                    disabled={isUpdatingName}
                     className="px-3 py-1 rounded-lg text-xs font-semibold transition-all"
                     style={{
                       backgroundColor: "var(--color-muted-bg)",
@@ -394,7 +290,7 @@ const Profile = () => {
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
                     placeholder="example@mail.com"
-                    disabled={savingEmail}
+                    disabled={isUpdatingEmail}
                     variant="filled"
                     size="sm"
                     wrapperClassName="flex-1"
@@ -402,19 +298,19 @@ const Profile = () => {
                   />
                   <button
                     onClick={handleSaveEmail}
-                    disabled={savingEmail}
+                    disabled={isUpdatingEmail}
                     className="px-3 py-1 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
                     style={{
                       backgroundColor: "var(--color-success)",
                       color: "white",
-                      opacity: savingEmail ? 0.6 : 1,
+                      opacity: isUpdatingEmail ? 0.6 : 1,
                     }}
                   >
-                    {savingEmail ? "..." : "حفظ"}
+                    {isUpdatingEmail ? "..." : "حفظ"}
                   </button>
                   <button
                     onClick={handleCancelEmailEdit}
-                    disabled={savingEmail}
+                    disabled={isUpdatingEmail}
                     className="px-3 py-1 rounded-lg text-xs font-semibold transition-all"
                     style={{
                       backgroundColor: "var(--color-muted-bg)",
@@ -459,26 +355,26 @@ const Profile = () => {
                     value={newUsername}
                     onChange={(e) => setNewUsername(e.target.value)}
                     placeholder="اليوزرنيم"
-                    disabled={savingUsername}
+                    disabled={isUpdatingUsername}
                     variant="filled"
                     size="sm"
                     wrapperClassName="flex-1"
                   />
                   <button
                     onClick={handleSaveUsername}
-                    disabled={savingUsername}
+                    disabled={isUpdatingUsername}
                     className="px-3 py-1 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
                     style={{
                       backgroundColor: "var(--color-success)",
                       color: "white",
-                      opacity: savingUsername ? 0.6 : 1,
+                      opacity: isUpdatingUsername ? 0.6 : 1,
                     }}
                   >
-                    {savingUsername ? "..." : "حفظ"}
+                    {isUpdatingUsername ? "..." : "حفظ"}
                   </button>
                   <button
                     onClick={handleCancelEdit}
-                    disabled={savingUsername}
+                    disabled={isUpdatingUsername}
                     className="px-3 py-1 rounded-lg text-xs font-semibold transition-all"
                     style={{
                       backgroundColor: "var(--color-muted-bg)",

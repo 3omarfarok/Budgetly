@@ -29,7 +29,6 @@ const MyPayments = () => {
     error,
     showDeleteModal,
     setShowDeleteModal,
-    deletingPaymentId,
     setDeletingPaymentId,
     isSubmitting,
     handleSubmit,

@@ -20,7 +20,7 @@ export function useLogin() {
       await login(username, password);
       toast.success("أهلاً بيك!");
       navigate("/");
-    } catch (err) {
+    } catch {
       const errorMsg = "اليوزر أو الباسورد غلط";
       setError(errorMsg);
       toast.error(errorMsg);

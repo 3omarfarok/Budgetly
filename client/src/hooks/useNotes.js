@@ -1,93 +1,98 @@
-import { useState, useCallback, useEffect } from "react";
 import { useToast } from "../context/ToastContext";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../utils/api";
 
 export function useNotes() {
-  const [notes, setNotes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
   const toast = useToast();
+  const queryClient = useQueryClient();
 
-  const fetchNotes = useCallback(async () => {
-    try {
-      setLoading(true);
+  // Query
+  const {
+    data: notes = [],
+    isLoading: loading,
+    refetch: refreshNotes,
+  } = useQuery({
+    queryKey: ["notes"],
+    queryFn: async () => {
       const { data } = await api.get("/notes");
-      setNotes(data);
-    } catch (error) {
+      return data;
+    },
+    onError: (error) => {
       console.error("Error fetching notes:", error);
       toast.error("فشل في تحميل الملاحظات");
-    } finally {
-      setLoading(false);
+    },
+  });
+
+  // Mutations
+  const addNoteMutation = useMutation({
+    mutationFn: (content) => api.post("/notes", { content }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["notes"]);
+      toast.success("تم إضافة الملاحظة");
+    },
+    onError: (error) => {
+      console.error("Error adding note:", error);
+      toast.error("فشل في إضافة الملاحظة");
+    },
+  });
+
+  const deleteNoteMutation = useMutation({
+    mutationFn: (id) => api.delete(`/notes/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["notes"]);
+      toast.success("تم حذف الملاحظة");
+    },
+    onError: (error) => {
+      console.error("Error deleting note:", error);
+      toast.error("فشل في حذف الملاحظة");
+    },
+  });
+
+  const addReplyMutation = useMutation({
+    mutationFn: ({ noteId, content }) =>
+      api.post(`/notes/${noteId}/reply`, { content }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["notes"]);
+      toast.success("تم إضافة الرد");
+    },
+    onError: (error) => {
+      console.error("Error adding reply:", error);
+      toast.error("فشل في إضافة الرد");
+    },
+  });
+
+  // Wrapper functions to maintain API compatibility
+  const addNote = async (content) => {
+    if (!content.trim()) return;
+    try {
+      await addNoteMutation.mutateAsync(content);
+      return true;
+    } catch {
+      return false;
     }
-  }, [toast]);
+  };
 
-  useEffect(() => {
-    fetchNotes();
-  }, [fetchNotes]);
+  const deleteNote = (id) => {
+    deleteNoteMutation.mutate(id);
+  };
 
-  const addNote = useCallback(
-    async (content) => {
-      if (!content.trim()) return;
-
-      try {
-        setSubmitting(true);
-        const { data } = await api.post("/notes", { content });
-        setNotes((prev) => [data, ...prev]);
-        toast.success("تم إضافة الملاحظة");
-        return true; // Success
-      } catch (error) {
-        console.error("Error adding note:", error);
-        toast.error("فشل في إضافة الملاحظة");
-        return false; // Failure
-      } finally {
-        setSubmitting(false);
-      }
-    },
-    [toast]
-  );
-
-  const deleteNote = useCallback(
-    async (id) => {
-      // Note: Confirmation should be handled in UI
-      try {
-        await api.delete(`/notes/${id}`);
-        setNotes((prev) => prev.filter((note) => note._id !== id));
-        toast.success("تم حذف الملاحظة");
-      } catch (error) {
-        console.error("Error deleting note:", error);
-        toast.error("فشل في حذف الملاحظة");
-      }
-    },
-    [toast]
-  );
-
-  const addReply = useCallback(
-    async (noteId, content) => {
-      if (!content.trim()) return;
-
-      try {
-        const { data } = await api.post(`/notes/${noteId}/reply`, {
-          content,
-        });
-        setNotes((prev) => prev.map((n) => (n._id === noteId ? data : n)));
-        toast.success("تم إضافة الرد");
-        return true;
-      } catch (error) {
-        console.error("Error adding reply:", error);
-        toast.error("فشل في إضافة الرد");
-        return false;
-      }
-    },
-    [toast]
-  );
+  const addReply = async (noteId, content) => {
+    if (!content.trim()) return;
+    try {
+      await addReplyMutation.mutateAsync({ noteId, content });
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   return {
     notes,
     loading,
-    submitting,
+    submitting: addNoteMutation.isPending || addReplyMutation.isPending,
     addNote,
     deleteNote,
     addReply,
-    refreshNotes: fetchNotes,
+    refreshNotes,
   };
 }

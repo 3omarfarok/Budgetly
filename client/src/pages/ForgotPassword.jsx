@@ -31,12 +31,12 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="bg-[var(--color-surface)] p-8 rounded-2xl shadow-lg w-full max-w-md border border-[var(--color-border)]">
+      <div className="bg-(--color-surface) p-8 rounded-2xl shadow-lg w-full max-w-md border border-(--color-border)">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-[var(--color-text)] mb-2">
+          <h1 className="text-2xl font-bold text-(--color-text) mb-2">
             نسيت كلمة المرور؟
           </h1>
-          <p className="text-[var(--color-text-secondary)]">
+          <p className="text-(--color-text-secondary)">
             أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور
           </p>
         </div>
@@ -46,15 +46,15 @@ const ForgotPassword = () => {
             <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <Mail size={32} />
             </div>
-            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-2">
+            <h3 className="text-lg font-semibold text-(--color-text) mb-2">
               تفقّد بريدك الإلكتروني
             </h3>
-            <p className="text-[var(--color-text-secondary)] mb-6">
+            <p className="text-(--color-text-secondary) mb-6">
               لقد أرسلنا رابط إعادة التعيين إلى {email}
             </p>
             <Link
               to="/login"
-              className="text-[var(--color-primary)] hover:underline flex items-center justify-center gap-2"
+              className="text-(--color-primary) hover:underline flex items-center justify-center gap-2"
             >
               <ArrowRight size={16} />
               العودة لتسجيل الدخول
@@ -63,7 +63,7 @@ const ForgotPassword = () => {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">
+              <label className="block text-sm font-medium text-(--color-text-secondary) mb-1">
                 البريد الإلكتروني
               </label>
               <div className="relative">
@@ -71,12 +71,12 @@ const ForgotPassword = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-4 pr-10 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-[var(--color-text)] dir-ltr"
+                  className="w-full pl-4 pr-10 py-2 bg-(--color-bg) border border-(--color-border) rounded-lg focus:outline-none focus:ring-2 focus:ring-(--color-primary) text-(--color-text) dir-ltr"
                   placeholder="name@example.com"
                   required
                 />
                 <Mail
-                  className="absolute left-3 top-2.5 text-[var(--color-text-secondary)]"
+                  className="absolute left-3 top-2.5 text-(--color-text-secondary)"
                   size={20}
                 />
               </div>
@@ -87,7 +87,7 @@ const ForgotPassword = () => {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="w-full bg-[var(--color-primary)] text-white py-2 rounded-lg hover:brightness-90 transition-all flex items-center justify-center gap-2"
+              className="w-full bg-(--color-primary) text-white py-2 rounded-lg hover:brightness-90 transition-all flex items-center justify-center gap-2"
             >
               {loading ? (
                 <Loader className="animate-spin" size={20} />
@@ -99,7 +99,7 @@ const ForgotPassword = () => {
             <div className="text-center">
               <Link
                 to="/login"
-                className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
+                className="text-sm text-(--color-text-secondary) hover:text-(--color-primary) transition-colors"
               >
                 العودة لتسجيل الدخول
               </Link>

@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../utils/api";
 
 export function useAddExpense() {
   const { user } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
     description: "",
@@ -17,30 +19,26 @@ export function useAddExpense() {
     payer: user?._id || "",
   });
   const [error, setError] = useState("");
-  const [users, setUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fetch Users
+  const { data: users = [], isLoading: loading } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      const { data } = await api.get("/users");
+      return data;
+    },
+    onError: (error) => {
+      console.error("خطأ في تحميل المستخدمين:", error);
+      toast.error("فيه مشكلة في تحميل المستخدمين");
+    },
+  });
 
   useEffect(() => {
-    fetchUsers();
     if (user && !formData.payer) {
       setFormData((prev) => ({ ...prev, payer: user._id }));
     }
-  }, [user]);
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const { data } = await api.get("/users");
-      setUsers(data);
-    } catch (error) {
-      console.error("خطأ في تحميل المستخدمين:", error);
-      toast.error("فيه مشكلة في تحميل المستخدمين");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [user, formData.payer]);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -62,7 +60,31 @@ export function useAddExpense() {
     );
   };
 
-  const handleSubmit = async (e) => {
+  // Add Mutation
+  const addExpenseMutation = useMutation({
+    mutationFn: (expenseData) => api.post("/expenses", expenseData),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["expenses"]);
+      queryClient.invalidateQueries(["myPayments"]); // If it affects payments/stats
+      queryClient.invalidateQueries(["dashboardStats"]);
+
+      if (user.role === "admin") {
+        toast.success("تم تسجيل المصروف بنجاح!");
+        navigate("/expenses");
+      } else {
+        toast.success("تم إرسال المصروف للمراجعة!");
+        navigate("/my-invoices");
+      }
+    },
+    onError: (err) => {
+      const errorMessage =
+        err.response?.data?.message || "خطأ في إنشاء المصروف";
+      toast.error(errorMessage);
+      setError(errorMessage);
+    },
+  });
+
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     if (formData.splitType === "specific" && selectedUsers.length === 0) {
@@ -70,34 +92,16 @@ export function useAddExpense() {
       return;
     }
 
-    try {
-      setIsSubmitting(true);
-      const expenseData = {
-        ...formData,
-        totalAmount: Number(formData.totalAmount),
-      };
+    const expenseData = {
+      ...formData,
+      totalAmount: Number(formData.totalAmount),
+    };
 
-      if (formData.splitType === "specific") {
-        expenseData.selectedUsers = selectedUsers;
-      }
-
-      await api.post("/expenses", expenseData);
-
-      if (user.role === "admin") {
-        toast.success("تم تسجيل المصروف بنجاح!");
-        navigate("/expenses");
-      } else {
-        toast.success("تم إرسال المصروف للمراجعة!");
-        navigate("/my-invoices"); // Or wherever users should go
-      }
-    } catch (err) {
-      const errorMessage =
-        err.response?.data?.message || "خطأ في إنشاء المصروف";
-      toast.error(errorMessage);
-      setError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
+    if (formData.splitType === "specific") {
+      expenseData.selectedUsers = selectedUsers;
     }
+
+    addExpenseMutation.mutate(expenseData);
   };
 
   return {
@@ -106,7 +110,7 @@ export function useAddExpense() {
     users,
     selectedUsers,
     loading,
-    isSubmitting,
+    isSubmitting: addExpenseMutation.isPending,
     error,
     handleInputChange,
     handleSplitTypeChange,

@@ -1,16 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../utils/api";
 
 export function useMyPayments() {
   const { user } = useAuth();
   const toast = useToast();
-  const [payments, setPayments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingPayment, setEditingPayment] = useState(null);
-  const [userBalance, setUserBalance] = useState(0);
   const [formData, setFormData] = useState({
     amount: "",
     description: "",
@@ -19,34 +18,81 @@ export function useMyPayments() {
   const [error, setError] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletingPaymentId, setDeletingPaymentId] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    fetchMyPayments();
-    fetchUserBalance();
-  }, []);
-
-  const fetchMyPayments = async () => {
-    try {
-      setLoading(true);
+  // Queries
+  const { data: payments = [], isLoading: loadingPayments } = useQuery({
+    queryKey: ["myPayments", user.id],
+    queryFn: async () => {
       const { data } = await api.get(`/payments/user/${user.id}`);
-      setPayments(data);
-    } catch (error) {
-      console.error("غلط في تحميل مدفوعاتي:", error);
-      toast.error("فيه مشكلة في تحميل مدفوعاتك");
-    } finally {
-      setLoading(false);
-    }
-  };
+      return data;
+    },
+  });
 
-  const fetchUserBalance = async () => {
-    try {
+  const { data: userBalance = 0, isLoading: loadingBalance } = useQuery({
+    queryKey: ["userBalance", user.id],
+    queryFn: async () => {
       const { data } = await api.get(`/stats/user/${user.id}`);
-      setUserBalance(data.balance || 0);
-    } catch (error) {
-      console.error("غلط في تحميل الرصيد:", error);
-      toast.error("فيه مشكلة في تحميل الرصيد");
-    }
+      return data.balance || 0;
+    },
+  });
+
+  const loading = loadingPayments || loadingBalance;
+
+  // Mutations
+  const addMutation = useMutation({
+    mutationFn: (data) => api.post("/payments", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["myPayments"]);
+      queryClient.invalidateQueries(["userBalance"]);
+      toast.success("تم تسجيل الدفعة بنجاح!");
+      resetForm();
+    },
+    onError: (error) => {
+      console.error("غلط في تسجيل الدفعة:", error);
+      const errorMsg = "فيه مشكلة في تسجيل الدفعة";
+      setError(errorMsg);
+      toast.error(errorMsg);
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }) => api.put(`/payments/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["myPayments"]);
+      queryClient.invalidateQueries(["userBalance"]);
+      toast.success("تم تعديل الدفعة بنجاح!");
+      resetForm();
+    },
+    onError: (error) => {
+      console.error("غلط في تعديل الدفعة:", error);
+      toast.error("فيه مشكلة في تعديل الدفعة");
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => api.delete(`/payments/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["myPayments"]);
+      queryClient.invalidateQueries(["userBalance"]);
+      toast.success("تم حذف الدفعة بنجاح");
+      setShowDeleteModal(false);
+      setDeletingPaymentId(null);
+    },
+    onError: (error) => {
+      console.error("غلط في مسح الدفعة:", error);
+      toast.error("فيه مشكلة في حذف الدفعة");
+    },
+  });
+
+  const resetForm = () => {
+    setFormData({
+      amount: "",
+      description: "",
+      date: new Date().toISOString().split("T")[0],
+    });
+    setShowAddForm(false);
+    setEditingPayment(null);
+    setError("");
   };
 
   const handleSubmit = async (e) => {
@@ -60,46 +106,24 @@ export function useMyPayments() {
       return;
     }
 
-    try {
-      setIsSubmitting(true);
-      if (editingPayment) {
-        // تعديل دفعة موجودة - keep original type if exists, or default to payment
-        await api.put(`/payments/${editingPayment._id}`, {
+    if (editingPayment) {
+      updateMutation.mutate({
+        id: editingPayment._id,
+        data: {
           amount: formData.amount,
           description: formData.description,
           date: formData.date,
           transactionType: editingPayment.transactionType || "payment",
-        });
-        toast.success("تم تعديل الدفعة بنجاح!");
-      } else {
-        // إضافة دفعة جديدة - ALWAYS payment (User Paying)
-        await api.post("/payments", {
-          user: user.id,
-          amount: formData.amount,
-          description: formData.description,
-          date: formData.date,
-          transactionType: "payment",
-        });
-        toast.success("تم تسجيل الدفعة بنجاح!");
-      }
-
-      // إعادة تعيين الفورم
-      setFormData({
-        amount: "",
-        description: "",
-        date: new Date().toISOString().split("T")[0],
+        },
       });
-      setShowAddForm(false);
-      setEditingPayment(null);
-      fetchMyPayments();
-      fetchUserBalance();
-    } catch (error) {
-      console.error("غلط في تسجيل الدفعة:", error);
-      const errorMsg = "فيه مشكلة في تسجيل الدفعة";
-      setError(errorMsg);
-      toast.error(errorMsg);
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      addMutation.mutate({
+        user: user.id,
+        amount: formData.amount,
+        description: formData.description,
+        date: formData.date,
+        transactionType: "payment",
+      });
     }
   };
 
@@ -120,31 +144,12 @@ export function useMyPayments() {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = async () => {
-    try {
-      setIsSubmitting(true);
-      await api.delete(`/payments/${deletingPaymentId}`);
-      toast.success("تم حذف الدفعة بنجاح");
-      fetchMyPayments();
-      fetchUserBalance();
-      setShowDeleteModal(false);
-      setDeletingPaymentId(null);
-    } catch (error) {
-      console.error("غلط في مسح الدفعة:", error);
-      toast.error("فيه مشكلة في حذف الدفعة");
-    } finally {
-      setIsSubmitting(false);
-    }
+  const confirmDelete = () => {
+    deleteMutation.mutate(deletingPaymentId);
   };
 
   const handleCancelEdit = () => {
-    setEditingPayment(null);
-    setFormData({
-      amount: "",
-      description: "",
-      date: new Date().toISOString().split("T")[0],
-    });
-    setShowAddForm(false);
+    resetForm();
   };
 
   // Calculations
@@ -180,7 +185,10 @@ export function useMyPayments() {
     setShowDeleteModal,
     deletingPaymentId,
     setDeletingPaymentId,
-    isSubmitting,
+    isSubmitting:
+      addMutation.isPending ||
+      updateMutation.isPending ||
+      deleteMutation.isPending,
     handleSubmit,
     handleEdit,
     handleDelete,

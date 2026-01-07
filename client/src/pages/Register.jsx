@@ -21,41 +21,6 @@ const Register = () => {
   );
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 font-primary">
-      {/* AuthCard expects a container but handles its own centering. 
-           However, Register page had an extra wrapper `min-h-screen flex items-center...` 
-           AuthCard has `min-h-[85vh]` and centering. 
-           To match exactly, I might need to adjust AuthCard or just use it directly.
-           AuthCard uses `min-h-[85vh]` which is close.
-           Let's just use AuthCard directly.
-       */}
-      <div className="w-full max-w-md">
-        {/* Wait, AuthCard renders the container. */}
-      </div>
-    </div>
-  );
-  // Correction: AuthCard renders the full page structure (mostly).
-  // Register has a slightly different outer Wrapper `min-h-screen`. AuthCard has `min-h-[85vh]`.
-  // I should just replace the return.
-};
-// Re-writing the component properly below
-const RegisterComponent = () => {
-  const { formData, handleChange, error, loading, handleRegister } =
-    useRegister();
-
-  const footerLink = (
-    <p className="text-ios-secondary">
-      لديك حساب بالفعل؟{" "}
-      <Link
-        to="/login"
-        className="text-ios-primary hover:underline font-semibold transition-colors"
-      >
-        تسجيل الدخول
-      </Link>
-    </p>
-  );
-
-  return (
     <AuthCard
       title="إنشاء حساب جديد"
       subtitle="أنشئ حسابك للبدء في إدارة ميزانيتك"
@@ -154,4 +119,4 @@ const RegisterComponent = () => {
     </AuthCard>
   );
 };
-export default RegisterComponent;
+export default Register;

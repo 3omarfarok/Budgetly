@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../utils/api";
 
 const usePayments = () => {
-  const [payments, setPayments] = useState([]);
   const { user } = useAuth();
   const toast = useToast();
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   // Filters & Search
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,47 +27,56 @@ const usePayments = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletingPaymentId, setDeletingPaymentId] = useState(null);
 
-  useEffect(() => {
-    fetchPayments();
-  }, []);
-
   const fetchPayments = async () => {
-    try {
-      setLoading(true);
-      const endpoint =
-        user.role === "admin" ? "/payments" : `/payments/user/${user.id}`;
-      const { data } = await api.get(endpoint);
-      setPayments(data);
-      setSelectedPayments([]); // Reset selection on fetch
-    } catch (error) {
-      console.error("غلط في تحميل المدفوعات:", error);
-      toast.error("فيه مشكلة في تحميل المدفوعات");
-    } finally {
-      setLoading(false);
-    }
+    const endpoint =
+      user.role === "admin" ? "/payments" : `/payments/user/${user.id}`;
+    const { data } = await api.get(endpoint);
+    return data;
   };
 
-  const handleApprove = async (id) => {
-    try {
-      await api.patch(`/payments/${id}/approve`);
+  const { data: payments = [], isLoading: loading } = useQuery({
+    queryKey: ["payments", user.role, user.id],
+    queryFn: fetchPayments,
+  });
+
+  // Mutations
+  const approveMutation = useMutation({
+    mutationFn: (id) => api.patch(`/payments/${id}/approve`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["payments"]);
       toast.success("تم الموافقة على الدفعة بنجاح");
-      fetchPayments();
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error("غلط في الموافقة:", error);
       toast.error("فيه مشكلة في الموافقة");
-    }
-  };
+    },
+  });
 
-  const handleReject = async (id) => {
-    try {
-      await api.patch(`/payments/${id}/reject`);
+  const rejectMutation = useMutation({
+    mutationFn: (id) => api.patch(`/payments/${id}/reject`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["payments"]);
       toast.success("تم رفض الدفعة");
-      fetchPayments();
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error("غلط في الرفض:", error);
       toast.error("فيه مشكلة في الرفض");
-    }
-  };
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => api.delete(`/payments/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["payments"]);
+    },
+    onError: (error) => {
+      console.error("غلط في الحذف:", error);
+      toast.error("فيه مشكلة في حذف الدفعة");
+    },
+  });
+
+  const handleApprove = (id) => approveMutation.mutate(id);
+  const handleReject = (id) => rejectMutation.mutate(id);
 
   // Single Delete
   const handleDeleteClick = (id) => {
@@ -86,21 +95,19 @@ const usePayments = () => {
     try {
       if (deletingPaymentId === "bulk") {
         await Promise.all(
-          selectedPayments.map((id) => api.delete(`/payments/${id}`))
+          selectedPayments.map((id) => deleteMutation.mutateAsync(id))
         );
         toast.success(`تم حذف ${selectedPayments.length} دفعة بنجاح`);
         setSelectedPayments([]);
         setIsSelectionMode(false);
       } else {
-        await api.delete(`/payments/${deletingPaymentId}`);
+        await deleteMutation.mutateAsync(deletingPaymentId);
         toast.success("تم حذف الدفعة بنجاح");
       }
       setShowDeleteModal(false);
       setDeletingPaymentId(null);
-      fetchPayments();
-    } catch (error) {
-      console.error("غلط في الحذف:", error);
-      toast.error("فيه مشكلة في حذف الدفعة");
+    } catch {
+      // Error handled in mutation onError
     }
   };
 
@@ -115,12 +122,11 @@ const usePayments = () => {
         return;
       }
       await Promise.all(
-        pendingSelected.map((p) => api.patch(`/payments/${p._id}/approve`))
+        pendingSelected.map((p) => approveMutation.mutateAsync(p._id))
       );
       toast.success(`تمت الموافقة على ${pendingSelected.length} دفعة`);
       setSelectedPayments([]);
       setIsSelectionMode(false);
-      fetchPayments();
     } catch (error) {
       console.error("Bulk approve error:", error);
       toast.error("حصلت مشكلة في الموافقة الجماعية");

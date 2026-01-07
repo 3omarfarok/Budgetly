@@ -446,3 +446,119 @@ select {
   -moz-appearance: none; /* Firefox */
   appearance: none;
 }
+
+/* ============================
+   New Dark Palettes
+   Must be combined with .dark class
+   Example: <html class="dark theme-yellow-black">
+=============================== */
+
+/* A) YellowBlack */
+.dark.theme-yellow-black {
+  --color-bg: #0b0b0d;
+  --color-surface: #151518;
+  --color-primary: #ffc400;
+  --color-primary-border: #ffb300;
+  --color-primary-bg: #2a2a2e;
+  --color-dark: #f2f2f2;
+  --color-secondary: #9ca3af;
+  --color-light: #2a2a2e;
+  --color-border: #2a2a2e;
+  --color-hover: #1e1e22;
+  --color-muted-bg: #0b0b0d;
+  --color-muted: #b5b5b5;
+  --color-success: #22c55e;
+  --color-error: #ff4d4d;
+  --color-warning: #f59e0b;
+  --color-info: #60a5fa;
+  --gradient-bg: linear-gradient(135deg, #0b0b0d 0%, #151518 100%);
+  --zigzag-color: #151518;
+}
+
+/* B) NavyCyan */
+.dark.theme-navy-cyan {
+  --color-bg: #0b1220;
+  --color-surface: #111b2e;
+  --color-primary: #22d3ee;
+  --color-primary-border: #06b6d4;
+  --color-primary-bg: #16243d;
+  --color-dark: #e5e7eb;
+  --color-secondary: #94a3b8;
+  --color-light: #1e2a44;
+  --color-border: #24324c;
+  --color-hover: #16243d;
+  --color-muted-bg: #0b1220;
+  --color-muted: #94a3b8;
+  --color-success: #34d399;
+  --color-error: #f87171;
+  --color-warning: #fbbf24;
+  --color-info: #60a5fa;
+  --gradient-bg: linear-gradient(135deg, #0b1220 0%, #111b2e 100%);
+  --zigzag-color: #111b2e;
+}
+
+/* C) CharcoalPurple */
+.dark.theme-charcoal-purple {
+  --color-bg: #0d0d12;
+  --color-surface: #161622;
+  --color-primary: #a78bfa;
+  --color-primary-border: #8b5cf6;
+  --color-primary-bg: #1b1b28;
+  --color-dark: #f5f5f5;
+  --color-secondary: #9ca3af;
+  --color-light: #2a2a35;
+  --color-border: #2d2d3a;
+  --color-hover: #1b1b28;
+  --color-muted-bg: #0d0d12;
+  --color-muted: #9ca3af;
+  --color-success: #34d399;
+  --color-error: #fb7185;
+  --color-warning: #fbbf24;
+  --color-info: #60a5fa;
+  --gradient-bg: linear-gradient(135deg, #0d0d12 0%, #161622 100%);
+  --zigzag-color: #161622;
+}
+
+/* D) BlackEmerald */
+.dark.theme-black-emerald {
+  --color-bg: #0b0f0d;
+  --color-surface: #101815;
+  --color-primary: #34d399;
+  --color-primary-border: #10b981;
+  --color-primary-bg: #14201b;
+  --color-dark: #eaeaea;
+  --color-secondary: #94a3b8;
+  --color-light: #1a2420;
+  --color-border: #21312b;
+  --color-hover: #14201b;
+  --color-muted-bg: #0b0f0d;
+  --color-muted: #94a3b8;
+  --color-success: #22c55e;
+  --color-error: #f87171;
+  --color-warning: #fbbf24;
+  --color-info: #60a5fa;
+  --gradient-bg: linear-gradient(135deg, #0b0f0d 0%, #101815 100%);
+  --zigzag-color: #101815;
+}
+
+/* E) DarkOrange */
+.dark.theme-dark-orange {
+  --color-bg: #0d0d0d;
+  --color-surface: #181818;
+  --color-primary: #fb923c;
+  --color-primary-border: #f97316;
+  --color-primary-bg: #202020;
+  --color-dark: #f3f4f6;
+  --color-secondary: #9ca3af;
+  --color-light: #2a2a2a;
+  --color-border: #333333;
+  --color-hover: #202020;
+  --color-muted-bg: #0d0d0d;
+  --color-muted: #9ca3af;
+  --color-success: #22c55e;
+  --color-error: #f87171;
+  --color-warning: #fbbf24;
+  --color-info: #60a5fa;
+  --gradient-bg: linear-gradient(135deg, #0d0d0d 0%, #181818 100%);
+  --zigzag-color: #181818;
+}

@@ -1,351 +1,253 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { useToast } from "../context/ToastContext";
-import api from "../utils/api";
+import { useState } from "react";
+import { Plus, Users, ArrowRight, Home } from "lucide-react";
 import Loader from "../components/Loader";
 import Input from "../components/Input";
-import { Home, Users, Plus, LogIn, Lock, Building } from "lucide-react";
+import useHouseSelection from "../hooks/useHouseSelection";
 
 const HouseSelection = () => {
-  const [houses, setHouses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const {
+    houses,
+    loading,
+    error,
+    createHouse,
+    joinHouse,
+    isCreating,
+    isJoining,
+  } = useHouseSelection();
+
+  const [view, setView] = useState("list"); // list, create, join
+  const [selectedHouse, setSelectedHouse] = useState(null);
+
+  // Form States
   const [newHouseName, setNewHouseName] = useState("");
   const [newHousePassword, setNewHousePassword] = useState("");
   const [joinPassword, setJoinPassword] = useState("");
-  const [selectedHouse, setSelectedHouse] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-  const navigate = useNavigate();
-  const { user, createHouse, joinHouse } = useAuth();
-  const toast = useToast();
 
-  useEffect(() => {
-    // If user already has a house, redirect to dashboard
-    if (user?.house) {
-      navigate("/");
-      return;
-    }
-    fetchHouses();
-  }, [user, navigate]);
-
-  const fetchHouses = async () => {
-    try {
-      const { data } = await api.get("/houses");
-      setHouses(data);
-    } catch (err) {
-      setError("فشل تحميل البيوت المتاحة");
-      toast.error("فشل تحميل البيوت المتاحة");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateHouse = async (e) => {
+  const handleCreate = async (e) => {
     e.preventDefault();
-    if (!newHouseName.trim()) {
-      setError("يرجى إدخال اسم البيت");
-      toast.warning("يرجى إدخال اسم البيت");
-      return;
-    }
+    if (!newHouseName || !newHousePassword) return;
 
-    if (!newHousePassword || newHousePassword.length < 4) {
-      setError("كلمة المرور يجب أن تكون 4 أحرف على الأقل");
-      toast.warning("كلمة المرور يجب أن تكون 4 أحرف على الأقل");
-      return;
-    }
-
-    setSubmitting(true);
-    setError("");
     try {
-      await createHouse(newHouseName.trim(), newHousePassword);
-      toast.success("تم إنشاء البيت بنجاح!");
-      navigate("/");
-    } catch (err) {
-      const errorMsg = err.response?.data?.message || "فشل إنشاء البيت";
-      setError(errorMsg);
-      toast.error(errorMsg);
-    } finally {
-      setSubmitting(false);
+      await createHouse({
+        name: newHouseName,
+        password: newHousePassword,
+      });
+    } catch (error) {
+      // Handled in hook
     }
   };
 
-  const handleJoinHouse = async (houseId) => {
-    setSelectedHouse(houseId);
-    setJoinPassword("");
-  };
-
-  const handleJoinSubmit = async (e) => {
+  const handleJoin = async (e) => {
     e.preventDefault();
-    if (!joinPassword) {
-      setError("يرجى إدخال كلمة المرور");
-      toast.warning("يرجى إدخال كلمة المرور");
-      return;
-    }
+    if (!selectedHouse || !joinPassword) return;
 
-    setSubmitting(true);
-    setError("");
     try {
-      await joinHouse(selectedHouse, joinPassword);
-      toast.success("تم الانضمام للبيت بنجاح!");
-      navigate("/");
+      await joinHouse({
+        houseId: selectedHouse._id,
+        password: joinPassword,
+      });
     } catch (err) {
-      const errorMsg = err.response?.data?.message || "فشل الانضمام للبيت";
-      setError(errorMsg);
-      toast.error(errorMsg);
-    } finally {
-      setSubmitting(false);
-      setSelectedHouse(null);
-      setJoinPassword("");
+      // Handled in hook
     }
   };
 
-  if (loading) {
-    return <Loader text="بنحمّل البيوت المتاحة..." />;
+  if (loading) return <Loader text="بنحمّل البيوت المتاحة..." />;
+
+  // Initial error or data check
+  if (error) {
+    return (
+      <div className="min-h-screen bg-(--color-bg) flex items-center justify-center">
+        <p className="text-red-500">
+          حدث خطأ في تحميل البيوت. يرجى المحاولة مرة أخرى.
+        </p>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-6 sm:p-4 font-primary">
-      <div className="w-full max-w-4xl">
+    <div className="min-h-screen bg-(--color-bg) p-6 flex items-center justify-center font-primary">
+      <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-6 sm:mb-8">
-          <div
-            className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 border animate-bounce rounded-full mb-3 sm:mb-4 shadow-lg"
-            style={{
-              borderColor: "var(--color-border)",
-              backgroundColor: "var(--color-primary)",
-            }}
-          >
-            <Home className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+        <div className="text-center mb-8">
+          <div className="inline-flex p-4 rounded-3xl bg-(--color-surface)/10 text-(--color-primary) mb-4">
+            <Home size={32} />
           </div>
-          <h1
-            className="text-2xl sm:text-4xl font-bold mb-2"
-            style={{ color: "var(--color-dark)" }}
-          >
-            اختر بيتك
+          <h1 className="text-2xl font-bold text-(--color-dark) mb-2">
+            أهلاً بيك في Budgetly
           </h1>
-          <p
-            className="text-base sm:text-lg"
-            style={{ color: "var(--color-muted)" }}
-          >
-            انضم لبيت موجود أو أنشئ بيت جديد
+          <p className="text-(--color-muted)">
+            علشان تبدأ، لازم تنضم لبيت أو تعمل بيت جديد
           </p>
         </div>
 
-        {error && (
-          <div
-            className="bg-ios-error/10 text-ios-error p-4 rounded-2xl mb-6 text-sm text-center border border-ios-error/20"
-            role="alert"
-          >
-            {error}
-          </div>
-        )}
+        {/* Main Content */}
+        <div className="bg-(--color-surface) rounded-3xl shadow-xl border border-(--color-border) overflow-hidden transition-all duration-300">
+          {view === "list" && (
+            <div className="p-6">
+              <div className="grid gap-3 mb-6">
+                <button
+                  onClick={() => setView("create")}
+                  className="p-4 rounded-2xl bg-(--color-primary) text-white hover:opacity-90 transition-all flex items-center justify-between group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-white/20 rounded-xl">
+                      <Plus size={20} />
+                    </div>
+                    <div className="text-right">
+                      <span className="block font-bold">إنشاء بيت جديد</span>
+                      <span className="text-xs opacity-80">
+                        أعمل بيت وضيف صحابك
+                      </span>
+                    </div>
+                  </div>
+                  <ArrowRight
+                    size={18}
+                    className="transform rotate-180 group-hover:-translate-x-1 transition-transform"
+                  />
+                </button>
 
-        <div
-          className="rounded-2xl shadow-2xl p-4 sm:p-8 border"
-          style={{
-            backgroundColor: "var(--color-surface)",
-            borderColor: "var(--color-border)",
-          }}
-        >
-          {/* Create New House Button */}
-          {!showCreateForm && (
-            <button
-              onClick={() => setShowCreateForm(true)}
-              disabled={submitting}
-              className="w-full mb-4 sm:mb-6 cursor-pointer text-white font-semibold py-3 sm:py-4 px-4 sm:px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-sm sm:text-base"
-              style={{ backgroundColor: "var(--color-primary)" }}
-            >
-              <Plus className="w-5 h-5" />
-              إنشاء بيت جديد
-            </button>
+                {houses?.length > 0 && (
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-(--color-border)"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="bg-(--color-surface) px-2 text-(--color-muted)">
+                        أو انضم لبيت موجود
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {houses?.length > 0 ? (
+                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1 scrollbar-thin">
+                  {houses.map((house) => (
+                    <button
+                      key={house._id}
+                      onClick={() => {
+                        setSelectedHouse(house);
+                        setView("join");
+                      }}
+                      className="w-full p-4 rounded-2xl bg-(--color-bg) hover:bg-(--color-hover) border border-(--color-border) transition-all flex items-center justify-between group text-right"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-(--color-surface) flex items-center justify-center text-(--color-primary) font-bold border border-(--color-border)">
+                          {house.name.charAt(0)}
+                        </div>
+                        <div>
+                          <span className="block font-bold text-(--color-dark)">
+                            {house.name}
+                          </span>
+                          <div className="flex items-center gap-1 text-xs text-(--color-muted)">
+                            <Users size={12} />
+                            <span>{house.membersCount} عضو</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="px-3 py-1 rounded-full bg-(--color-surface) text-xs font-semibold text-(--color-secondary) group-hover:bg-(--color-primary) group-hover:text-white transition-colors">
+                        انضمام
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-(--color-muted)">
+                  <p>مفيش بيوت متاحة حالياً</p>
+                </div>
+              )}
+            </div>
           )}
 
-          {/* Create House Form */}
-          {showCreateForm && (
-            <form
-              onSubmit={handleCreateHouse}
-              className="mb-4 sm:mb-6 p-4 sm:p-6 rounded-xl"
-              style={{ backgroundColor: "var(--color-hover)" }}
-            >
-              <h3
-                className="text-base sm:text-lg font-semibold mb-3 sm:mb-4"
-                style={{ color: "var(--color-dark)" }}
+          {view === "create" && (
+            <div className="p-6">
+              <div
+                className="flex items-center gap-2 mb-6 text-(--color-muted) cursor-pointer hover:text-(--color-dark)"
+                onClick={() => setView("list")}
               >
+                <ArrowRight size={18} className="transform rotate-180" />
+                <span className="text-sm font-bold">رجوع</span>
+              </div>
+
+              <h2 className="text-xl font-bold mb-4 text-(--color-dark)">
                 إنشاء بيت جديد
-              </h3>
-              <div className="space-y-4">
+              </h2>
+
+              <form onSubmit={handleCreate} className="space-y-4">
                 <Input
-                  type="text"
+                  label="اسم البيت"
                   value={newHouseName}
                   onChange={(e) => setNewHouseName(e.target.value)}
-                  placeholder="اسم البيت (مثال: عائلة أحمد)"
-                  icon={Building}
-                  disabled={submitting}
-                  size="md"
+                  placeholder="مثلاً: بيت العز"
+                  required
                 />
                 <Input
+                  label="باسوورد الانضمام"
                   type="password"
                   value={newHousePassword}
                   onChange={(e) => setNewHousePassword(e.target.value)}
-                  placeholder="كلمة المرور (4 أحرف على الأقل)"
-                  icon={Lock}
-                  disabled={submitting}
-                  hint="سيحتاجها الأعضاء للانضمام"
+                  placeholder="اللي هيدخل بيه صحابك"
+                  required
                 />
-              </div>
-              <div className="flex flex-col sm:flex-row gap-3 mt-4">
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="flex-1 text-white px-6 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                  disabled={isCreating}
+                  className="w-full py-3 rounded-2xl bg-(--color-primary) text-white font-bold hover:shadow-lg hover:bg-(--color-primary-dark) transition-all disabled:opacity-50"
                   style={{ backgroundColor: "var(--color-primary)" }}
                 >
-                  {submitting ? "جاري الإنشاء..." : "إنشاء"}
+                  {isCreating ? "جاري الإنشاء..." : "إنشاء البيت"}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCreateForm(false);
-                    setNewHouseName("");
-                    setNewHousePassword("");
-                  }}
-                  disabled={submitting}
-                  className="px-6 py-3 rounded-xl font-semibold transition-all text-sm sm:text-base"
-                  style={{
-                    backgroundColor: "var(--color-light)",
-                    color: "var(--color-dark)",
-                  }}
-                >
-                  إلغاء
-                </button>
-              </div>
-            </form>
+              </form>
+            </div>
           )}
 
-          {/* Available Houses List */}
-          <div>
-            <h3
-              className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center gap-2"
-              style={{ color: "var(--color-dark)" }}
-            >
-              <Users className="w-5 h-5" />
-              البيوت المتاحة
-            </h3>
-
-            {houses.length === 0 ? (
+          {view === "join" && selectedHouse && (
+            <div className="p-6">
               <div
-                className="text-center py-8 sm:py-12"
-                style={{ color: "var(--color-muted)" }}
+                className="flex items-center gap-2 mb-6 text-(--color-muted) cursor-pointer hover:text-(--color-dark)"
+                onClick={() => {
+                  setView("list");
+                  setSelectedHouse(null);
+                  setJoinPassword("");
+                }}
               >
-                <Home className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 opacity-50" />
-                <p className="text-sm sm:text-base">لا توجد بيوت حالياً</p>
-                <p className="text-xs sm:text-sm mt-2">كن أول من ينشئ بيت!</p>
+                <ArrowRight size={18} className="transform rotate-180" />
+                <span className="text-sm font-bold">رجوع</span>
               </div>
-            ) : (
-              <div className="grid gap-3 sm:gap-4">
-                {houses.map((house) => (
-                  <div
-                    key={house._id}
-                    className="p-4 sm:p-5 rounded-xl border-2 transition-all"
-                    style={{
-                      backgroundColor: "var(--color-bg)",
-                      borderColor: "var(--color-border)",
-                    }}
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
-                      <div className="flex-1">
-                        <h4
-                          className="text-base sm:text-lg font-semibold mb-1"
-                          style={{ color: "var(--color-dark)" }}
-                        >
-                          {house.name}
-                        </h4>
-                        <div
-                          className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm"
-                          style={{ color: "var(--color-muted)" }}
-                        >
-                          <span className="flex items-center gap-1">
-                            <Users className="w-4 h-4" />
-                            {house.memberCount} عضو
-                          </span>
-                          <span>مدير: {house.admin?.name}</span>
-                        </div>
-                      </div>
-                      {selectedHouse !== house._id && (
-                        <button
-                          onClick={() => handleJoinHouse(house._id)}
-                          disabled={submitting}
-                          className="w-full sm:w-auto text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
-                          style={{ backgroundColor: "var(--color-primary)" }}
-                        >
-                          <LogIn className="w-5 h-5" />
-                          انضم
-                        </button>
-                      )}
-                    </div>
-                    {selectedHouse === house._id && (
-                      <form
-                        onSubmit={handleJoinSubmit}
-                        className="mt-3 pt-3 border-t"
-                        style={{ borderColor: "var(--color-border)" }}
-                      >
-                        <div className="flex flex-col sm:flex-row gap-2">
-                          <div className="flex-1">
-                            <Input
-                              type="password"
-                              value={joinPassword}
-                              onChange={(e) => setJoinPassword(e.target.value)}
-                              placeholder="ادخل كلمة المرور"
-                              icon={Lock}
-                              disabled={submitting}
-                              size="sm"
-                            />
-                          </div>
-                          <div className="flex gap-2">
-                            <button
-                              type="submit"
-                              disabled={submitting}
-                              className="flex-1 sm:flex-initial text-white px-4 py-2.5 sm:py-2 rounded-xl font-semibold transition-all disabled:opacity-50 text-sm sm:text-base"
-                              style={{
-                                backgroundColor: "var(--color-primary)",
-                              }}
-                            >
-                              {submitting ? "..." : "تأكيد"}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedHouse(null);
-                                setJoinPassword("");
-                              }}
-                              disabled={submitting}
-                              className="flex-1 sm:flex-initial px-4 py-2.5 sm:py-2 rounded-xl font-semibold transition-all text-sm sm:text-base"
-                              style={{
-                                backgroundColor: "var(--color-light)",
-                                color: "var(--color-dark)",
-                              }}
-                            >
-                              إلغاء
-                            </button>
-                          </div>
-                        </div>
-                      </form>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
 
-        {/* Info Message */}
-        <div
-          className="mt-4 sm:mt-6 text-center text-xs sm:text-sm px-4"
-          style={{ color: "var(--color-muted)" }}
-        >
-          <p>💡 البيت هو المجموعة التي تدير ميزانيتها معاً</p>
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 mx-auto rounded-full bg-(--color-primary)/10 flex items-center justify-center text-(--color-primary) text-2xl font-bold mb-3">
+                  {selectedHouse.name.charAt(0)}
+                </div>
+                <h2 className="text-xl font-bold text-(--color-dark)">
+                  انضمام لـ {selectedHouse.name}
+                </h2>
+                <p className="text-sm text-(--color-muted)">
+                  أدخل باسوورد البيت عشان تنضم
+                </p>
+              </div>
+
+              <form onSubmit={handleJoin} className="space-y-4">
+                <Input
+                  type="password"
+                  value={joinPassword}
+                  onChange={(e) => setJoinPassword(e.target.value)}
+                  placeholder="باسوورد البيت"
+                  className="text-center"
+                  autoFocus
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={isJoining}
+                  className="w-full py-3 rounded-2xl bg-(--color-primary) text-white font-bold hover:shadow-lg hover:bg-(--color-primary-dark) transition-all disabled:opacity-50"
+                  style={{ backgroundColor: "var(--color-primary)" }}
+                >
+                  {isJoining ? "جاري الانضمام..." : "انضمام الآن"}
+                </button>
+              </form>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,61 +1,47 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "../context/ToastContext";
 import api from "../utils/api";
 
 export function useExpenses() {
-  const [expenses, setExpenses] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const toast = useToast();
+  const queryClient = useQueryClient();
 
-  const fetchExpenses = useCallback(
-    async (currentPage) => {
-      try {
-        setLoading(true);
-        const { data } = await api.get(
-          `/expenses?page=${currentPage}&limit=10`
-        );
-        if (data.expenses) {
-          setExpenses(data.expenses);
-          setTotalPages(data.totalPages);
-        } else {
-          setExpenses(data); // Fallback
-        }
-      } catch (error) {
-        console.error("Error fetching expenses:", error);
-        toast.error("فيه مشكلة في تحميل المصاريف");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [toast]
-  );
-
-  useEffect(() => {
-    fetchExpenses(page);
-  }, [page, fetchExpenses]);
-
-  const deleteExpense = async (id) => {
-    try {
-      await api.delete(`/expenses/${id}`);
-      setExpenses((prev) => prev.filter((e) => e._id !== id));
-      toast.success("تم مسح المصروف بنجاح");
-      return true;
-    } catch (error) {
-      console.error("Error deleting expense:", error);
-      toast.error("فيه مشكلة في مسح المصروف");
-      return false;
-    }
+  const fetchExpenses = async (page) => {
+    const { data } = await api.get(`/expenses?page=${page}&limit=10`);
+    return data;
   };
 
+  const {
+    data,
+    isLoading: loading,
+    refetch,
+  } = useQuery({
+    queryKey: ["expenses", page],
+    queryFn: () => fetchExpenses(page),
+    keepPreviousData: true,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => api.delete(`/expenses/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["expenses"]);
+      toast.success("تم مسح المصروف بنجاح");
+    },
+    onError: (error) => {
+      console.error("Error deleting expense:", error);
+      toast.error("فيه مشكلة في مسح المصروف");
+    },
+  });
+
   return {
-    expenses,
+    expenses: data?.expenses || [],
     loading,
     page,
     setPage,
-    totalPages,
-    fetchExpenses,
-    deleteExpense,
+    totalPages: data?.totalPages || 1,
+    fetchExpenses: refetch,
+    deleteExpense: deleteMutation.mutateAsync,
   };
 }

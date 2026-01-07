@@ -1,633 +1,430 @@
 import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
-import api from "../utils/api";
-import Loader from "../components/Loader";
-import Toast from "../components/Toast";
-import Input from "../components/Input";
 import {
-  Home,
   Users,
-  Crown,
-  Edit2,
-  Save,
-  X,
+  Settings,
   LogOut,
-  UserX,
   Trash2,
+  Shield,
+  Key,
+  Home,
+  UserX,
+  Copy,
+  CheckCheck,
 } from "lucide-react";
-
+import Loader from "../components/Loader";
+import Input from "../components/Input";
 import ConfirmModal from "../components/ConfirmModal";
+import useHouse from "../hooks/useHouse";
 
 const HouseDetails = () => {
-  const { user, updateUser } = useAuth();
-  const navigate = useNavigate();
-  const [houseData, setHouseData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
-  // Removed isEditingId and newHouseId as per user request to remove House ID update field
-  const [newHouseName, setNewHouseName] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const { id } = useParams();
+  const { user } = useAuth();
+
+  const houseId =
+    id || (typeof user?.house === "object" ? user?.house?._id : user?.house);
+
+  const {
+    house,
+    loading,
+    error,
+    updateName,
+    updatePassword,
+    removeMember,
+    leaveHouse,
+    deleteHouse,
+    isUpdatingName,
+    isUpdatingPassword,
+  } = useHouse(houseId);
+
+  const [activeTab, setActiveTab] = useState("members");
+
+  // Edit Name State
+  const [editingName, setEditingName] = useState(false);
+  const [newName, setNewName] = useState("");
+
+  // Edit Password State
+  const [editingPassword, setEditingPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
 
-  const houseId = user?.house?._id || user?.house;
+  // Modals State
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState(null);
 
-  // Modal State
-  const [modalConfig, setModalConfig] = useState({
-    isOpen: false,
-    title: "",
-    message: "",
-    type: "danger",
-    onConfirm: () => {},
-  });
+  // Copy ID State
+  const [copiedId, setCopiedId] = useState(false);
 
+  // Initialize newName when house is loaded
   useEffect(() => {
-    if (!houseId) {
-      navigate("/house-selection");
-      return;
+    if (house) {
+      setNewName(house.name);
     }
-    fetchHouseDetails();
-  }, [houseId, navigate]);
+  }, [house]);
 
-  const fetchHouseDetails = async () => {
+  const isAdmin = house?.admin?._id === user?.id;
+
+  const handleCopyId = () => {
+    navigator.clipboard.writeText(house._id);
+    setCopiedId(true);
+    setTimeout(() => setCopiedId(false), 2000);
+  };
+
+  const handleUpdateName = async () => {
+    if (!newName.trim()) return;
     try {
-      const { data } = await api.get(`/houses/${houseId}`);
-      setHouseData(data);
-      setNewHouseName(data.name);
+      await updateName(newName.trim());
+      setEditingName(false);
     } catch (err) {
-      setError("فشل تحميل بيانات البيت");
-    } finally {
-      setLoading(false);
+      // Handled in hook
     }
   };
 
-  const handleUpdateHouseName = async (e) => {
-    e.preventDefault();
-    if (!newHouseName.trim()) {
-      setError("اسم البيت لا يمكن أن يكون فارغاً");
-      return;
-    }
-
-    setSubmitting(true);
-    setError("");
-    setSuccess("");
+  const handleUpdatePassword = async () => {
+    if (!newPassword.trim()) return;
     try {
-      await api.patch(`/houses/${houseId}/name`, {
-        name: newHouseName.trim(),
-      });
-      setSuccess("تم تحديث اسم البيت بنجاح");
-      setIsEditing(false);
-      await fetchHouseDetails();
-      // Refresh user data
-      const { data: userData } = await api.get("/auth/me");
-      updateUser(userData);
-    } catch (err) {
-      setError(err.response?.data?.message || "فشل تحديث اسم البيت");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // handleUpdateHouseId removed as per user request
-
-  const handleUpdatePassword = async (e) => {
-    e.preventDefault();
-    if (!newPassword || newPassword.length < 4) {
-      setError("كلمة المرور يجب أن تكون 4 أحرف على الأقل");
-      return;
-    }
-
-    setSubmitting(true);
-    setError("");
-    setSuccess("");
-    try {
-      await api.patch(`/houses/${houseId}/password`, {
-        password: newPassword,
-      });
-      setSuccess("تم تحديث كلمة المرور بنجاح");
-      setIsEditingPassword(false);
+      await updatePassword(newPassword.trim());
+      setEditingPassword(false);
       setNewPassword("");
     } catch (err) {
-      setError(err.response?.data?.message || "فشل تحديث كلمة المرور");
-    } finally {
-      setSubmitting(false);
+      // Handled in hook
     }
   };
 
-  const confirmAction = (title, message, action, type = "danger") => {
-    setModalConfig({
-      isOpen: true,
-      title,
-      message,
-      type,
-      onConfirm: async () => {
-        setModalConfig((prev) => ({ ...prev, isOpen: false }));
-        await action();
-      },
-    });
+  const handleRemoveMember = async () => {
+    if (!memberToRemove) return;
+    try {
+      await removeMember(memberToRemove._id);
+      setMemberToRemove(null);
+    } catch (err) {
+      // Handled in hook
+    }
   };
 
-  const handleRemoveMember = (memberId, memberName) => {
-    confirmAction(
-      "إزالة عضو",
-      `هل أنت متأكد من إزالة ${memberName} من البيت؟`,
-      async () => {
-        setSubmitting(true);
-        setError("");
-        setSuccess("");
-        try {
-          await api.delete(`/houses/${houseId}/members/${memberId}`);
-          setSuccess(`تم إزالة ${memberName} من البيت بنجاح`);
-          await fetchHouseDetails();
-        } catch (err) {
-          setError(err.response?.data?.message || "فشل إزالة العضو");
-        } finally {
-          setSubmitting(false);
-        }
-      }
-    );
+  const handleLeaveHouse = async () => {
+    try {
+      await leaveHouse();
+    } catch (err) {
+      // Handled in hook
+    }
   };
 
-  const handleLeaveHouse = () => {
-    confirmAction(
-      "مغادرة البيت",
-      "هل أنت متأكد من الخروج من هذا البيت؟",
-      async () => {
-        setSubmitting(true);
-        setError("");
-        try {
-          await api.post(`/houses/${houseId}/leave`);
-          setSuccess("تم الخروج من البيت بنجاح");
-          // Refresh user data and redirect
-          const { data: userData } = await api.get("/auth/me");
-          updateUser(userData);
-          setTimeout(() => {
-            navigate("/house-selection");
-          }, 1500);
-        } catch (err) {
-          setError(err.response?.data?.message || "فشل الخروج من البيت");
-        } finally {
-          setSubmitting(false);
-        }
-      }
-    );
+  const handleDeleteHouse = async () => {
+    try {
+      await deleteHouse();
+    } catch (err) {
+      // Handled in hook
+    }
   };
 
-  const handleDeleteHouse = () => {
-    confirmAction(
-      "حذف البيت نهائياً",
-      "هل أنت متأكد من حذف البيت نهائياً؟ هذا الإجراء لا يمكن التراجع عنه وسيتم إخراج جميع الأعضاء.",
-      async () => {
-        setSubmitting(true);
-        setError("");
-        try {
-          await api.delete(`/houses/${houseId}`);
-          setSuccess("تم حذف البيت بنجاح");
-          // Refresh user data and redirect
-          const { data: userData } = await api.get("/auth/me");
-          updateUser(userData);
-          setTimeout(() => {
-            navigate("/house-selection");
-          }, 1500);
-        } catch (err) {
-          setError(err.response?.data?.message || "فشل حذف البيت");
-        } finally {
-          setSubmitting(false);
-        }
-      }
-    );
-  };
+  if (loading) return <Loader text="بنحمّل تفاصيل البيت..." />;
 
-  const isAdmin = user?.house && houseData && user.id === houseData.admin._id;
-
-  if (loading) {
-    return <Loader text="بنحمّل بيانات البيت..." />;
-  }
-
-  if (!houseData) {
+  if (error || !house) {
     return (
-      <div className="text-center py-12">
-        <p style={{ color: "var(--color-muted)" }}>
-          لم يتم العثور على بيانات البيت
-        </p>
+      <div className="text-center py-20 text-red-500">
+        مش قادرين نحمل تفاصيل البيت حالياً
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto font-primary">
+    <div className="pb-8 px-4 max-w-4xl mx-auto font-primary">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <div
-            className="p-3 rounded-xl"
-            style={{ backgroundColor: "var(--color-primary-bg)" }}
-          >
-            <Home
-              className="w-8 h-8"
-              style={{ color: "var(--color-primary)" }}
-            />
-          </div>
-          <h1
-            className="text-3xl font-bold "
-            style={{ color: "var(--color-dark)" }}
-          >
-            تفاصيل البيت
-          </h1>
-        </div>
-        <p style={{ color: "var(--color-muted)" }}>
-          معلومات وإدارة البيت الخاص بك
-        </p>
-      </div>
-
-      {error && (
-        <Toast message={error} type="error" onClose={() => setError("")} />
-      )}
-      {success && (
-        <Toast
-          message={success}
-          type="success"
-          onClose={() => setSuccess("")}
-        />
-      )}
-
-      <div className="space-y-6">
-        {/* House Name Card */}
-        <div
-          className="rounded-2xl shadow-lg p-6"
-          style={{
-            backgroundColor: "var(--color-surface)",
-            borderColor: "var(--color-border)",
-            borderWidth: "1px",
-            borderStyle: "solid",
-          }}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h2
-              className="text-xl font-semibold"
-              style={{ color: "var(--color-dark)" }}
-            >
-              اسم البيت
-            </h2>
-            {isAdmin && !isEditing && (
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="flex items-center gap-2 transition-colors"
-                  style={{ color: "var(--color-primary)" }}
-                >
-                  <Edit2 className="w-4 h-4" />
-                  تعديل الاسم
-                </button>
-              </div>
-            )}
-          </div>
-
-          {isEditing ? (
-            <form onSubmit={handleUpdateHouseName} className="flex gap-3">
-              <Input
-                value={newHouseName}
-                onChange={(e) => setNewHouseName(e.target.value)}
-                disabled={submitting}
-                autoFocus
-                variant="filled" // Using filled variant to match general style
-                wrapperClassName="flex-1"
-              />
-              <button
-                type="submit"
-                disabled={submitting}
-                className="px-6 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                style={{
-                  backgroundColor: "var(--color-primary)",
-                  color: "white",
-                }}
-              >
-                <Save className="w-5 h-5" />
-                حفظ
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsEditing(false);
-                  setNewHouseName(houseData.name);
-                }}
-                disabled={submitting}
-                className="px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"
-                style={{
-                  backgroundColor: "var(--color-light)",
-                  color: "var(--color-dark)",
-                }}
-              >
-                <X className="w-5 h-5" />
-                إلغاء
-              </button>
-            </form>
-          ) : (
-            <p
-              className="text-2xl font-bold"
-              style={{ color: "var(--color-dark)" }}
-            >
-              {houseData.name}
-            </p>
-          )}
-        </div>
-
-        {/* House Password Card */}
-        <div
-          className="rounded-2xl shadow-lg p-6"
-          style={{
-            backgroundColor: "var(--color-surface)",
-            borderColor: "var(--color-border)",
-            borderWidth: "1px",
-            borderStyle: "solid",
-          }}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h2
-              className="text-xl font-semibold"
-              style={{ color: "var(--color-dark)" }}
-            >
-              كلمة مرور البيت
-            </h2>
-          </div>
-
-          {isEditingPassword ? (
-            <form onSubmit={handleUpdatePassword} className="flex gap-3">
-              <Input
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                disabled={submitting}
-                autoFocus
-                variant="filled"
-                wrapperClassName="flex-1"
-                placeholder="أدخل كلمة المرور الجديدة"
-                dir="ltr"
-              />
-              <button
-                type="submit"
-                disabled={submitting}
-                className="px-6 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                style={{
-                  backgroundColor: "var(--color-primary)",
-                  color: "white",
-                }}
-              >
-                <Save className="w-5 h-5" />
-                حفظ
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsEditingPassword(false);
-                  setNewPassword("");
-                }}
-                disabled={submitting}
-                className="px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"
-                style={{
-                  backgroundColor: "var(--color-light)",
-                  color: "var(--color-dark)",
-                }}
-              >
-                <X className="w-5 h-5" />
-                إلغاء
-              </button>
-            </form>
-          ) : (
-            <div className="flex items-center justify-between bg-(--color-input-bg) p-2 rounded-xl border border-(--color-border)">
-              <div className="flex items-center gap-2">
-                <p
-                  className="text-xl sm:text-2xl font-bold font-mono px-2 tracking-wider"
-                  style={{
-                    color: "var(--color-dark)",
-                    minWidth: "120px",
-                  }}
-                >
-                  ••••••••
-                </p>
-              </div>
-
-              <div className="flex items-center gap-1">
-                {isAdmin && (
-                  <button
-                    onClick={() => setIsEditingPassword(true)}
-                    className="p-2 rounded-lg transition-colors hover:bg-(--color-bg)"
-                    style={{ color: "var(--color-primary)" }}
-                    title="تغيير كلمة المرور"
-                  >
-                    <Edit2 size={18} />
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Admin Info Card */}
-        <div
-          className="rounded-2xl shadow-lg p-6"
-          style={{
-            backgroundColor: "var(--color-surface)",
-            borderColor: "var(--color-border)",
-            borderWidth: "1px",
-            borderStyle: "solid",
-          }}
-        >
-          <h2
-            className="text-xl font-semibold mb-4 flex items-center gap-2"
-            style={{ color: "var(--color-dark)" }}
-          >
-            <Crown className="w-5 h-5" style={{ color: "#eab308" }} />
-            مدير البيت
-          </h2>
-          <div className="flex items-center gap-4">
-            <div
-              className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg"
-              style={{
-                background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)",
-                color: "white",
-              }}
-            >
-              {houseData.admin.name.charAt(0).toUpperCase()}
+      <div className="bg-(--color-surface) rounded-2xl p-6 shadow-sm border border-(--color-border) mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-(--color-primary)/10 rounded-xl">
+              <Home className="text-(--color-primary)" size={32} />
             </div>
             <div>
-              <p
-                className="font-semibold"
-                style={{ color: "var(--color-dark)" }}
+              <h1 className="text-2xl font-bold text-(--color-dark)">
+                {house.name}
+              </h1>
+              <div
+                className="flex items-center gap-2 text-sm text-(--color-muted) cursor-pointer hover:text-(--color-primary) transition-colors"
+                onClick={handleCopyId}
+                title="نسخ كود البيت"
               >
-                {houseData.admin.name}
-              </p>
-              <p className="text-sm" style={{ color: "var(--color-muted)" }}>
-                @{houseData.admin.username}
-              </p>
+                <span>ID: {house._id}</span>
+                {copiedId ? <CheckCheck size={14} /> : <Copy size={14} />}
+              </div>
             </div>
-            {isAdmin && (
-              <span
-                className="mr-auto px-3 py-1 rounded-full text-sm font-semibold"
-                style={{
-                  backgroundColor: "#fef3c7",
-                  color: "#92400e",
-                }}
-              >
-                أنت المدير
-              </span>
-            )}
           </div>
+          {isAdmin && (
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setNewName(house.name);
+                  setEditingName(true);
+                }}
+                className="p-2 hover:bg-(--color-bg) rounded-xl transition-colors text-(--color-primary)"
+                title="تعديل الاسم"
+              >
+                <Settings size={20} />
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Members Card */}
-        <div
-          className="rounded-2xl shadow-lg p-6"
-          style={{
-            backgroundColor: "var(--color-surface)",
-            borderColor: "var(--color-border)",
-            borderWidth: "1px",
-            borderStyle: "solid",
-          }}
+        {/* Edit Name Form */}
+        {editingName && (
+          <div className="mb-4 p-4 bg-(--color-bg) rounded-xl border border-(--color-border)">
+            <h3 className="font-bold mb-3 text-sm">تغيير اسم البيت</h3>
+            <div className="flex gap-2">
+              <Input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="اسم البيت الجديد"
+                className="flex-1"
+              />
+              <button
+                onClick={handleUpdateName}
+                disabled={isUpdatingName}
+                className="px-4 bg-(--color-primary) text-white rounded-xl font-bold disabled:opacity-50"
+              >
+                {isUpdatingName ? "حفظ..." : "حفظ"}
+              </button>
+              <button
+                onClick={() => setEditingName(false)}
+                className="px-4 bg-(--color-surface) border border-(--color-border) rounded-xl font-bold"
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 gap-4 mt-6">
+          <div className="p-4 bg-(--color-bg) rounded-xl text-center">
+            <p className="text-(--color-muted) text-sm mb-1">الأعضاء</p>
+            <p className="text-2xl font-bold text-(--color-dark)">
+              {house.members.length}
+            </p>
+          </div>
+          <div className="p-4 bg-(--color-bg) rounded-xl text-center">
+            <p className="text-(--color-muted) text-sm mb-1">الأدمن</p>
+            <p className="font-bold text-(--color-primary)">
+              {house.admin.name}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-2 mb-6 p-1 bg-(--color-surface) rounded-xl border border-(--color-border)">
+        <button
+          onClick={() => setActiveTab("members")}
+          className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
+            activeTab === "members"
+              ? "bg-(--color-primary) text-white shadow-md"
+              : "text-(--color-muted) hover:bg-(--color-bg)"
+          }`}
         >
-          <h2
-            className="text-xl font-semibold mb-4 flex items-center gap-2"
-            style={{ color: "var(--color-dark)" }}
+          <div className="flex items-center justify-center gap-2">
+            <Users size={18} />
+            <span>الأعضاء</span>
+          </div>
+        </button>
+        {isAdmin && (
+          <button
+            onClick={() => setActiveTab("settings")}
+            className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
+              activeTab === "settings"
+                ? "bg-(--color-primary) text-white shadow-md"
+                : "text-(--color-muted) hover:bg-(--color-bg)"
+            }`}
           >
-            <Users
-              className="w-5 h-5"
-              style={{ color: "var(--color-primary)" }}
-            />
-            الأعضاء ({houseData.members.length})
-          </h2>
+            <div className="flex items-center justify-center gap-2">
+              <Settings size={18} />
+              <span>إعدادات</span>
+            </div>
+          </button>
+        )}
+      </div>
+
+      {/* Tab Content */}
+      <div className="space-y-4">
+        {activeTab === "members" && (
           <div className="space-y-3">
-            {houseData.members.map((member) => (
+            {house.members.map((member) => (
               <div
                 key={member._id}
-                className="flex items-center gap-4 p-4 rounded-xl"
-                style={{
-                  backgroundColor: "var(--color-hover)",
-                }}
+                className="flex items-center justify-between p-4 bg-(--color-surface) rounded-xl border border-(--color-border) shadow-sm"
               >
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center font-bold"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)",
-                    color: "white",
-                  }}
-                >
-                  {member.name.charAt(0).toUpperCase()}
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    {member.profilePicture ? (
+                      <img
+                        src={`/profiles/${member.profilePicture}`}
+                        alt={member.name}
+                        className="w-12 h-12 rounded-full object-cover border-2 border-(--color-border)"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-(--color-primary)/10 flex items-center justify-center text-(--color-primary) font-bold text-lg border-2 border-(--color-primary)/20">
+                        {member.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    {house.admin._id === member._id && (
+                      <div className="absolute -bottom-1 -right-1 bg-yellow-400 text-white p-1 rounded-full shadow-sm">
+                        <Shield size={10} fill="currentColor" />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-bold text-(--color-dark)">
+                      {member.name}
+                      {user.id === member._id && (
+                        <span className="text-xs text-(--color-muted) mr-2">
+                          (أنت)
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-xs text-(--color-muted)">
+                      @{member.username}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p
-                    className="font-semibold"
-                    style={{ color: "var(--color-dark)" }}
-                  >
-                    {member.name}
-                  </p>
-                  <p
-                    className="text-sm"
-                    style={{ color: "var(--color-muted)" }}
-                  >
-                    @{member.username}
-                  </p>
-                </div>
-                {member._id === houseData.admin._id && (
-                  <span
-                    className="px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1"
-                    style={{
-                      backgroundColor: "#fef3c7",
-                      color: "#92400e",
-                    }}
-                  >
-                    <Crown className="w-3 h-3" />
-                    مدير
-                  </span>
-                )}
-                {member._id === user.id &&
-                  member._id !== houseData.admin._id && (
-                    <span
-                      className="px-2 py-1 rounded-full text-xs font-semibold"
-                      style={{
-                        backgroundColor: "var(--color-primary-bg)",
-                        color: "var(--color-primary)",
-                      }}
-                    >
-                      أنت
-                    </span>
-                  )}
-                {isAdmin && member._id !== houseData.admin._id && (
+
+                {isAdmin && member._id !== user.id && (
                   <button
-                    onClick={() => handleRemoveMember(member._id, member.name)}
-                    disabled={submitting}
-                    className="p-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{
-                      color: "var(--color-error)",
-                      backgroundColor: "var(--color-status-rejected-bg)",
-                    }}
-                    title="إزالة من البيت"
+                    onClick={() => setMemberToRemove(member)}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    title="حذف العضو"
                   >
-                    <UserX className="w-5 h-5" />
+                    <UserX size={20} />
                   </button>
                 )}
               </div>
             ))}
           </div>
-        </div>
+        )}
 
-        {/* Actions Card */}
-        <div
-          className="rounded-2xl shadow-lg p-6"
-          style={{
-            backgroundColor: "var(--color-surface)",
-            borderColor: "var(--color-border)",
-            borderWidth: "1px",
-            borderStyle: "solid",
-          }}
-        >
-          <h2
-            className="text-xl font-semibold mb-4"
-            style={{ color: "var(--color-dark)" }}
-          >
-            الإجراءات
-          </h2>
-          {isAdmin ? (
-            <button
-              onClick={handleDeleteHouse}
-              disabled={submitting}
-              className="w-full font-semibold py-3 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-              style={{
-                backgroundColor: "var(--color-error)",
-                color: "white",
-              }}
-            >
-              <Trash2 className="w-5 h-5" />
-              حذف البيت نهائياً
-            </button>
-          ) : (
-            <button
-              onClick={handleLeaveHouse}
-              disabled={submitting}
-              className="w-full font-semibold py-3 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-              style={{
-                backgroundColor: "var(--color-error)",
-                color: "white",
-              }}
-            >
-              <LogOut className="w-5 h-5" />
-              مغادرة البيت
-            </button>
-          )}
-        </div>
+        {activeTab === "settings" && isAdmin && (
+          <div className="space-y-6">
+            {/* Change Password */}
+            <div className="bg-(--color-surface) p-6 rounded-2xl border border-(--color-border) shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-(--color-primary)/10 text-(--color-primary) rounded-lg">
+                  <Key size={24} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-(--color-dark)">
+                    باسوورد البيت
+                  </h3>
+                  <p className="text-xs text-(--color-muted)">
+                    تغيير الباسوورد المستخدم للانضمام للبيت
+                  </p>
+                </div>
+              </div>
+
+              {editingPassword ? (
+                <div className="space-y-3">
+                  <Input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="الباسوورد الجديد"
+                  />
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      onClick={() => setEditingPassword(false)}
+                      className="px-4 py-2 text-sm font-bold  cursor-pointer text-(--color-muted) hover:bg-(--color-bg) rounded-xl"
+                    >
+                      إلغاء
+                    </button>
+                    <button
+                      onClick={handleUpdatePassword}
+                      disabled={isUpdatingPassword}
+                      className="px-4 py-2 text-sm font-bold cursor-pointer bg-(--color-primary) text-white rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50"
+                    >
+                      {isUpdatingPassword
+                        ? "جاري التغيير..."
+                        : "تغيير الباسوورد"}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setEditingPassword(true)}
+                  className="w-full py-3 border-2 border-dashed border-(--color-border) rounded-xl text-(--color-muted) font-bold hover:border-(--color-primary) hover:text-(--color-primary) transition-all"
+                >
+                  تغيير الباسوورد
+                </button>
+              )}
+            </div>
+
+            {/* Danger Zone */}
+            <div className="bg-(--color-surface) p-6 rounded-2xl border border-(--color-border)">
+              <h3 className="font-bold text-(--color-red) mb-4 flex items-center gap-2">
+                <div className="p-2 bg-(--color-error)/10 text-(--color-error) rounded-lg">
+                  <Shield size={20} />
+                </div>
+                منطقة الخطر
+              </h3>
+
+              <div className="flex flex-col gap-3">
+                {/* Only admin can delete house, but check safely */}
+                <button
+                  onClick={() => setShowDeleteModal(true)}
+                  className="flex items-center justify-between p-4  hover:bg-(--color-error)/20 rounded-xl border border-(--color-error) text-(--color-error) cursor-pointer transition-all shadow-sm group"
+                >
+                  <span className="font-bold">حذف البيت بالكامل</span>
+                  <Trash2
+                    size={20}
+                    className="group-hover:scale-110 transition-transform"
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Reusable Confirm Modal */}
+      {/* Leave House Button (Visible to everyone) */}
+      <div className="mt-8 pt-6 border-t border-(--color-border)">
+        <button
+          onClick={() => setShowLeaveModal(true)}
+          className="w-full border cursor-pointer flex items-center justify-center gap-2 py-3 text-(--color-error) font-bold hover:bg-(--color-error)/10 rounded-xl transition-all"
+        >
+          <LogOut size={20} />
+          مغادرة البيت
+        </button>
+      </div>
+
+      {/* Modals */}
       <ConfirmModal
-        isOpen={modalConfig.isOpen}
-        onClose={() => setModalConfig((prev) => ({ ...prev, isOpen: false }))}
-        onConfirm={modalConfig.onConfirm}
-        title={modalConfig.title}
-        message={modalConfig.message}
-        type={modalConfig.type}
+        isOpen={!!memberToRemove}
+        onClose={() => setMemberToRemove(null)}
+        onConfirm={handleRemoveMember}
+        title="حذف عضو"
+        message={`متأكد إنك عايز تحذف ${memberToRemove?.name} من البيت؟`}
+        confirmText="حذف"
+        cancelText="إلغاء"
+        type="danger"
+      />
+
+      <ConfirmModal
+        isOpen={showLeaveModal}
+        onClose={() => setShowLeaveModal(false)}
+        onConfirm={handleLeaveHouse}
+        title="مغادرة البيت"
+        message="متأكد إنك عايز تخرج من البيت ده؟ مش هتقدر تشوف المصاريف تاني."
+        confirmText="مغادرة"
+        cancelText="إلغاء"
+        type="danger"
+      />
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteHouse}
+        title="حذف البيت"
+        message="تحذير: الإجراء ده نهائي! كل البيانات والمصاريف هتتحذف تماماً ومحدش هيقدر يرجعها. متأكد؟"
+        confirmText="حذف نهائي"
+        cancelText="إلغاء"
+        type="danger"
       />
     </div>
   );

@@ -5,9 +5,7 @@ import { useTheme } from "../context/ThemeContext";
 import {
   LayoutDashboard,
   Receipt,
-  Users,
   LogOut,
-  Palette,
   Banknote,
   BarChart3,
   User,
@@ -17,19 +15,24 @@ import {
   StickyNote,
   ChevronLeft,
   ChevronRight,
-  CreditCard,
-  Settings,
-  Bot,
   Mail,
+  Sun,
+  Moon,
 } from "lucide-react";
-import { BiColorFill } from "react-icons/bi";
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
-  const { currentTheme, changeTheme, availableThemes } = useTheme();
+  const {
+    themeMode,
+    changeThemeMode,
+    currentPalette,
+    changePalette,
+    palettes,
+  } = useTheme();
+
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
-  const [showThemeMenu, setShowThemeMenu] = useState(false);
+  const [showPaletteMenu, setShowPaletteMenu] = useState(false);
 
   if (!user) return null;
 
@@ -81,12 +84,6 @@ const Sidebar = () => {
       title: "الأدوات",
       items: [
         {
-          path: "/ai",
-          label: "المساعد الذكي",
-          icon: Bot,
-          roles: ["admin", "user"],
-        },
-        {
           path: "/notes",
           label: "الملاحظات",
           icon: StickyNote,
@@ -123,6 +120,10 @@ const Sidebar = () => {
     if (window.confirm("هل أنت متأكد أنك تريد تسجيل الخروج؟")) {
       logout();
     }
+  };
+
+  const toggleTheme = () => {
+    changeThemeMode(themeMode === "dark" ? "light" : "dark");
   };
 
   return (
@@ -248,9 +249,60 @@ const Sidebar = () => {
 
       {/* Footer / User Tools */}
       <div
-        className="p-4 border-t"
+        className="p-4 border-t relative"
         style={{ borderColor: "var(--color-border)" }}
       >
+        {/* Palette Menu */}
+        {showPaletteMenu && themeMode === "dark" && (
+          <div
+            className={`absolute bottom-full left-4 mb-2 p-2 rounded-xl border shadow-lg bg-(--color-surface) min-w-[200px] z-50`}
+            style={{ borderColor: "var(--color-border)" }}
+          >
+            <div className="text-xs font-bold text-(--color-muted) mb-2 px-2">
+              اختر الثيم الليلي
+            </div>
+            <div className="space-y-1">
+              {palettes
+                .filter((p) => p.id !== "default")
+                .map((palette) => (
+                  <button
+                    key={palette.id}
+                    onClick={() => {
+                      changePalette(palette.id);
+                      setShowPaletteMenu(false);
+                    }}
+                    className={`w-full text-right px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${
+                      currentPalette === palette.id
+                        ? "bg-(--color-primary) text-white"
+                        : "hover:bg-(--color-hover) text-(--color-dark)"
+                    }`}
+                  >
+                    {palette.name}
+                    {currentPalette === palette.id && (
+                      <div className="w-2 h-2 rounded-full bg-white"></div>
+                    )}
+                  </button>
+                ))}
+              <button
+                onClick={() => {
+                  changePalette("default");
+                  setShowPaletteMenu(false);
+                }}
+                className={`w-full text-right px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${
+                  currentPalette === "default"
+                    ? "bg-(--color-primary) text-white"
+                    : "hover:bg-(--color-hover) text-(--color-dark)"
+                }`}
+              >
+                الافتراضي
+                {currentPalette === "default" && (
+                  <div className="w-2 h-2 rounded-full bg-white"></div>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
         <div
           className={`flex ${
             collapsed
@@ -258,55 +310,46 @@ const Sidebar = () => {
               : "flex-row items-center justify-between"
           }`}
         >
-          {/* Theme Toggle */}
-          <div className="relative">
+          <div className="flex items-center gap-1">
+            {/* Theme Toggle */}
             <button
-              onClick={() => setShowThemeMenu(!showThemeMenu)}
+              onClick={toggleTheme}
               className="p-2 rounded-lg hover:bg-(--color-bg) transition-colors text-(--color-secondary)"
-              title="تغيير المظهر"
+              title={themeMode === "dark" ? "الوضع النهاري" : "الوضع الليلي"}
             >
-              <BiColorFill size={22} />
-              {collapsed && showThemeMenu && (
-                <div className="fixed right-16 bottom-20 bg-(--color-surface) border border-(--color-border) rounded-xl shadow-xl p-2 z-50 min-w-[150px]">
-                  {availableThemes.map((theme) => (
-                    <div
-                      key={theme.key}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        changeTheme(theme.key);
-                        setShowThemeMenu(false);
-                      }}
-                      className="px-3 py-2 hover:bg-(--color-bg) rounded cursor-pointer text-sm text-(--color-dark) flex items-center justify-between"
-                    >
-                      {theme.name}
-                      {currentTheme === theme.key && (
-                        <div className="w-2 h-2 rounded-full bg-(--color-primary)"></div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
+              {themeMode === "dark" ? <Sun size={22} /> : <Moon size={22} />}
             </button>
 
-            {/* Desktop expanded theme menu */}
-            {!collapsed && showThemeMenu && (
-              <div className="absolute bottom-full right-0 mb-2 bg-(--color-surface) border border-(--color-border) rounded-xl shadow-xl p-2 z-50 min-w-[200px]">
-                {availableThemes.map((theme) => (
-                  <button
-                    key={theme.key}
-                    onClick={() => {
-                      changeTheme(theme.key);
-                      setShowThemeMenu(false);
-                    }}
-                    className="w-full px-3 py-2 hover:bg-(--color-bg) rounded cursor-pointer text-sm text-(--color-dark) flex items-center justify-between text-right"
-                  >
-                    {theme.name}
-                    {currentTheme === theme.key && (
-                      <div className="w-2 h-2 rounded-full bg-(--color-primary)"></div>
-                    )}
-                  </button>
-                ))}
-              </div>
+            {/* Palette Toggle (Only in Dark Mode) */}
+            {themeMode === "dark" && (
+              <button
+                onClick={() => setShowPaletteMenu(!showPaletteMenu)}
+                className={`p-2 rounded-lg hover:bg-(--color-bg) transition-colors ${
+                  showPaletteMenu
+                    ? "text-(--color-primary) bg-(--color-bg)"
+                    : "text-(--color-secondary)"
+                }`}
+                title="تغيير ألوان الثيم"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-palette"
+                >
+                  <circle cx="13.5" cy="6.5" r=".5" />
+                  <circle cx="17.5" cy="10.5" r=".5" />
+                  <circle cx="8.5" cy="7.5" r=".5" />
+                  <circle cx="6.5" cy="12.5" r=".5" />
+                  <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
+                </svg>
+              </button>
             )}
           </div>
 
