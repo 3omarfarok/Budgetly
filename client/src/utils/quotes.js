@@ -1,4 +1,1 @@
-export const egyptianQuotes = [
-"هاتواا الفلوس اللي عليكوا ",
-""
-];
+export const egyptianQuotes = ["هاتواا الفلوس اللي عليكوا "];

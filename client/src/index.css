@@ -41,25 +41,24 @@
    Root Colors & Font Families
 =============================== */
 :root {
-  /* Font Families */
   --font-primary: "Cairo", sans-serif;
   --font-headings: "Poppins", sans-serif;
   --font-numbers: "Roboto Mono", monospace;
-  --font-decorative: "Rakkas", serif;
+  --font-decorative: "Amiri", serif;
 
   /* Colors — WCAG Contrast Fix */
   --color-dark: #0e1628;
-  --color-primary: #d97706; /* Amber-600 */
-  --color-primary-bg: #fffbeb; /* Amber-50 */
-  --color-primary-border: #fcd34d; /* Amber-300 */
+  --color-primary: #ca8a04; /* Yellow-600 */
+  --color-primary-bg: #fefce8; /* Yellow-50 */
+  --color-primary-border: #fef08a; /* Yellow-200 */
   --color-secondary: #475569;
   --color-light: #e2e8f0;
   --color-bg: #ffffff;
   --color-surface: #f8fafc;
 
-  --color-success: #059669;
+  --color-success: #16a34a;
   --color-error: #dc2626;
-  --color-warning: #d97706;
+  --color-warning: #ca8a04;
   --color-info: #0284c7;
 
   /* تحسين contrast الخلفيات الفاتحة */
