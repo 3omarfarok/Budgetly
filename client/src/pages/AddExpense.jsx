@@ -54,17 +54,62 @@ const AddExpense = () => {
         />
 
         {user?.role === "admin" && (
-          <Select
-            label="مين اللي دفع؟"
-            value={formData.payer}
-            onChange={(e) => handleInputChange("payer", e.target.value)}
-          >
-            {users.map((u) => (
-              <option key={u._id} value={u._id}>
-                {u.name}
-              </option>
-            ))}
-          </Select>
+          <div className="space-y-3">
+            <label className="block text-sm font-semibold text-(--color-dark)">
+              مين اللي دفع؟
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-96 overflow-y-auto p-1 custom-scrollbar">
+              {users.map((u) => {
+                const isSelected = formData.payer === u._id;
+                return (
+                  <div
+                    key={u._id}
+                    onClick={() => handleInputChange("payer", u._id)}
+                    className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 group flex flex-col items-center gap-3 ${
+                      isSelected
+                        ? "bg-(--color-primary) border-(--color-primary) text-white shadow-lg scale-[1.02]"
+                        : "bg-(--color-surface) border-(--color-border) hover:border-(--color-primary) hover:shadow-md"
+                    }`}
+                  >
+                    {isSelected && (
+                      <div className="absolute top-2 right-2 bg-white text-(--color-primary) rounded-full p-0.5 shadow-sm">
+                        <Check size={14} strokeWidth={3} />
+                      </div>
+                    )}
+
+                    <div
+                      className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold border-2 ${
+                        isSelected
+                          ? "bg-white/20 border-white/50 text-white"
+                          : "bg-(--color-bg) border-(--color-border) text-(--color-primary)"
+                      }`}
+                    >
+                      {u.name.charAt(0)}
+                    </div>
+
+                    <div className="text-center w-full">
+                      <p
+                        className={`font-bold truncate text-sm mb-0.5 ${
+                          isSelected ? "text-white" : "text-(--color-dark)"
+                        }`}
+                      >
+                        {u.name}
+                      </p>
+                      <p
+                        className={`text-xs truncate ${
+                          isSelected
+                            ? "text-white/80"
+                            : "text-(--color-secondary)"
+                        }`}
+                      >
+                        @{u.username}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

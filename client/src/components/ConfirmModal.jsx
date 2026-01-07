@@ -89,7 +89,7 @@ const ConfirmModal = ({
                   </div>
                   <button
                     onClick={onClose}
-                    className="text-gray-400 hover:text-gray-500 transition-colors"
+                    className="text-gray-400 cursor-pointer hover:text-gray-500 transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -111,7 +111,7 @@ const ConfirmModal = ({
                 <div className="flex gap-3">
                   <button
                     onClick={onConfirm}
-                    className="flex-1 px-4 py-2.5 rounded-xl font-semibold transition-transform active:scale-95"
+                    className="flex-1 px-4 py-2.5 cursor-pointer rounded-xl font-semibold transition-transform active:scale-95"
                     style={{
                       backgroundColor: styles.buttonBg,
                       color: styles.buttonText,
@@ -121,7 +121,7 @@ const ConfirmModal = ({
                   </button>
                   <button
                     onClick={onClose}
-                    className="flex-1 px-4 py-2.5 rounded-xl font-semibold transition-colors"
+                    className="flex-1 px-4 py-2.5 cursor-pointer rounded-xl font-semibold transition-colors"
                     style={{
                       backgroundColor: "var(--color-light)",
                       color: "var(--color-dark)",

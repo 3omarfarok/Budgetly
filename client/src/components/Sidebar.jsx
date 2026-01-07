@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import ConfirmModal from "./ConfirmModal";
 import {
   LayoutDashboard,
   Receipt,
@@ -33,6 +34,7 @@ const Sidebar = () => {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [showPaletteMenu, setShowPaletteMenu] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   if (!user) return null;
 
@@ -116,10 +118,9 @@ const Sidebar = () => {
     },
   ];
 
-  const handleLogout = () => {
-    if (window.confirm("هل أنت متأكد أنك تريد تسجيل الخروج؟")) {
-      logout();
-    }
+  const handleLogoutConfirmation = () => {
+    logout();
+    setShowLogoutModal(false);
   };
 
   const toggleTheme = () => {
@@ -367,14 +368,23 @@ const Sidebar = () => {
 
           {/* Logout */}
           <button
-            onClick={handleLogout}
-            className="p-2 rounded-lg hover:bg-red-50 text-(--color-error) transition-colors"
+            onClick={() => setShowLogoutModal(true)}
+            className="p-2 rounded-lg hover:bg-(--color-error)/10 cursor-pointer text-(--color-error) transition-colors"
             title="تسجيل الخروج"
           >
             <LogOut size={22} />
           </button>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogoutConfirmation}
+        title="تسجيل الخروج"
+        message="هل أنت متأكد أنك تريد تسجيل الخروج؟"
+        type="danger"
+      />
     </aside>
   );
 };
