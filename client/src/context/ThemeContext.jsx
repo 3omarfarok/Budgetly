@@ -13,7 +13,7 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider = ({ children }) => {
-  const [themeMode, setThemeMode] = useState("light"); // 'light' | 'dark'
+  const [themeMode, setThemeMode] = useState("dark"); // 'light' | 'dark'
   const [currentPalette, setCurrentPalette] = useState("default");
 
   // Load saved theme and palette
