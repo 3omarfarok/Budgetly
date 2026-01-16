@@ -101,9 +101,6 @@ export function useAddExpense() {
       expenseData.selectedUsers = selectedUsers;
     }
 
-    // Debug: log the payer value being sent
-    console.log("Submitting expense with payer:", formData.payer);
-    console.log("Full expense data:", expenseData);
 
     addExpenseMutation.mutate(expenseData);
   };
