@@ -1,6 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { Search, CreditCard, CheckCircle, Clock, Plus } from "lucide-react";
+import {
+  Search,
+  CreditCard,
+  CheckCircle,
+  Clock,
+  Plus,
+  ArrowUpDown,
+} from "lucide-react";
 import ConfirmModal from "../components/ConfirmModal";
 import { useMyInvoices } from "../hooks/useMyInvoices";
 
@@ -163,6 +170,8 @@ export default function MyInvoices() {
     setFilterStatus,
     searchTerm,
     setSearchTerm,
+    sortBy,
+    setSortBy,
     filteredData,
     totalPending,
     isConfirmModalOpen,
@@ -276,6 +285,26 @@ export default function MyInvoices() {
             size={18}
           />
         </div>
+
+        {/* Sort Dropdown */}
+        <div className="relative">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="appearance-none pl-8 pr-4 py-2 bg-(--color-bg) border border-(--color-border) rounded-lg focus:ring-2 focus:ring-(--color-primary) focus:border-transparent outline-none transition-all text-(--color-dark) cursor-pointer min-w-[160px]"
+          >
+            <option value="date_desc">الأحدث أولاً</option>
+            <option value="date_asc">الأقدم أولاً</option>
+            <option value="amount_desc">المبلغ: الأعلى</option>
+            <option value="amount_asc">المبلغ: الأقل</option>
+            <option value="status">الحالة</option>
+          </select>
+          <ArrowUpDown
+            className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+            size={16}
+          />
+        </div>
+
         <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
           {filterOptions.map((status) => (
             <button

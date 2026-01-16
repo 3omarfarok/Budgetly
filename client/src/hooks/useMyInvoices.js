@@ -11,6 +11,7 @@ export function useMyInvoices() {
   const [activeTab, setActiveTab] = useState("invoices"); // "invoices" | "requests"
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("date_desc"); // "date_desc" | "date_asc" | "amount_desc" | "amount_asc" | "status"
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState(null);
 
@@ -61,8 +62,35 @@ export function useMyInvoices() {
     payMutation.mutate(selectedInvoiceId);
   };
 
+  // Sort function
+  const sortData = (data) => {
+    const sorted = [...data];
+    switch (sortBy) {
+      case "date_desc":
+        return sorted.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+      case "date_asc":
+        return sorted.sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        );
+      case "amount_desc":
+        return sorted.sort(
+          (a, b) => (b.amount || b.totalAmount) - (a.amount || a.totalAmount)
+        );
+      case "amount_asc":
+        return sorted.sort(
+          (a, b) => (a.amount || a.totalAmount) - (b.amount || b.totalAmount)
+        );
+      case "status":
+        return sorted.sort((a, b) => a.status.localeCompare(b.status));
+      default:
+        return sorted;
+    }
+  };
+
   // Filter Logic
-  const filteredData =
+  const filteredData = sortData(
     activeTab === "invoices"
       ? invoices.filter((inv) => {
           const matchesSearch = inv.description
@@ -79,7 +107,8 @@ export function useMyInvoices() {
           const matchesStatus =
             filterStatus === "all" || req.status === filterStatus;
           return matchesSearch && matchesStatus;
-        });
+        })
+  );
 
   const totalPending = invoices
     .filter((inv) => inv.status === "pending")
@@ -95,6 +124,8 @@ export function useMyInvoices() {
     setFilterStatus,
     searchTerm,
     setSearchTerm,
+    sortBy,
+    setSortBy,
     filteredData,
     totalPending,
     isConfirmModalOpen,

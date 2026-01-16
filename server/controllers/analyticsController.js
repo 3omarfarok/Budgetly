@@ -1,5 +1,5 @@
+import Invoice from "../models/Invoice.js";
 import Expense from "../models/Expense.js";
-import Payment from "../models/Payment.js";
 import User from "../models/User.js";
 
 // Get monthly analytics for user
@@ -12,11 +12,11 @@ export const getMonthlyAnalytics = async (req, res) => {
       "splits.user": userId,
     }).sort({ date: -1 });
 
-    // Get all approved payments for this user
-    const payments = await Payment.find({
+    // Get all paid invoices for this user instead of payments
+    const paidInvoices = await Invoice.find({
       user: userId,
-      status: "approved",
-    }).sort({ date: -1 });
+      status: "paid",
+    }).sort({ createdAt: -1 });
 
     // Group expenses by month
     const monthlyExpenses = {};
@@ -45,10 +45,10 @@ export const getMonthlyAnalytics = async (req, res) => {
         userSplit?.amount || 0;
     });
 
-    // Group payments by month
+    // Group paid invoices by month
     const monthlyPayments = {};
-    payments.forEach((payment) => {
-      const month = new Date(payment.date).toISOString().slice(0, 7);
+    paidInvoices.forEach((invoice) => {
+      const month = new Date(invoice.createdAt).toISOString().slice(0, 7);
 
       if (!monthlyPayments[month]) {
         monthlyPayments[month] = {
@@ -57,7 +57,7 @@ export const getMonthlyAnalytics = async (req, res) => {
         };
       }
 
-      monthlyPayments[month].total += payment.amount;
+      monthlyPayments[month].total += invoice.amount;
       monthlyPayments[month].count += 1;
     });
 
@@ -100,7 +100,7 @@ export const getMonthlyAnalytics = async (req, res) => {
       categoryBreakdown: categoryPercentages,
       summary: {
         totalExpenses: totalAllTime,
-        totalPayments: payments.reduce((sum, p) => sum + p.amount, 0),
+        totalPayments: paidInvoices.reduce((sum, inv) => sum + inv.amount, 0),
         avgMonthlyExpense: avgMonthlyExpense.toFixed(2),
         monthsTracked: monthCount,
         totalTransactions: expenses.length,

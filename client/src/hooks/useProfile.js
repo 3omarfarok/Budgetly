@@ -13,14 +13,14 @@ const useProfile = (user, updateUser) => {
   } = useQuery({
     queryKey: ["profileStats", user?.id],
     queryFn: async () => {
-      const [balancesRes, paymentsRes, expensesRes] = await Promise.all([
+      const [balancesRes, invoicesRes, expensesRes] = await Promise.all([
         api.get("/stats/balances"),
-        api.get("/payments"),
+        api.get("/invoices/my-invoices"),
         api.get("/expenses?limit=1000"),
       ]);
 
       const balances = balancesRes.data;
-      const payments = paymentsRes.data;
+      const invoices = invoicesRes.data;
       // Handle both paginated (object) and non-paginated (array) responses
       const expenses = Array.isArray(expensesRes.data)
         ? expensesRes.data
@@ -29,11 +29,6 @@ const useProfile = (user, updateUser) => {
       // Find current user's balance
       const userBalance =
         balances.find((b) => b.userId.toString() === user.id) || {};
-
-      // Filter user's payments
-      const userPayments = payments.filter(
-        (p) => p.user && p.user._id === user.id
-      );
 
       // Filter expenses that include this user
       const userExpenses = expenses.filter((e) =>
@@ -44,12 +39,12 @@ const useProfile = (user, updateUser) => {
         balance: userBalance.balance || 0,
         totalOwed: userBalance.totalOwed || 0,
         totalPaid: userBalance.totalPaid || 0,
-        paymentsCount: userPayments.length,
+        paymentsCount: invoices.filter((i) => i.status === "paid").length, // Using paid invoices as payment count
         expensesCount: userExpenses.length,
-        pendingPayments: userPayments.filter((p) => p.status === "pending")
-          .length,
-        approvedPayments: userPayments.filter((p) => p.status === "approved")
-          .length,
+        pendingPayments: invoices.filter(
+          (i) => i.status === "pending" || i.status === "awaiting_approval"
+        ).length,
+        approvedPayments: invoices.filter((i) => i.status === "paid").length,
       };
     },
     enabled: !!user,
