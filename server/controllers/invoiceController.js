@@ -165,7 +165,59 @@ export const rejectInvoicePayment = async (req, res) => {
 
     res.json(invoice);
   } catch (error) {
-    console.error("Reject invoice error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// User pays ALL pending invoices
+export const payBulkInvoices = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user || !user.house) {
+      return res.status(400).json({ message: "User not in a house" });
+    }
+
+    // Find all pending invoices for this user
+    const pendingInvoices = await Invoice.find({
+      user: req.user.id,
+      house: user.house,
+      status: "pending",
+    });
+
+    if (pendingInvoices.length === 0) {
+      return res.status(400).json({ message: "No pending invoices found" });
+    }
+
+    const updatedInvoices = [];
+
+    // Process each invoice
+    // We use a loop to create individual payment requests for better tracking
+    for (const invoice of pendingInvoices) {
+      // Create Payment Record (Pending)
+      const payment = await Payment.create({
+        user: req.user.id,
+        amount: invoice.amount,
+        description: `Bulk Payment for Invoice: ${invoice.description}`,
+        status: "pending",
+        transactionType: "payment",
+        recordedBy: req.user.id,
+        house: invoice.house,
+      });
+
+      // Update Invoice
+      invoice.status = "awaiting_approval";
+      invoice.paymentRequest = payment._id;
+      await invoice.save();
+      updatedInvoices.push(invoice);
+    }
+
+    res.json({
+      message: `Successfully submitted payment requests for ${updatedInvoices.length} invoices`,
+      count: updatedInvoices.length,
+      invoices: updatedInvoices,
+    });
+  } catch (error) {
+    console.error("Bulk pay error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

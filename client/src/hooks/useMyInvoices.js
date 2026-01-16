@@ -35,31 +35,64 @@ export function useMyInvoices() {
     enabled: !!user,
   });
 
+  // Bulk payment state
+  const [isBulkPayModalOpen, setIsBulkPayModalOpen] = useState(false);
+
   const loading = loadingInvoices || loadingRequests;
 
   // Mutations
-  const payMutation = useMutation({
+  // Pay Single Invoice Mutation
+  const payInvoiceMutation = useMutation({
     mutationFn: (invoiceId) => api.post(`/invoices/${invoiceId}/pay`),
     onSuccess: () => {
       queryClient.invalidateQueries(["myInvoices"]);
+      queryClient.invalidateQueries(["profileStats"]); // Update stats
       toast.success("تم إرسال طلب الدفع بنجاح!");
       setIsConfirmModalOpen(false);
       setSelectedInvoiceId(null);
     },
     onError: (error) => {
       console.error("Payment error:", error);
-      toast.error(error.response?.data?.message || "فشل إرسال طلب الدفع");
+      const msg = error.response?.data?.message || "فشل إرسال طلب الدفع";
+      toast.error(msg);
     },
   });
 
+  // Pay All Invoices Mutation
+  const payAllInvoicesMutation = useMutation({
+    mutationFn: () => api.post("/invoices/bulk-pay"),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["myInvoices"]);
+      queryClient.invalidateQueries(["profileStats"]);
+      toast.success(`تم إرسال طلبات الدفع لـ ${data.data.count} فاتورة بنجاح!`);
+      setIsBulkPayModalOpen(false);
+    },
+    onError: (error) => {
+      console.error("Bulk Payment error:", error);
+      const msg =
+        error.response?.data?.message || "حدث خطأ أثناء الدفع الجماعي";
+      toast.error(msg);
+    },
+  });
+
+  // Handlers
   const handlePay = (invoiceId) => {
     setSelectedInvoiceId(invoiceId);
     setIsConfirmModalOpen(true);
   };
 
   const confirmPayment = () => {
-    if (!selectedInvoiceId) return;
-    payMutation.mutate(selectedInvoiceId);
+    if (selectedInvoiceId) {
+      payInvoiceMutation.mutate(selectedInvoiceId);
+    }
+  };
+
+  const handleBulkPay = () => {
+    setIsBulkPayModalOpen(true);
+  };
+
+  const confirmBulkPayment = () => {
+    payAllInvoicesMutation.mutate();
   };
 
   // Sort function
@@ -132,6 +165,12 @@ export function useMyInvoices() {
     setIsConfirmModalOpen,
     handlePay,
     confirmPayment,
-    isPaying: payMutation.isPending,
+    isPaying: payInvoiceMutation.isPending,
+    // Bulk Payment Exports
+    isBulkPayModalOpen,
+    setIsBulkPayModalOpen,
+    handleBulkPay,
+    confirmBulkPayment,
+    isBulkPaying: payAllInvoicesMutation.isPending,
   };
 }

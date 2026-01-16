@@ -69,7 +69,14 @@ export const createExpense = async (req, res) => {
 
     const isAdmin = user.role === "admin";
     const status = isAdmin ? "approved" : "pending";
+
+    // Debug: log payer value received
+    console.log("Received payer from request:", payer);
+    console.log("Is admin:", isAdmin);
+    console.log("req.user.id:", req.user.id);
+
     const payerId = isAdmin && payer ? payer : req.user.id;
+    console.log("Final payerId:", payerId);
 
     let finalSplits = [];
 
@@ -101,7 +108,8 @@ export const createExpense = async (req, res) => {
       totalAmount,
       splitType,
       splits: finalSplits,
-      createdBy: payerId,
+      createdBy: req.user.id, // Always the user who created the request
+      paidBy: payerId, // The person who paid (selected by admin or default to creator)
       house: user.house,
       status,
     });
@@ -109,7 +117,7 @@ export const createExpense = async (req, res) => {
     // Only generate Invoices if Admin (Approved immediately)
     if (status === "approved") {
       const invoicePromises = finalSplits.map((split) => {
-        const isPayer = split.user.toString() === payerId.toString();
+        const isPayer = split.user.toString() === expense.paidBy.toString();
         return Invoice.create({
           user: split.user,
           expense: expense._id,
@@ -150,8 +158,9 @@ export const approveExpense = async (req, res) => {
 
     // Generate Invoices
     const invoicePromises = expense.splits.map((split) => {
-      // Payer is the one who created the expense
-      const isPayer = split.user.toString() === expense.createdBy.toString();
+      // Payer is stored in paidBy field, fallback to createdBy for backward compatibility
+      const payerId = expense.paidBy || expense.createdBy;
+      const isPayer = split.user.toString() === payerId.toString();
 
       return Invoice.create({
         user: split.user,

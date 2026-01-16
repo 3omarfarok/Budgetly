@@ -88,13 +88,13 @@ const MobileInvoiceCard = ({ invoice, onApprove, onReject, showUser }) => (
       <div className="flex gap-2 pt-2 border-t border-(--color-border)">
         <button
           onClick={() => onApprove(invoice._id)}
-          className="flex-1 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm font-bold transition-colors flex items-center justify-center gap-2"
+          className="flex-1 py-2 bg-(--color-status-approved-bg) text-(--color-status-approved) rounded-lg hover:opacity-80 text-sm font-bold transition-colors flex items-center justify-center gap-2"
         >
           <Check size={16} /> موافقة
         </button>
         <button
           onClick={() => onReject(invoice._id)}
-          className="flex-1 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-sm font-bold transition-colors flex items-center justify-center gap-2"
+          className="flex-1 py-2 bg-(--color-status-rejected-bg) text-(--color-status-rejected) rounded-lg hover:opacity-80 text-sm font-bold transition-colors flex items-center justify-center gap-2"
         >
           <X size={16} /> رفض
         </button>
@@ -119,7 +119,7 @@ const MobileRequestCard = ({ request, onOpenDetails, onApprove, onReject }) => (
           </p>
         </div>
       </div>
-      <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">
+      <span className="px-2 py-1 bg-(--color-status-pending-bg) text-(--color-status-pending) rounded-full text-xs font-bold">
         معلق
       </span>
     </div>
@@ -142,13 +142,13 @@ const MobileRequestCard = ({ request, onOpenDetails, onApprove, onReject }) => (
       </button>
       <button
         onClick={() => onApprove(request._id)}
-        className="py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm font-bold transition-colors"
+        className="py-2 bg-(--color-status-approved-bg) text-(--color-status-approved) rounded-lg hover:opacity-80 text-sm font-bold transition-colors"
       >
         موافقة
       </button>
       <button
         onClick={() => onReject(request._id)}
-        className="py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-sm font-bold transition-colors"
+        className="py-2 bg-(--color-status-rejected-bg) text-(--color-status-rejected) rounded-lg hover:opacity-80 text-sm font-bold transition-colors"
       >
         رفض
       </button>
@@ -213,14 +213,14 @@ const InvoicesTable = ({
                 <>
                   <button
                     onClick={() => onApprove(invoice._id)}
-                    className="p-1.5 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors"
+                    className="p-1.5 bg-(--color-status-approved-bg) text-(--color-status-approved) rounded-lg hover:opacity-80 transition-colors"
                     title="موافقة"
                   >
                     <Check size={16} />
                   </button>
                   <button
                     onClick={() => onReject(invoice._id)}
-                    className="p-1.5 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                    className="p-1.5 bg-(--color-status-rejected-bg) text-(--color-status-rejected) rounded-lg hover:opacity-80 transition-colors"
                     title="رفض"
                   >
                     <X size={16} />
@@ -469,7 +469,7 @@ const RequestDetailsModal = ({ isOpen, onClose, request }) => {
                           {split.user.name}
                         </p>
                         {isPayer && (
-                          <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">
+                          <span className="text-[10px] bg-(--color-status-approved-bg) text-(--color-status-approved) px-2 py-0.5 rounded-full font-bold">
                             الدافع
                           </span>
                         )}
@@ -596,13 +596,13 @@ export default function AllInvoices() {
                         </button>
                         <button
                           onClick={() => handleApproveRequest(req._id)}
-                          className="px-3 py-1 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-xs font-bold transition-colors"
+                          className="px-3 py-1 bg-(--color-status-approved-bg) text-(--color-status-approved) rounded-lg hover:opacity-80 text-xs font-bold transition-colors"
                         >
                           موافقة
                         </button>
                         <button
                           onClick={() => handleRejectRequest(req._id)}
-                          className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-xs font-bold transition-colors"
+                          className="px-3 py-1 bg-(--color-status-rejected-bg) text-(--color-status-rejected) rounded-lg hover:opacity-80 text-xs font-bold transition-colors"
                         >
                           رفض
                         </button>

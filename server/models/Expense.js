@@ -47,6 +47,11 @@ const expenseSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    paidBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      // Optional - will be set when expense is approved or when admin creates it
+    },
     generatedFromPayment: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Payment",

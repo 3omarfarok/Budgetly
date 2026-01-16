@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import {
@@ -7,6 +8,9 @@ import {
   Clock,
   Plus,
   ArrowUpDown,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import ConfirmModal from "../components/ConfirmModal";
 import { useMyInvoices } from "../hooks/useMyInvoices";
@@ -179,7 +183,48 @@ export default function MyInvoices() {
     handlePay,
     confirmPayment,
     isPaying,
+    // Bulk Payment
+    isBulkPayModalOpen,
+    setIsBulkPayModalOpen,
+    handleBulkPay,
+    confirmBulkPayment,
+    isBulkPaying,
   } = useMyInvoices();
+
+  // Calculate pending invoices count and total for bulk payment
+  const pendingInvoicesCount = filteredData
+    ? filteredData.filter((item) => item.status === "pending").length
+    : 0;
+
+  const pendingInvoicesTotal = filteredData
+    ? filteredData
+        .filter((item) => item.status === "pending")
+        .reduce((sum, item) => sum + (item.amount || 0), 0)
+    : 0;
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+
+  // Calculate paginated data
+  const totalPages = Math.ceil((filteredData?.length || 0) / itemsPerPage);
+  const paginatedData = filteredData
+    ? filteredData.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+      )
+    : [];
+
+  // Reset to page 1 when tab or filter changes
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setCurrentPage(1);
+  };
+
+  const handleFilterChange = (status) => {
+    setFilterStatus(status);
+    setCurrentPage(1);
+  };
 
   const statusFilterLabels =
     activeTab === "invoices"
@@ -216,6 +261,20 @@ export default function MyInvoices() {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Pay All Button - Only show when there are pending invoices */}
+          {activeTab === "invoices" && pendingInvoicesCount > 0 && (
+            <button
+              onClick={handleBulkPay}
+              className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition-all font-medium shadow-sm hover:shadow-md"
+            >
+              <CheckCircle2 size={20} />
+              <span className="hidden sm:inline">
+                دفع الكل ({pendingInvoicesTotal.toLocaleString()} ج.م)
+              </span>
+              <span className="sm:hidden">دفع الكل</span>
+            </button>
+          )}
+
           <button
             onClick={() => navigate("/add-expense")}
             className="flex items-center gap-2 bg-(--color-primary) text-white px-4 py-2 rounded-xl hover:brightness-90 transition-all font-medium shadow-sm hover:shadow-md"
@@ -245,7 +304,7 @@ export default function MyInvoices() {
       {/* Tabs */}
       <div className="flex bg-(--color-surface) p-1 rounded-xl border border-(--color-border) w-fit">
         <button
-          onClick={() => setActiveTab("invoices")}
+          onClick={() => handleTabChange("invoices")}
           className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
             activeTab === "invoices"
               ? "bg-(--color-primary) text-white shadow-sm"
@@ -255,7 +314,7 @@ export default function MyInvoices() {
           فواتيري
         </button>
         <button
-          onClick={() => setActiveTab("requests")}
+          onClick={() => handleTabChange("requests")}
           className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
             activeTab === "requests"
               ? "bg-(--color-primary) text-white shadow-sm"
@@ -309,7 +368,7 @@ export default function MyInvoices() {
           {filterOptions.map((status) => (
             <button
               key={status}
-              onClick={() => setFilterStatus(status)}
+              onClick={() => handleFilterChange(status)}
               className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
                 filterStatus === status
                   ? "bg-(--color-primary) text-white"
@@ -336,7 +395,7 @@ export default function MyInvoices() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredData.map((item) =>
+          {paginatedData.map((item) =>
             activeTab === "invoices" ? (
               <InvoiceCard key={item._id} invoice={item} onPay={handlePay} />
             ) : (
@@ -345,15 +404,65 @@ export default function MyInvoices() {
           )}
         </div>
       )}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 py-4">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="p-2 rounded-lg border border-(--color-border) disabled:opacity-50 disabled:cursor-not-allowed hover:bg-(--color-hover) transition-colors"
+          >
+            <ChevronRight size={20} className="text-(--color-dark)" />
+          </button>
+
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`w-10 h-10 rounded-lg font-medium transition-colors ${
+                  currentPage === page
+                    ? "bg-(--color-primary) text-white"
+                    : "bg-(--color-surface) text-(--color-dark) hover:bg-(--color-hover) border border-(--color-border)"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="p-2 rounded-lg border border-(--color-border) disabled:opacity-50 disabled:cursor-not-allowed hover:bg-(--color-hover) transition-colors"
+          >
+            <ChevronLeft size={20} className="text-(--color-dark)" />
+          </button>
+        </div>
+      )}
       {/* Confirm Modal */}
       <ConfirmModal
         isOpen={isConfirmModalOpen}
         onClose={() => setIsConfirmModalOpen(false)}
         onConfirm={confirmPayment}
         title="تأكيد الدفع"
-        message="هل أنت متأكد أنك تريد دفع هذه الفاتورة؟ سيتم إرسال طلب للموافقة."
-        type="info"
-        loading={isPaying}
+        message="هل أنت متأكد من دفع هذه الفاتورة؟ سيتم إرسال إشعار للمسؤول للموافقة."
+        confirmText={isPaying ? "جاري الدفع..." : "تأكيد الدفع"}
+        cancelText="إلغاء"
+        isLoading={isPaying}
+      />
+
+      <ConfirmModal
+        isOpen={isBulkPayModalOpen}
+        onClose={() => setIsBulkPayModalOpen(false)}
+        onConfirm={confirmBulkPayment}
+        title={`دفع الكل (${pendingInvoicesCount} فواتير)`}
+        message={`هل أنت متأكد من دفع جميع الفواتير المعلقة بإجمالي ${pendingInvoicesTotal.toLocaleString()} ج.م؟ سيتم إرسال طلبات دفع للمسؤول.`}
+        confirmText={isBulkPaying ? "جاري الدفع..." : "تأكيد الدفع للكل"}
+        cancelText="إلغاء"
+        isLoading={isBulkPaying}
+        type="primary"
       />
     </div>
   );
