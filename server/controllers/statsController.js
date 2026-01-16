@@ -5,10 +5,11 @@ import User from "../models/User.js";
 
 // Helper to calculate balance for a user
 const calculateUserBalance = async (userId, houseId) => {
-  // 1. External Paid (Credit): Expenses created by user
+  // 1. External Paid (Credit): Expenses created by user (only approved)
   const expensesCreated = await Expense.find({
     house: houseId,
     createdBy: userId,
+    status: "approved",
   });
   const externalPaid = expensesCreated.reduce(
     (sum, e) => sum + e.totalAmount,
@@ -151,7 +152,10 @@ export const getAdminDashboard = async (req, res) => {
     }
 
     const users = await User.find({ isActive: true, house: currentUser.house });
-    const expenses = await Expense.find({ house: currentUser.house });
+    const expenses = await Expense.find({
+      house: currentUser.house,
+      status: "approved",
+    });
     const invoices = await Invoice.find({ house: currentUser.house });
     const payments = await Payment.find({ house: currentUser.house });
 

@@ -10,18 +10,19 @@ export const getExpenses = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const query = {};
+    // Get user's house for filtering
+    const currentUser = await User.findById(req.user.id);
+    if (!currentUser || !currentUser.house) {
+      return res.status(400).json({ message: "User not in a house" });
+    }
+
+    const query = { house: currentUser.house };
     if (req.query.status) {
       query.status = req.query.status;
     }
     if (req.query.createdBy) {
       query.createdBy = req.query.createdBy;
     }
-    // If user is not admin, show their own requests + all approved expenses (which are shared history)
-    // OR just show all for simplicity as requested "View all invoices they created"
-    // Let's stick to: Admin sees all. User sees createdBy them OR involved in splits (complex).
-    // For "My Requests" tab on frontend, we will filter by createdBy.
-    // Here we just return all or filtered by status.
 
     const totalExpenses = await Expense.countDocuments(query);
     const totalPages = Math.ceil(totalExpenses / limit);
@@ -206,10 +207,20 @@ export const updateExpense = async (req, res) => {
       customSplits,
     } = req.body;
 
+    // Get the expense first to know its house
+    const existingExpense = await Expense.findById(req.params.id);
+    if (!existingExpense) {
+      return res.status(404).json({ message: "Expense not found" });
+    }
+
     let finalSplits = [];
 
     if (splitType === "equal") {
-      const users = await User.find({ isActive: true });
+      // Get all active users in the SAME HOUSE only
+      const users = await User.find({
+        isActive: true,
+        house: existingExpense.house,
+      });
       const amountPerUser = totalAmount / users.length;
       finalSplits = users.map((user) => ({
         user: user._id,
@@ -253,13 +264,19 @@ export const updateExpense = async (req, res) => {
 // Delete expense (Admin only)
 export const deleteExpense = async (req, res) => {
   try {
-    const expense = await Expense.findByIdAndDelete(req.params.id);
+    const expense = await Expense.findById(req.params.id);
 
     if (!expense) {
       return res.status(404).json({ message: "Expense not found" });
     }
 
-    res.json({ message: "Expense deleted" });
+    // Cascade delete: Remove all invoices linked to this expense
+    await Invoice.deleteMany({ expense: expense._id });
+
+    // Now delete the expense
+    await Expense.findByIdAndDelete(req.params.id);
+
+    res.json({ message: "Expense and related invoices deleted" });
   } catch (error) {
     console.error("Delete expense error:", error);
     res.status(500).json({ message: "Server error" });

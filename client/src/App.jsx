@@ -29,7 +29,7 @@ import HouseDetails from "./pages/HouseDetails";
 import Dashboard from "./pages/Dashboard";
 import Expenses from "./pages/Expenses";
 import AddExpense from "./pages/AddExpense";
-import Payments from "./pages/Payments";
+
 import Analytics from "./pages/Analytics";
 import Profile from "./pages/Profile";
 import About from "./pages/About";
@@ -119,14 +119,6 @@ function App() {
                         }
                       />
 
-                      <Route
-                        path="/payments"
-                        element={
-                          <ProtectedRoute>
-                            <Payments />
-                          </ProtectedRoute>
-                        }
-                      />
                       <Route
                         path="/my-invoices"
                         element={

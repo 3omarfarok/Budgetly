@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
 import expenseRoutes from "./routes/expenses.js";
-import paymentRoutes from "./routes/payments.js";
+
 import statsRoutes from "./routes/stats.js";
 import analyticsRoutes from "./routes/analytics.js";
 import noteRoutes from "./routes/notes.js";
@@ -53,7 +53,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/houses", housesRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/expenses", expenseRoutes);
-app.use("/api/payments", paymentRoutes);
+
 app.use("/api/stats", statsRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/notes", noteRoutes);
