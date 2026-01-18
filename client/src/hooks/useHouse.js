@@ -84,6 +84,63 @@ const useHouse = (houseId) => {
     },
   });
 
+  // Clear all house data (expenses, invoices, payments)
+  const clearAllDataMutation = useMutation({
+    mutationFn: () => api.delete(`/houses/${houseId}/clear-data`),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries(["expenses"]);
+      queryClient.invalidateQueries(["allInvoices"]);
+      queryClient.invalidateQueries(["myInvoices"]);
+      const { deleted } = response.data;
+      toast.success(
+        `تم حذف ${deleted.expenses} مصروف و ${deleted.invoices} فاتورة و ${deleted.payments} عملية دفع`,
+      );
+    },
+    onError: (error) => {
+      console.error("Error clearing house data:", error);
+      toast.error(error.response?.data?.message || "فشل حذف البيانات");
+    },
+  });
+
+  // Export house data as CSV
+  const exportData = async (type) => {
+    try {
+      const response = await api.get(`/houses/${houseId}/export/${type}`, {
+        responseType: "blob",
+      });
+
+      // Create download link
+      const blob = new Blob([response.data], {
+        type: "text/csv;charset=utf-8",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+
+      // Extract filename from header or create one
+      const contentDisposition = response.headers["content-disposition"];
+      let filename = `${type}_export.csv`;
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+        if (filenameMatch) filename = filenameMatch[1];
+      }
+
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success(
+        `تم تصدير ${type === "expenses" ? "المصاريف" : "الفواتير"} بنجاح`,
+      );
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      const message = error.response?.data?.message || "فشل تصدير البيانات";
+      toast.error(message);
+    }
+  };
+
   return {
     house,
     loading,
@@ -93,8 +150,11 @@ const useHouse = (houseId) => {
     removeMember: removeMemberMutation.mutateAsync,
     leaveHouse: leaveHouseMutation.mutateAsync,
     deleteHouse: deleteHouseMutation.mutateAsync,
+    clearAllData: clearAllDataMutation.mutateAsync,
+    exportData,
     isUpdatingName: updateNameMutation.isPending,
     isUpdatingPassword: updatePasswordMutation.isPending,
+    isClearingData: clearAllDataMutation.isPending,
   };
 };
 

@@ -1,5 +1,8 @@
 import House from "../models/House.js";
 import User from "../models/User.js";
+import Expense from "../models/Expense.js";
+import Invoice from "../models/Invoice.js";
+import Payment from "../models/Payment.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -76,7 +79,7 @@ export const createHouse = async (req, res) => {
       if (oldHouse) {
         // Remove user from old house members
         oldHouse.members = oldHouse.members.filter(
-          (memberId) => memberId.toString() !== user._id.toString()
+          (memberId) => memberId.toString() !== user._id.toString(),
         );
         await oldHouse.save();
       }
@@ -108,7 +111,7 @@ export const createHouse = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, username: user.username, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "30d" }
+      { expiresIn: "30d" },
     );
 
     const populatedHouse = await House.findById(house._id)
@@ -150,7 +153,7 @@ export const joinHouse = async (req, res) => {
       if (oldHouse) {
         // Remove user from old house members
         oldHouse.members = oldHouse.members.filter(
-          (memberId) => memberId.toString() !== user._id.toString()
+          (memberId) => memberId.toString() !== user._id.toString(),
         );
         await oldHouse.save();
       }
@@ -179,7 +182,7 @@ export const joinHouse = async (req, res) => {
 
     // Check if user is already a member
     const isAlreadyMember = house.members.some(
-      (memberId) => memberId.toString() === user._id.toString()
+      (memberId) => memberId.toString() === user._id.toString(),
     );
 
     if (!isAlreadyMember) {
@@ -353,7 +356,7 @@ export const leaveHouse = async (req, res) => {
 
     // Remove user from house members
     house.members = house.members.filter(
-      (memberId) => memberId.toString() !== user._id.toString()
+      (memberId) => memberId.toString() !== user._id.toString(),
     );
     await house.save();
 
@@ -393,7 +396,7 @@ export const removeMember = async (req, res) => {
 
     // Check if member exists in house
     const memberIndex = house.members.findIndex(
-      (id) => id.toString() === memberId
+      (id) => id.toString() === memberId,
     );
     if (memberIndex === -1) {
       return res
@@ -435,7 +438,7 @@ export const deleteHouse = async (req, res) => {
     // Remove house reference from all members
     await User.updateMany(
       { house: house._id },
-      { $set: { house: null, role: "user" } }
+      { $set: { house: null, role: "user" } },
     );
 
     await House.findByIdAndDelete(req.params.id);
@@ -443,6 +446,155 @@ export const deleteHouse = async (req, res) => {
     res.json({ message: "House deleted successfully" });
   } catch (error) {
     console.error("Delete house error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Clear all expenses, invoices, and payments for a house (admin only)
+export const clearAllHouseData = async (req, res) => {
+  try {
+    const house = await House.findById(req.params.id);
+    if (!house) {
+      return res.status(404).json({ message: "House not found" });
+    }
+
+    // Check if user is admin of this house
+    if (house.admin.toString() !== req.user.id.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Only the house admin can clear house data" });
+    }
+
+    // Delete all related data
+    const expenseResult = await Expense.deleteMany({ house: house._id });
+    const invoiceResult = await Invoice.deleteMany({ house: house._id });
+    const paymentResult = await Payment.deleteMany({ house: house._id });
+
+    res.json({
+      message: "All house data cleared successfully",
+      deleted: {
+        expenses: expenseResult.deletedCount,
+        invoices: invoiceResult.deletedCount,
+        payments: paymentResult.deletedCount,
+      },
+    });
+  } catch (error) {
+    console.error("Clear house data error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Export house data as CSV (admin only)
+export const exportHouseData = async (req, res) => {
+  try {
+    const { type } = req.params; // 'expenses' or 'invoices'
+    const house = await House.findById(req.params.id);
+
+    if (!house) {
+      return res.status(404).json({ message: "House not found" });
+    }
+
+    // Check if user is admin of this house
+    if (house.admin.toString() !== req.user.id.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Only the house admin can export house data" });
+    }
+
+    let data = [];
+    let headers = [];
+    let filename = "";
+
+    if (type === "expenses") {
+      const expenses = await Expense.find({ house: house._id })
+        .populate("createdBy", "name username")
+        .populate("paidBy", "name username")
+        .populate("splits.user", "name username")
+        .sort({ date: -1 });
+
+      headers = [
+        "التاريخ",
+        "الوصف",
+        "الفئة",
+        "المبلغ الإجمالي",
+        "نوع التقسيم",
+        "الحالة",
+        "أُنشئ بواسطة",
+        "دُفع بواسطة",
+        "التقسيمات",
+      ];
+      data = expenses.map((exp) => ({
+        التاريخ: new Date(exp.date).toLocaleDateString("ar-EG"),
+        الوصف: exp.description,
+        الفئة: exp.category,
+        "المبلغ الإجمالي": exp.totalAmount,
+        "نوع التقسيم": exp.splitType,
+        الحالة: exp.status,
+        "أُنشئ بواسطة": exp.createdBy?.name || "N/A",
+        "دُفع بواسطة": exp.paidBy?.name || "N/A",
+        التقسيمات: exp.splits
+          .map((s) => `${s.user?.name || "N/A"}: ${s.amount}`)
+          .join(" | "),
+      }));
+      filename = `expenses_${house._id}_${Date.now()}.csv`;
+    } else if (type === "invoices") {
+      const invoices = await Invoice.find({ house: house._id })
+        .populate("user", "name username")
+        .populate("expense", "description category")
+        .sort({ createdAt: -1 });
+
+      headers = [
+        "التاريخ",
+        "المستخدم",
+        "الوصف",
+        "المبلغ",
+        "الحالة",
+        "تاريخ الاستحقاق",
+      ];
+      data = invoices.map((inv) => ({
+        التاريخ: new Date(inv.createdAt).toLocaleDateString("ar-EG"),
+        المستخدم: inv.user?.name || "N/A",
+        الوصف: inv.description,
+        المبلغ: inv.amount,
+        الحالة: inv.status,
+        "تاريخ الاستحقاق": inv.dueDate
+          ? new Date(inv.dueDate).toLocaleDateString("ar-EG")
+          : "N/A",
+      }));
+      filename = `invoices_${house._id}_${Date.now()}.csv`;
+    } else {
+      return res
+        .status(400)
+        .json({ message: "Invalid export type. Use 'expenses' or 'invoices'" });
+    }
+
+    // Convert to CSV
+    if (data.length === 0) {
+      return res.status(404).json({ message: "No data found to export" });
+    }
+
+    // Add BOM for UTF-8 Excel compatibility
+    const BOM = "\uFEFF";
+    const csvRows = [];
+    csvRows.push(headers.join(","));
+
+    for (const row of data) {
+      const values = headers.map((header) => {
+        const val = row[header] ?? "";
+        // Escape quotes and wrap in quotes if contains comma
+        const stringVal = String(val).replace(/"/g, '""');
+        return `"${stringVal}"`;
+      });
+      csvRows.push(values.join(","));
+    }
+
+    const csvContent = BOM + csvRows.join("\n");
+
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
+    res.send(csvContent);
+  } catch (error) {
+    console.error("Export house data error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

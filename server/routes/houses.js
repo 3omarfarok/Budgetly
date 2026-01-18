@@ -11,6 +11,8 @@ import {
   leaveHouse,
   removeMember,
   deleteHouse,
+  clearAllHouseData,
+  exportHouseData,
 } from "../controllers/houseController.js";
 
 const router = express.Router();
@@ -41,6 +43,12 @@ router.post("/:id/leave", authenticate, leaveHouse);
 
 // Remove member from house (admin only)
 router.delete("/:id/members/:memberId", authenticate, removeMember);
+
+// Clear all house data (expenses, invoices, payments) - admin only
+router.delete("/:id/clear-data", authenticate, clearAllHouseData);
+
+// Export house data as CSV - admin only
+router.get("/:id/export/:type", authenticate, exportHouseData);
 
 // Delete house (admin only)
 router.delete("/:id", authenticate, deleteHouse);

@@ -6,10 +6,15 @@ import QuoteCard from "../components/QuoteCard";
 import WelcomeModal from "../components/WelcomeModal";
 import AdminDashboard from "../components/dashboard/AdminDashboard";
 import UserDashboard from "../components/dashboard/UserDashboard";
+import DishwashingWidget from "../components/dishwashing/DishwashingWidget";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { stats, loading } = useDashboardStats();
+
+  // Get house ID from user
+  const houseId =
+    typeof user?.house === "object" ? user?.house?._id : user?.house;
 
   if (loading) return <Loader text="بنحمّل لوحة التحكم..." />;
 
@@ -30,6 +35,13 @@ const Dashboard = () => {
       </div>
 
       <WelcomeModal />
+
+      {/* Dishwashing Widget */}
+      {houseId && (
+        <div className="mb-6">
+          <DishwashingWidget houseId={houseId} />
+        </div>
+      )}
 
       <div className="mb-8">
         <QuoteCard />

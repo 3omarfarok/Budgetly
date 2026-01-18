@@ -12,11 +12,16 @@ import {
   UserX,
   Copy,
   CheckCheck,
+  Download,
+  FileSpreadsheet,
+  AlertTriangle,
+  UtensilsCrossed,
 } from "lucide-react";
 import Loader from "../components/Loader";
 import Input from "../components/Input";
 import ConfirmModal from "../components/ConfirmModal";
 import useHouse from "../hooks/useHouse";
+import DishwashingSettings from "../components/dishwashing/DishwashingSettings";
 
 const HouseDetails = () => {
   const { id } = useParams();
@@ -34,8 +39,11 @@ const HouseDetails = () => {
     removeMember,
     leaveHouse,
     deleteHouse,
+    clearAllData,
+    exportData,
     isUpdatingName,
     isUpdatingPassword,
+    isClearingData,
   } = useHouse(houseId);
 
   const [activeTab, setActiveTab] = useState("members");
@@ -51,6 +59,7 @@ const HouseDetails = () => {
   // Modals State
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showClearDataModal, setShowClearDataModal] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState(null);
 
   // Copy ID State
@@ -116,6 +125,19 @@ const HouseDetails = () => {
     } catch (err) {
       // Handled in hook
     }
+  };
+
+  const handleClearAllData = async () => {
+    try {
+      await clearAllData();
+      setShowClearDataModal(false);
+    } catch (err) {
+      // Handled in hook
+    }
+  };
+
+  const handleExport = async (type) => {
+    await exportData(type);
   };
 
   if (loading) return <Loader text="بنحمّل تفاصيل البيت..." />;
@@ -242,6 +264,21 @@ const HouseDetails = () => {
             </div>
           </button>
         )}
+        {isAdmin && (
+          <button
+            onClick={() => setActiveTab("dishwashing")}
+            className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
+              activeTab === "dishwashing"
+                ? "bg-(--color-primary) text-white shadow-md"
+                : "text-(--color-muted) hover:bg-(--color-bg)"
+            }`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <UtensilsCrossed size={18} />
+              <span>الأطباق</span>
+            </div>
+          </button>
+        )}
       </div>
 
       {/* Tab Content */}
@@ -355,22 +392,78 @@ const HouseDetails = () => {
               )}
             </div>
 
+            {/* Data Export Section */}
+            <div className="bg-(--color-surface) p-6 rounded-2xl border border-(--color-border) shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-(--color-success)/10 text-(--color-success) rounded-lg">
+                  <Download size={24} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-(--color-dark)">
+                    تصدير البيانات
+                  </h3>
+                  <p className="text-xs text-(--color-muted)">
+                    تحميل البيانات كملف CSV
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => handleExport("expenses")}
+                  className="flex items-center justify-center gap-2 py-3 border-2 border-dashed border-(--color-border) rounded-xl text-(--color-secondary) font-bold hover:border-(--color-success) hover:text-(--color-success) transition-all"
+                >
+                  <FileSpreadsheet size={18} />
+                  تصدير المصاريف
+                </button>
+                <button
+                  onClick={() => handleExport("invoices")}
+                  className="flex items-center justify-center gap-2 py-3 border-2 border-dashed border-(--color-border) rounded-xl text-(--color-secondary) font-bold hover:border-(--color-success) hover:text-(--color-success) transition-all"
+                >
+                  <FileSpreadsheet size={18} />
+                  تصدير الفواتير
+                </button>
+              </div>
+            </div>
+
             {/* Danger Zone */}
-            <div className="bg-(--color-surface) p-6 rounded-2xl border border-(--color-border)">
-              <h3 className="font-bold text-(--color-red) mb-4 flex items-center gap-2">
+            <div className="bg-(--color-surface) p-6 rounded-2xl border border-(--color-error)/30 shadow-sm">
+              <h3 className="font-bold text-(--color-error) mb-4 flex items-center gap-2">
                 <div className="p-2 bg-(--color-error)/10 text-(--color-error) rounded-lg">
-                  <Shield size={20} />
+                  <AlertTriangle size={20} />
                 </div>
                 منطقة الخطر
               </h3>
 
               <div className="flex flex-col gap-3">
-                {/* Only admin can delete house, but check safely */}
+                {/* Clear All Data */}
+                <button
+                  onClick={() => setShowClearDataModal(true)}
+                  disabled={isClearingData}
+                  className="flex items-center justify-between p-4 hover:bg-(--color-warning)/10 rounded-xl border border-(--color-warning) text-(--color-warning) cursor-pointer transition-all shadow-sm group disabled:opacity-50"
+                >
+                  <div className="text-right">
+                    <span className="font-bold block">مسح كل البيانات</span>
+                    <span className="text-xs opacity-75">
+                      حذف جميع المصاريف والفواتير
+                    </span>
+                  </div>
+                  <Trash2
+                    size={20}
+                    className="group-hover:scale-110 transition-transform"
+                  />
+                </button>
+
+                {/* Delete House */}
                 <button
                   onClick={() => setShowDeleteModal(true)}
-                  className="flex items-center justify-between p-4  hover:bg-(--color-error)/20 rounded-xl border border-(--color-error) text-(--color-error) cursor-pointer transition-all shadow-sm group"
+                  className="flex items-center justify-between p-4 hover:bg-(--color-error)/20 rounded-xl border border-(--color-error) text-(--color-error) cursor-pointer transition-all shadow-sm group"
                 >
-                  <span className="font-bold">حذف البيت بالكامل</span>
+                  <div className="text-right">
+                    <span className="font-bold block">حذف البيت بالكامل</span>
+                    <span className="text-xs opacity-75">
+                      إجراء نهائي لا يمكن التراجع عنه
+                    </span>
+                  </div>
                   <Trash2
                     size={20}
                     className="group-hover:scale-110 transition-transform"
@@ -379,6 +472,14 @@ const HouseDetails = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {activeTab === "dishwashing" && isAdmin && (
+          <DishwashingSettings
+            houseId={houseId}
+            members={house?.members || []}
+            isAdmin={isAdmin}
+          />
         )}
       </div>
 
@@ -423,6 +524,17 @@ const HouseDetails = () => {
         title="حذف البيت"
         message="تحذير: الإجراء ده نهائي! كل البيانات والمصاريف هتتحذف تماماً ومحدش هيقدر يرجعها. متأكد؟"
         confirmText="حذف نهائي"
+        cancelText="إلغاء"
+        type="danger"
+      />
+
+      <ConfirmModal
+        isOpen={showClearDataModal}
+        onClose={() => setShowClearDataModal(false)}
+        onConfirm={handleClearAllData}
+        title="مسح كل البيانات"
+        message="هيتم حذف كل المصاريف والفواتير والمدفوعات. البيت والأعضاء هيفضلوا زي ما هم. متأكد؟"
+        confirmText="مسح البيانات"
         cancelText="إلغاء"
         type="danger"
       />
