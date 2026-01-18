@@ -2,7 +2,13 @@ import { Receipt } from "lucide-react";
 import ExpenseCard from "./ExpenseCard";
 import Loader from "../Loader"; // Check path
 
-export default function ExpensesList({ expenses, loading, onDelete, isAdmin }) {
+export default function ExpensesList({
+  expenses,
+  loading,
+  onDelete,
+  onViewDetails,
+  isAdmin,
+}) {
   if (loading) {
     return <Loader text="بنحمّل المصاريف..." />;
   }
@@ -27,6 +33,7 @@ export default function ExpensesList({ expenses, loading, onDelete, isAdmin }) {
           key={expense._id}
           expense={expense}
           onDelete={onDelete}
+          onViewDetails={onViewDetails}
           isAdmin={isAdmin}
         />
       ))}

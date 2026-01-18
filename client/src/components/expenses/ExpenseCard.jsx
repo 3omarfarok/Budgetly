@@ -1,11 +1,16 @@
-import { Calendar, User, Trash2 } from "lucide-react";
+import { Calendar, User, Trash2, Eye } from "lucide-react";
 import {
   getCategoryIcon,
   getCategoryStyles,
   translateCategory,
 } from "../../utils/expenseUtils.jsx";
 
-export default function ExpenseCard({ expense, onDelete, isAdmin }) {
+export default function ExpenseCard({
+  expense,
+  onDelete,
+  onViewDetails,
+  isAdmin,
+}) {
   return (
     <div
       className="group rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 relative overflow-hidden h-full flex flex-col"
@@ -88,26 +93,47 @@ export default function ExpenseCard({ expense, onDelete, isAdmin }) {
           </div>
         </div>
 
-        {/* Delete Button */}
-        {isAdmin && (
+        {/* Action Buttons */}
+        <div className="flex items-center gap-1">
+          {/* View Details Button */}
           <button
-            onClick={() => onDelete(expense._id)}
+            onClick={() => onViewDetails && onViewDetails(expense)}
             className="p-2 rounded-lg transition-colors cursor-pointer"
             style={{ color: "var(--color-muted)" }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.color = "var(--color-error)";
-              e.currentTarget.style.backgroundColor =
-                "var(--color-status-rejected-bg)";
+              e.currentTarget.style.color = "var(--color-primary)";
+              e.currentTarget.style.backgroundColor = "var(--color-light)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.color = "var(--color-muted)";
               e.currentTarget.style.backgroundColor = "transparent";
             }}
-            title="امسح"
+            title="عرض التفاصيل"
           >
-            <Trash2 size={18} />
+            <Eye size={18} />
           </button>
-        )}
+
+          {/* Delete Button */}
+          {isAdmin && (
+            <button
+              onClick={() => onDelete(expense._id)}
+              className="p-2 rounded-lg transition-colors cursor-pointer"
+              style={{ color: "var(--color-muted)" }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "var(--color-error)";
+                e.currentTarget.style.backgroundColor =
+                  "var(--color-status-rejected-bg)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "var(--color-muted)";
+                e.currentTarget.style.backgroundColor = "transparent";
+              }}
+              title="امسح"
+            >
+              <Trash2 size={18} />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
