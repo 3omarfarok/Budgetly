@@ -254,7 +254,7 @@ export const updateExpense = async (req, res) => {
         splitType,
         splits: finalSplits,
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     )
       .populate("createdBy", "name username")
       .populate("splits.user", "name username");
@@ -288,6 +288,53 @@ export const deleteExpense = async (req, res) => {
     res.json({ message: "Expense and related invoices deleted" });
   } catch (error) {
     console.error("Delete expense error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Delete own pending request (User)
+export const deleteMyRequest = async (req, res) => {
+  try {
+    const expense = await Expense.findById(req.params.id);
+
+    if (!expense) {
+      return res.status(404).json({ message: "Expense request not found" });
+    }
+
+    // Debug logging
+    console.log("Delete request - User ID:", req.user.id);
+    console.log("Delete request - Expense createdBy:", expense.createdBy);
+    console.log(
+      "Delete request - Expense createdBy toString:",
+      expense.createdBy.toString(),
+    );
+
+    // Check if the user owns this request (handle both string and ObjectId)
+    const userId = req.user.id || req.user._id;
+    const creatorId = expense.createdBy.toString();
+
+    if (creatorId !== userId.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to delete this request" });
+    }
+
+    // Only allow deleting pending requests
+    if (expense.status !== "pending") {
+      return res.status(400).json({
+        message: "Cannot delete request. Only pending requests can be deleted.",
+      });
+    }
+
+    // Cascade delete: Remove all invoices linked to this expense (should be none for pending, but just in case)
+    await Invoice.deleteMany({ expense: expense._id });
+
+    // Now delete the expense
+    await Expense.findByIdAndDelete(req.params.id);
+
+    res.json({ message: "Request deleted successfully" });
+  } catch (error) {
+    console.error("Delete my request error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

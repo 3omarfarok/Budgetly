@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Trash2,
 } from "lucide-react";
 import ConfirmModal from "../components/ConfirmModal";
 import { useMyInvoices } from "../hooks/useMyInvoices";
@@ -97,7 +98,7 @@ const InvoiceCard = ({ invoice, onPay }) => {
 };
 
 // Request Card Component
-const RequestCard = ({ request }) => {
+const RequestCard = ({ request, onDelete }) => {
   const statusColors = {
     pending:
       "bg-(--color-status-pending-bg) text-(--color-status-pending) border-(--color-status-pending-border)",
@@ -152,12 +153,24 @@ const RequestCard = ({ request }) => {
             جنيه
           </span>
         </span>
-        {/* Actions or Status Details */}
-        {request.status === "rejected" && request.adminNotes && (
-          <div className="text-xs text-red-500 mt-2">
-            سبب الرفض: {request.adminNotes}
-          </div>
-        )}
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          {request.status === "pending" && (
+            <button
+              onClick={() => onDelete(request._id)}
+              className="flex items-center gap-2 px-3 py-2 bg-(--color-status-rejected-bg) text-(--color-status-rejected) border border-(--color-status-rejected-border) rounded-lg hover:brightness-95 transition-all text-sm font-medium active:scale-95"
+              title="حذف الطلب"
+            >
+              <Trash2 size={16} />
+              حذف
+            </button>
+          )}
+          {request.status === "rejected" && request.adminNotes && (
+            <div className="text-xs text-(--color-status-rejected)">
+              سبب الرفض: {request.adminNotes}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -189,6 +202,12 @@ export default function MyInvoices() {
     handleBulkPay,
     confirmBulkPayment,
     isBulkPaying,
+    // Delete Request
+    isDeleteModalOpen,
+    setIsDeleteModalOpen,
+    handleDeleteRequest,
+    confirmDeleteRequest,
+    isDeleting,
   } = useMyInvoices();
 
   // Calculate pending invoices count and total for bulk payment
@@ -211,7 +230,7 @@ export default function MyInvoices() {
   const paginatedData = filteredData
     ? filteredData.slice(
         (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
+        currentPage * itemsPerPage,
       )
     : [];
 
@@ -399,8 +418,12 @@ export default function MyInvoices() {
             activeTab === "invoices" ? (
               <InvoiceCard key={item._id} invoice={item} onPay={handlePay} />
             ) : (
-              <RequestCard key={item._id} request={item} />
-            )
+              <RequestCard
+                key={item._id}
+                request={item}
+                onDelete={handleDeleteRequest}
+              />
+            ),
           )}
         </div>
       )}
@@ -463,6 +486,18 @@ export default function MyInvoices() {
         cancelText="إلغاء"
         isLoading={isBulkPaying}
         type="primary"
+      />
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={confirmDeleteRequest}
+        title="حذف الطلب"
+        message="هل أنت متأكد من حذف هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء."
+        confirmText={isDeleting ? "جاري الحذف..." : "تأكيد الحذف"}
+        cancelText="إلغاء"
+        isLoading={isDeleting}
+        type="danger"
       />
     </div>
   );

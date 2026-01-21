@@ -75,6 +75,25 @@ export function useMyInvoices() {
     },
   });
 
+  // Delete Request State and Mutation
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedRequestId, setSelectedRequestId] = useState(null);
+
+  const deleteRequestMutation = useMutation({
+    mutationFn: (requestId) => api.delete(`/expenses/${requestId}/my-request`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["myRequests"]);
+      toast.success("تم حذف الطلب بنجاح!");
+      setIsDeleteModalOpen(false);
+      setSelectedRequestId(null);
+    },
+    onError: (error) => {
+      console.error("Delete request error:", error);
+      const msg = error.response?.data?.message || "فشل حذف الطلب";
+      toast.error(msg);
+    },
+  });
+
   // Handlers
   const handlePay = (invoiceId) => {
     setSelectedInvoiceId(invoiceId);
@@ -95,25 +114,36 @@ export function useMyInvoices() {
     payAllInvoicesMutation.mutate();
   };
 
+  const handleDeleteRequest = (requestId) => {
+    setSelectedRequestId(requestId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDeleteRequest = () => {
+    if (selectedRequestId) {
+      deleteRequestMutation.mutate(selectedRequestId);
+    }
+  };
+
   // Sort function
   const sortData = (data) => {
     const sorted = [...data];
     switch (sortBy) {
       case "date_desc":
         return sorted.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
         );
       case "date_asc":
         return sorted.sort(
-          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
         );
       case "amount_desc":
         return sorted.sort(
-          (a, b) => (b.amount || b.totalAmount) - (a.amount || a.totalAmount)
+          (a, b) => (b.amount || b.totalAmount) - (a.amount || a.totalAmount),
         );
       case "amount_asc":
         return sorted.sort(
-          (a, b) => (a.amount || a.totalAmount) - (b.amount || b.totalAmount)
+          (a, b) => (a.amount || a.totalAmount) - (b.amount || b.totalAmount),
         );
       case "status":
         return sorted.sort((a, b) => a.status.localeCompare(b.status));
@@ -140,7 +170,7 @@ export function useMyInvoices() {
           const matchesStatus =
             filterStatus === "all" || req.status === filterStatus;
           return matchesSearch && matchesStatus;
-        })
+        }),
   );
 
   const totalPending = invoices
@@ -172,5 +202,11 @@ export function useMyInvoices() {
     handleBulkPay,
     confirmBulkPayment,
     isBulkPaying: payAllInvoicesMutation.isPending,
+    // Delete Request Exports
+    isDeleteModalOpen,
+    setIsDeleteModalOpen,
+    handleDeleteRequest,
+    confirmDeleteRequest,
+    isDeleting: deleteRequestMutation.isPending,
   };
 }

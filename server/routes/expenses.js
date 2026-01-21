@@ -5,6 +5,7 @@ import {
   createExpense,
   updateExpense,
   deleteExpense,
+  deleteMyRequest,
   approveExpense,
   rejectExpense,
 } from "../controllers/expenseController.js";
@@ -25,6 +26,9 @@ router.put("/:id/approve", authenticate, isAdmin, approveExpense);
 
 // Reject expense (Admin only)
 router.put("/:id/reject", authenticate, isAdmin, rejectExpense);
+
+// Delete own pending request (User)
+router.delete("/:id/my-request", authenticate, deleteMyRequest);
 
 // Delete expense (Admin only)
 router.delete("/:id", authenticate, isAdmin, deleteExpense);
