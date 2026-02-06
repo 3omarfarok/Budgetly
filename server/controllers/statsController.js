@@ -5,13 +5,17 @@ import User from "../models/User.js";
 
 // Helper to calculate balance for a user
 const calculateUserBalance = async (userId, houseId) => {
-  // 1. External Paid (Credit): Expenses created by user (only approved)
-  const expensesCreated = await Expense.find({
+  // 1. External Paid (Credit): Expenses paid by user (only approved)
+  const payerExpenses = await Expense.find({
     house: houseId,
-    createdBy: userId,
     status: "approved",
+    $or: [
+      { paidBy: userId },
+      { paidBy: { $exists: false }, createdBy: userId },
+      { paidBy: null, createdBy: userId },
+    ],
   });
-  const externalPaid = expensesCreated.reduce(
+  const externalPaid = payerExpenses.reduce(
     (sum, e) => sum + e.totalAmount,
     0
   );
@@ -21,43 +25,50 @@ const calculateUserBalance = async (userId, houseId) => {
     house: houseId,
     user: userId,
     status: "approved",
+    transactionType: "payment",
   });
   const internalSent = paymentsSent.reduce((sum, p) => sum + p.amount, 0);
 
-  // 3. Invoices Assigned (Debit): All invoices for user
-  const invoices = await Invoice.find({
+  // 3. Invoices Assigned (Debit): Unpaid invoices for user
+  const unpaidInvoices = await Invoice.find({
     house: houseId,
     user: userId,
+    status: { $ne: "paid" },
   });
-  const invoicesAssigned = invoices.reduce((sum, i) => sum + i.amount, 0);
-
-  // 4. Internal Received (Debit): Approved payments received for expenses created by user
-  // (User paid external -> Expenses -> Invoices -> Payments(Approved) -> Money back to User)
-  // We need payments where linked invoice's expense was created by this user
-  // Strategy: Find Invoices linked to 'expensesCreated', then find Payments linked to those Invoices
-  const expenseIds = expensesCreated.map((e) => e._id);
-  const invoicesOwedToUser = await Invoice.find({
-    expense: { $in: expenseIds },
-    house: houseId,
-  });
-  const invoiceIds = invoicesOwedToUser.map((i) => i._id);
-
-  // Find payments linked to these invoices (via paymentRequest field OR we might need to look up Payment by invoice)
-  // Our Invoice model has `paymentRequest` field which is the Payment ID.
-  // We only care if the payment is APPROVED.
-  // Filter invoices that have a payment request, get those payment IDs
-  const paymentIds = invoicesOwedToUser
-    .filter((i) => i.paymentRequest)
-    .map((i) => i.paymentRequest);
-
-  const paymentsReceived = await Payment.find({
-    _id: { $in: paymentIds },
-    status: "approved",
-  });
-  const internalReceived = paymentsReceived.reduce(
-    (sum, p) => sum + p.amount,
+  const invoicesAssigned = unpaidInvoices.reduce(
+    (sum, i) => sum + i.amount,
     0
   );
+
+  // 4. Internal Received (Debit): Approved payments received for expenses paid by user
+  // (User paid external -> Expenses -> Invoices -> Payments(Approved) -> Money back to User)
+  const payerExpenseIds = payerExpenses.map((e) => e._id);
+  let internalReceived = 0;
+
+  if (payerExpenseIds.length > 0) {
+    const invoicesOwedToUser = await Invoice.find({
+      expense: { $in: payerExpenseIds },
+      house: houseId,
+      paymentRequest: { $ne: null },
+    });
+
+    const paymentIds = invoicesOwedToUser
+      .map((i) => i.paymentRequest)
+      .filter(Boolean);
+
+    if (paymentIds.length > 0) {
+      const paymentsReceived = await Payment.find({
+        _id: { $in: paymentIds },
+        status: "approved",
+        transactionType: "payment",
+        house: houseId,
+      });
+      internalReceived = paymentsReceived.reduce(
+        (sum, p) => sum + p.amount,
+        0
+      );
+    }
+  }
 
   const balance =
     externalPaid + internalSent - (invoicesAssigned + internalReceived);

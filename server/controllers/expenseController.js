@@ -222,6 +222,12 @@ export const updateExpense = async (req, res) => {
       return res.status(404).json({ message: "Expense not found" });
     }
 
+    if (existingExpense.status !== "pending") {
+      return res
+        .status(400)
+        .json({ message: "Only pending expenses can be updated" });
+    }
+
     let finalSplits = [];
 
     if (splitType === "equal") {
@@ -279,6 +285,17 @@ export const deleteExpense = async (req, res) => {
       return res.status(404).json({ message: "Expense not found" });
     }
 
+    const invoices = await Invoice.find({ expense: expense._id }).select(
+      "paymentRequest"
+    );
+    const paymentIds = invoices
+      .map((invoice) => invoice.paymentRequest)
+      .filter(Boolean);
+
+    if (paymentIds.length > 0) {
+      await Payment.deleteMany({ _id: { $in: paymentIds } });
+    }
+
     // Cascade delete: Remove all invoices linked to this expense
     await Invoice.deleteMany({ expense: expense._id });
 
@@ -324,6 +341,17 @@ export const deleteMyRequest = async (req, res) => {
       return res.status(400).json({
         message: "Cannot delete request. Only pending requests can be deleted.",
       });
+    }
+
+    const invoices = await Invoice.find({ expense: expense._id }).select(
+      "paymentRequest"
+    );
+    const paymentIds = invoices
+      .map((invoice) => invoice.paymentRequest)
+      .filter(Boolean);
+
+    if (paymentIds.length > 0) {
+      await Payment.deleteMany({ _id: { $in: paymentIds } });
     }
 
     // Cascade delete: Remove all invoices linked to this expense (should be none for pending, but just in case)

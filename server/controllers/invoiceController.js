@@ -60,6 +60,16 @@ export const payInvoice = async (req, res) => {
       return res.status(404).json({ message: "Invoice not found" });
     }
 
+    if (!req.user.house) {
+      return res.status(400).json({ message: "User not in a house" });
+    }
+
+    if (invoice.house.toString() !== req.user.house.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to pay this invoice" });
+    }
+
     if (invoice.user.toString() !== req.user.id) {
       return res
         .status(403)
@@ -68,6 +78,12 @@ export const payInvoice = async (req, res) => {
 
     if (invoice.status !== "pending") {
       return res.status(400).json({ message: "Invoice is not pending" });
+    }
+
+    if (invoice.paymentRequest) {
+      return res
+        .status(400)
+        .json({ message: "Payment request already exists" });
     }
 
     // Create Payment Record (Pending)
@@ -106,6 +122,12 @@ export const approveInvoicePayment = async (req, res) => {
       return res.status(404).json({ message: "Invoice not found" });
     }
 
+    if (!req.user.house || invoice.house.toString() !== req.user.house.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to approve this invoice" });
+    }
+
     if (invoice.status !== "awaiting_approval" || !invoice.paymentRequest) {
       return res
         .status(400)
@@ -114,6 +136,9 @@ export const approveInvoicePayment = async (req, res) => {
 
     // Approve the underlying Payment
     const payment = await Payment.findById(invoice.paymentRequest._id);
+    if (!payment) {
+      return res.status(404).json({ message: "Payment not found" });
+    }
     if (payment) {
       payment.status = "approved";
       payment.approvedBy = req.user.id;
@@ -144,10 +169,22 @@ export const rejectInvoicePayment = async (req, res) => {
       return res.status(404).json({ message: "Invoice not found" });
     }
 
+    if (!req.user.house || invoice.house.toString() !== req.user.house.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to reject this invoice" });
+    }
+
     if (invoice.status !== "awaiting_approval") {
       return res
         .status(400)
         .json({ message: "Invoice is not awaiting approval" });
+    }
+
+    if (!invoice.paymentRequest) {
+      return res
+        .status(400)
+        .json({ message: "Invoice has no payment request" });
     }
 
     // Reject Payment
