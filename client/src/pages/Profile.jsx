@@ -91,7 +91,7 @@ const Profile = () => {
     try {
       await updateUsername(newUsername.trim());
       setEditingUsername(false);
-    } catch (error) {
+    } catch {
       // Error handled in hook
     }
   };
@@ -116,7 +116,7 @@ const Profile = () => {
     try {
       await updateName(newName.trim());
       setEditingName(false);
-    } catch (error) {
+    } catch {
       // Error handled in hook
     }
   };
@@ -142,7 +142,7 @@ const Profile = () => {
     try {
       await updateEmail(newEmail.trim());
       setEditingEmail(false);
-    } catch (error) {
+    } catch {
       // Error handled in hook
     }
   };
@@ -158,9 +158,9 @@ const Profile = () => {
   if (!stats) return null;
 
   return (
-    <div className="pb-8 max-w-4xl mx-auto font-primary">
+    <div className="pb-8 px-3 sm:px-4 max-w-4xl mx-auto font-primary">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-start sm:items-center gap-3 mb-6 sm:mb-8">
         <div
           className="p-3 rounded-2xl border border-(--color-border)"
           style={{ backgroundColor: "var(--color-surface)" }}
@@ -169,7 +169,7 @@ const Profile = () => {
         </div>
         <div>
           <h1
-            className="text-3xl font-bold"
+            className="text-2xl sm:text-3xl font-bold"
             style={{ color: "var(--color-dark)" }}
           >
             الملف الشخصي
@@ -182,14 +182,14 @@ const Profile = () => {
 
       {/* Profile Card */}
       <div
-        className="backdrop-blur-xl p-8 rounded-3xl shadow-lg mb-6"
+        className="backdrop-blur-xl p-4 sm:p-8 rounded-3xl shadow-lg mb-6"
         style={{
           backgroundColor: "var(--color-surface)",
           border: "1px solid var(--color-border)",
         }}
       >
         {/* Avatar and Name */}
-        <div className="flex items-center gap-6 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6 mb-6">
           <div className="relative">
             {user.profilePicture ? (
               <img
@@ -220,11 +220,11 @@ const Profile = () => {
               <Edit size={16} className="cursor-pointer" />
             </button>
           </div>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0 w-full">
             {/* Editable Name */}
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-2 sm:mb-1">
               {editingName ? (
-                <div className="flex items-center gap-2 flex-1">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 w-full">
                   <Input
                     type="text"
                     value={newName}
@@ -238,7 +238,7 @@ const Profile = () => {
                   <button
                     onClick={handleSaveName}
                     disabled={isUpdatingName}
-                    className="px-3 py-1 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
+                    className="px-3 py-2 sm:py-1 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
                     style={{
                       backgroundColor: "var(--color-success)",
                       color: "white",
@@ -250,7 +250,7 @@ const Profile = () => {
                   <button
                     onClick={handleCancelNameEdit}
                     disabled={isUpdatingName}
-                    className="px-3 py-1 rounded-lg text-xs font-semibold transition-all"
+                    className="px-3 py-2 sm:py-1 rounded-lg text-xs font-semibold transition-all"
                     style={{
                       backgroundColor: "var(--color-muted-bg)",
                       color: "var(--color-secondary)",
@@ -260,9 +260,9 @@ const Profile = () => {
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 min-w-0">
                   <h2
-                    className="text-2xl font-bold"
+                    className="text-xl sm:text-2xl font-bold break-words"
                     style={{ color: "var(--color-dark)" }}
                   >
                     {user.name}
@@ -281,10 +281,14 @@ const Profile = () => {
               )}
             </div>
             {/* Editable Email */}
-            <div className="flex items-center gap-2 mb-2">
-              <Mail size={16} style={{ color: "var(--color-secondary)" }} />
+            <div className="flex items-start gap-2 mb-2">
+              <Mail
+                size={16}
+                style={{ color: "var(--color-secondary)" }}
+                className="mt-1 shrink-0"
+              />
               {editingEmail ? (
-                <div className="flex items-center gap-2 flex-1">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
                   <Input
                     type="email"
                     value={newEmail}
@@ -299,7 +303,7 @@ const Profile = () => {
                   <button
                     onClick={handleSaveEmail}
                     disabled={isUpdatingEmail}
-                    className="px-3 py-1 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
+                    className="px-3 py-2 sm:py-1 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
                     style={{
                       backgroundColor: "var(--color-success)",
                       color: "white",
@@ -311,7 +315,7 @@ const Profile = () => {
                   <button
                     onClick={handleCancelEmailEdit}
                     disabled={isUpdatingEmail}
-                    className="px-3 py-1 rounded-lg text-xs font-semibold transition-all"
+                    className="px-3 py-2 sm:py-1 rounded-lg text-xs font-semibold transition-all"
                     style={{
                       backgroundColor: "var(--color-muted-bg)",
                       color: "var(--color-secondary)",
@@ -321,14 +325,14 @@ const Profile = () => {
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex items-start sm:items-center gap-2 min-w-0">
                   <span
                     style={{
                       color: user.email
                         ? "var(--color-secondary)"
                         : "var(--color-error)",
                     }}
-                    className={!user.email ? "italic" : ""}
+                    className={`${!user.email ? "italic" : ""} text-sm break-all`}
                   >
                     {user.email || "أضف بريدك الإلكتروني لاسترجاع الباسورد"}
                   </span>
@@ -346,10 +350,14 @@ const Profile = () => {
               )}
             </div>
             {/* Editable Username */}
-            <div className="flex items-center gap-2 mb-2">
-              <User size={16} style={{ color: "var(--color-secondary)" }} />
+            <div className="flex items-start gap-2 mb-2">
+              <User
+                size={16}
+                style={{ color: "var(--color-secondary)" }}
+                className="mt-1 shrink-0"
+              />
               {editingUsername ? (
-                <div className="flex items-center gap-2 flex-1">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
                   <Input
                     type="text"
                     value={newUsername}
@@ -363,7 +371,7 @@ const Profile = () => {
                   <button
                     onClick={handleSaveUsername}
                     disabled={isUpdatingUsername}
-                    className="px-3 py-1 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
+                    className="px-3 py-2 sm:py-1 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
                     style={{
                       backgroundColor: "var(--color-success)",
                       color: "white",
@@ -375,7 +383,7 @@ const Profile = () => {
                   <button
                     onClick={handleCancelEdit}
                     disabled={isUpdatingUsername}
-                    className="px-3 py-1 rounded-lg text-xs font-semibold transition-all"
+                    className="px-3 py-2 sm:py-1 rounded-lg text-xs font-semibold transition-all"
                     style={{
                       backgroundColor: "var(--color-muted-bg)",
                       color: "var(--color-secondary)",
@@ -385,8 +393,8 @@ const Profile = () => {
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
-                  <span style={{ color: "var(--color-secondary)" }}>
+                <div className="flex items-start sm:items-center gap-2 min-w-0">
+                  <span className="break-all" style={{ color: "var(--color-secondary)" }}>
                     @{user.username}
                   </span>
                   <button
@@ -403,7 +411,7 @@ const Profile = () => {
               )}
             </div>
             <span
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase mt-2"
               style={{
                 backgroundColor:
                   user.role === "admin"
@@ -676,21 +684,21 @@ const Profile = () => {
           onClick={() => setShowAvatarModal(false)}
         >
           <div
-            className="backdrop-blur-xl p-6 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+            className="backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto"
             style={{
               backgroundColor: "var(--color-surface)",
               border: "1px solid var(--color-border)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h3
-              className="text-2xl font-bold mb-4"
-              style={{ color: "var(--color-dark)" }}
-            >
-              اختر صورة الملف الشخصي
-            </h3>
+              <h3
+                className="text-xl sm:text-2xl font-bold mb-4"
+                style={{ color: "var(--color-dark)" }}
+              >
+                اختر صورة الملف الشخصي
+              </h3>
 
-            <div className="grid grid-cols-4 sm:grid-cols-5 gap-4 mb-6">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4 mb-6">
               {availableAvatars.map((avatar) => (
                 <div
                   key={avatar}
@@ -715,7 +723,7 @@ const Profile = () => {
               ))}
             </div>
 
-            <div className="flex gap-3">
+              <div className="flex flex-col-reverse sm:flex-row gap-3">
               <button
                 onClick={handleSaveAvatar}
                 className="flex-1 py-3 px-4 text-white font-bold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl"

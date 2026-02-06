@@ -5,6 +5,8 @@ import api from "../utils/api";
 import { useToast } from "../context/ToastContext";
 import { motion } from "framer-motion";
 
+const _motion = motion;
+
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);

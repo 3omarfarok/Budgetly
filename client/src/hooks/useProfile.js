@@ -1,9 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import api from "../utils/api";
 import { useToast } from "../context/ToastContext";
 
 const useProfile = (user, updateUser) => {
   const toast = useToast();
+  const userId = user?.id || user?._id;
 
   // Fetch Profile Stats
   const {
@@ -11,7 +12,7 @@ const useProfile = (user, updateUser) => {
     isLoading: loadingStats,
     error: statsError,
   } = useQuery({
-    queryKey: ["profileStats", user?.id],
+    queryKey: ["profileStats", userId],
     queryFn: async () => {
       const [balancesRes, invoicesRes, expensesRes] = await Promise.all([
         api.get("/stats/balances"),
@@ -28,11 +29,11 @@ const useProfile = (user, updateUser) => {
 
       // Find current user's balance
       const userBalance =
-        balances.find((b) => b.userId.toString() === user.id) || {};
+        balances.find((b) => b.userId.toString() === userId) || {};
 
       // Filter expenses that include this user
       const userExpenses = expenses.filter((e) =>
-        e.splits.some((s) => s.user && s.user._id === user.id)
+        e.splits.some((s) => s.user && s.user._id === userId)
       );
 
       return {
@@ -47,15 +48,17 @@ const useProfile = (user, updateUser) => {
         approvedPayments: invoices.filter((i) => i.status === "paid").length,
       };
     },
-    enabled: !!user,
+    enabled: !!userId,
   });
+
+  const extractUpdatedUser = (response) => response.data?.user || response.data;
 
   // Update Profile Picture
   const updateAvatarMutation = useMutation({
     mutationFn: (avatar) =>
       api.patch("/users/me/profile-picture", { profilePicture: avatar }),
     onSuccess: (response) => {
-      if (updateUser) updateUser(response.data);
+      if (updateUser) updateUser(extractUpdatedUser(response));
       toast.success("تم حفظ صورة الملف الشخصي بنجاح!");
     },
     onError: (error) => {
@@ -68,7 +71,7 @@ const useProfile = (user, updateUser) => {
   const updateUsernameMutation = useMutation({
     mutationFn: (username) => api.patch("/users/me/username", { username }),
     onSuccess: (response) => {
-      if (updateUser) updateUser(response.data);
+      if (updateUser) updateUser(extractUpdatedUser(response));
       toast.success("تم تغيير اليوزرنيم بنجاح!");
     },
     onError: (error) => {
@@ -83,7 +86,7 @@ const useProfile = (user, updateUser) => {
   const updateNameMutation = useMutation({
     mutationFn: (name) => api.patch("/users/me/name", { name }),
     onSuccess: (response) => {
-      if (updateUser) updateUser(response.data);
+      if (updateUser) updateUser(extractUpdatedUser(response));
       toast.success("تم تغيير الاسم بنجاح!");
     },
     onError: (error) => {
@@ -96,7 +99,7 @@ const useProfile = (user, updateUser) => {
   const updateEmailMutation = useMutation({
     mutationFn: (email) => api.patch("/users/me/profile", { email }),
     onSuccess: (response) => {
-      if (updateUser) updateUser(response.data.user);
+      if (updateUser) updateUser(extractUpdatedUser(response));
       toast.success("تم تحديث البريد الإلكتروني بنجاح!");
     },
     onError: (error) => {

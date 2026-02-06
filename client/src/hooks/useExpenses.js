@@ -41,13 +41,13 @@ export function useExpenses() {
   } = useQuery({
     queryKey: ["expenses", page, selectedUserId],
     queryFn: fetchExpenses,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => api.delete(`/expenses/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries(["expenses"]);
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
       toast.success("تم مسح المصروف بنجاح");
     },
     onError: (error) => {

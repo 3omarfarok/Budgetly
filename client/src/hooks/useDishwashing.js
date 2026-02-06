@@ -59,7 +59,7 @@ const useDishwashing = (houseId) => {
     mutationFn: ({ enabled, startDate, order }) =>
       api.put(`/houses/${houseId}/dishwashing`, { enabled, startDate, order }),
     onSuccess: () => {
-      queryClient.invalidateQueries(["dishwashing", houseId]);
+      queryClient.invalidateQueries({ queryKey: ["dishwashing", houseId] });
       toast.success("تم حفظ إعدادات جدول غسيل الأطباق");
     },
     onError: (error) => {
@@ -72,7 +72,7 @@ const useDishwashing = (houseId) => {
   const deleteSettingsMutation = useMutation({
     mutationFn: () => api.delete(`/houses/${houseId}/dishwashing`),
     onSuccess: () => {
-      queryClient.invalidateQueries(["dishwashing", houseId]);
+      queryClient.invalidateQueries({ queryKey: ["dishwashing", houseId] });
       toast.success("تم إلغاء جدول غسيل الأطباق");
     },
     onError: (error) => {

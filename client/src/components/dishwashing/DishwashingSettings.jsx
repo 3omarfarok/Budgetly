@@ -72,7 +72,7 @@ const DishwashingSettings = ({ houseId, members, isAdmin }) => {
   const handleSave = async () => {
     try {
       await updateSettings({ enabled, startDate, order });
-    } catch (error) {
+    } catch {
       // Handled in hook
     }
   };

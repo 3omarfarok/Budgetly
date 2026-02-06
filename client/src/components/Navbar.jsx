@@ -61,7 +61,7 @@ const Navbar = () => {
     color: isActive(path) ? "white" : "var(--color-dark)",
   });
 
-  const navLinkClass = (path) => {
+  const navLinkClass = () => {
     const baseClass = `flex items-center gap-2 px-4 py-2.5 rounded-2xl transition-all duration-200 font-medium`;
     const lockedClass = isLocked ? "opacity-50 cursor-not-allowed" : "";
     return `${baseClass} ${lockedClass}`;
@@ -118,7 +118,6 @@ const Navbar = () => {
               role="menuitem"
               aria-current={isActive("/") ? "page" : undefined}
               onClick={handleLockedLinkClick}
-              {...(isLocked && { pointerEvents: "none" })}
             >
               <LayoutDashboard size={18} aria-hidden="true" />
               <span>الصفحة الرئيسية</span>
@@ -134,7 +133,6 @@ const Navbar = () => {
                   : undefined
               }
               onClick={handleLockedLinkClick}
-              {...(isLocked && { pointerEvents: "none" })}
             >
               <Receipt size={18} aria-hidden="true" />
               <span>المصاريف</span>
@@ -147,7 +145,6 @@ const Navbar = () => {
                 role="menuitem"
                 aria-current={isActive("/analytics") ? "page" : undefined}
                 onClick={handleLockedLinkClick}
-                {...(isLocked && { pointerEvents: "none" })}
               >
                 <BarChart3 size={18} aria-hidden="true" />
                 <span>التحليلات</span>
@@ -168,7 +165,6 @@ const Navbar = () => {
                   : undefined
               }
               onClick={handleLockedLinkClick}
-              {...(isLocked && { pointerEvents: "none" })}
             >
               <Banknote size={18} aria-hidden="true" />
               <span>الفواتير</span>
@@ -180,7 +176,6 @@ const Navbar = () => {
               role="menuitem"
               aria-current={isActive("/profile") ? "page" : undefined}
               onClick={handleLockedLinkClick}
-              {...(isLocked && { pointerEvents: "none" })}
             >
               <User size={18} aria-hidden="true" />
               <span>الملف الشخصي</span>
@@ -192,7 +187,6 @@ const Navbar = () => {
               role="menuitem"
               aria-current={isActive("/about") ? "page" : undefined}
               onClick={handleLockedLinkClick}
-              {...(isLocked && { pointerEvents: "none" })}
             >
               <Info size={18} aria-hidden="true" />
               <span>عن التطبيق</span>
@@ -204,7 +198,6 @@ const Navbar = () => {
               role="menuitem"
               aria-current={isActive("/house-details") ? "page" : undefined}
               onClick={handleLockedLinkClick}
-              {...(isLocked && { pointerEvents: "none" })}
             >
               <Home size={18} aria-hidden="true" />
               <span>البيت</span>
@@ -216,7 +209,6 @@ const Navbar = () => {
               role="menuitem"
               aria-current={isActive("/notes") ? "page" : undefined}
               onClick={handleLockedLinkClick}
-              {...(isLocked && { pointerEvents: "none" })}
             >
               <StickyNote size={18} aria-hidden="true" />
               <span>الملاحظات</span>
@@ -344,7 +336,6 @@ const Navbar = () => {
             <Link
               to="/"
               onClick={handleLockedLinkClick}
-              {...(isLocked && { pointerEvents: "none" })}
               className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                 isLocked ? "opacity-50 cursor-not-allowed" : ""
               }`}
@@ -366,7 +357,6 @@ const Navbar = () => {
             <Link
               to="/expenses"
               onClick={handleLockedLinkClick}
-              {...(isLocked && { pointerEvents: "none" })}
               className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                 isLocked ? "opacity-50 cursor-not-allowed" : ""
               }`}
@@ -395,7 +385,6 @@ const Navbar = () => {
             <Link
               to={user.role === "admin" ? "/all-invoices" : "/my-invoices"}
               onClick={handleLockedLinkClick}
-              {...(isLocked && { pointerEvents: "none" })}
               className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                 isLocked ? "opacity-50 cursor-not-allowed" : ""
               }`}
@@ -423,7 +412,6 @@ const Navbar = () => {
             <Link
               to="/profile"
               onClick={handleLockedLinkClick}
-              {...(isLocked && { pointerEvents: "none" })}
               className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                 isLocked ? "opacity-50 cursor-not-allowed" : ""
               }`}
@@ -445,7 +433,6 @@ const Navbar = () => {
             <Link
               to="/house-details"
               onClick={handleLockedLinkClick}
-              {...(isLocked && { pointerEvents: "none" })}
               className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                 isLocked ? "opacity-50 cursor-not-allowed" : ""
               }`}

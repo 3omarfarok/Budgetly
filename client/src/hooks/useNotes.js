@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useToast } from "../context/ToastContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../utils/api";
@@ -11,23 +12,27 @@ export function useNotes() {
     data: notes = [],
     isLoading: loading,
     refetch: refreshNotes,
+    error: notesError,
   } = useQuery({
     queryKey: ["notes"],
     queryFn: async () => {
       const { data } = await api.get("/notes");
       return data;
     },
-    onError: (error) => {
-      console.error("Error fetching notes:", error);
-      toast.error("فشل في تحميل الملاحظات");
-    },
   });
+
+  useEffect(() => {
+    if (notesError) {
+      console.error("Error fetching notes:", notesError);
+      toast.error("فشل في تحميل الملاحظات");
+    }
+  }, [notesError, toast]);
 
   // Mutations
   const addNoteMutation = useMutation({
     mutationFn: (content) => api.post("/notes", { content }),
     onSuccess: () => {
-      queryClient.invalidateQueries(["notes"]);
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
       toast.success("تم إضافة الملاحظة");
     },
     onError: (error) => {
@@ -39,7 +44,7 @@ export function useNotes() {
   const deleteNoteMutation = useMutation({
     mutationFn: (id) => api.delete(`/notes/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries(["notes"]);
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
       toast.success("تم حذف الملاحظة");
     },
     onError: (error) => {
@@ -52,7 +57,7 @@ export function useNotes() {
     mutationFn: ({ noteId, content }) =>
       api.post(`/notes/${noteId}/reply`, { content }),
     onSuccess: () => {
-      queryClient.invalidateQueries(["notes"]);
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
       toast.success("تم إضافة الرد");
     },
     onError: (error) => {

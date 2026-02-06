@@ -13,6 +13,8 @@ import ReactMarkdown from "react-markdown";
 import Loader from "../components/Loader";
 import useAI from "../hooks/useAI";
 
+const _motion = motion;
+
 const AIPage = () => {
   const { chats, loadingChats, useChat, sendMessage, isSending, deleteChat } =
     useAI();
@@ -52,7 +54,7 @@ const AIPage = () => {
       if (!currentChatId && response?.data?.chatId) {
         setCurrentChatId(response.data.chatId);
       }
-    } catch (err) {
+    } catch {
       setInput(userMessage); // Restore input on error
     }
   };

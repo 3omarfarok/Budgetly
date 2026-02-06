@@ -32,7 +32,7 @@ const HouseSelection = () => {
         name: newHouseName,
         password: newHousePassword,
       });
-    } catch (error) {
+    } catch {
       // Handled in hook
     }
   };
@@ -46,7 +46,7 @@ const HouseSelection = () => {
         houseId: selectedHouse._id,
         password: joinPassword,
       });
-    } catch (err) {
+    } catch {
       // Handled in hook
     }
   };
@@ -141,7 +141,7 @@ const HouseSelection = () => {
                           </span>
                           <div className="flex items-center gap-1 text-xs text-(--color-muted)">
                             <Users size={12} />
-                            <span>{house.membersCount} عضو</span>
+                            <span>{house.memberCount} عضو</span>
                           </div>
                         </div>
                       </div>

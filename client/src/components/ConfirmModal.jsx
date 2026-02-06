@@ -1,6 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle, X } from "lucide-react";
 
+const _motion = motion;
+
 /**
  * ConfirmModal Component
  * Reusable modal for confirming user actions
@@ -19,6 +21,9 @@ const ConfirmModal = ({
   title,
   message,
   type = "danger",
+  confirmText = "تأكيد",
+  cancelText = "إلغاء",
+  isLoading = false,
 }) => {
   if (!isOpen) return null;
 
@@ -40,6 +45,12 @@ const ConfirmModal = ({
         return {
           iconColor: "var(--color-info)",
           buttonBg: "var(--color-info)",
+          buttonText: "white",
+        };
+      case "primary":
+        return {
+          iconColor: "var(--color-primary)",
+          buttonBg: "var(--color-primary)",
           buttonText: "white",
         };
       default:
@@ -111,23 +122,27 @@ const ConfirmModal = ({
                 <div className="flex gap-3">
                   <button
                     onClick={onConfirm}
+                    disabled={isLoading}
                     className="flex-1 px-4 py-2.5 cursor-pointer rounded-xl font-semibold transition-transform active:scale-95"
                     style={{
                       backgroundColor: styles.buttonBg,
                       color: styles.buttonText,
+                      opacity: isLoading ? 0.75 : 1,
                     }}
                   >
-                    تأكيد
+                    {isLoading ? "جاري التنفيذ..." : confirmText}
                   </button>
                   <button
                     onClick={onClose}
+                    disabled={isLoading}
                     className="flex-1 px-4 py-2.5 cursor-pointer rounded-xl font-semibold transition-colors"
                     style={{
                       backgroundColor: "var(--color-light)",
                       color: "var(--color-dark)",
+                      opacity: isLoading ? 0.75 : 1,
                     }}
                   >
-                    إلغاء
+                    {cancelText}
                   </button>
                 </div>
               </div>

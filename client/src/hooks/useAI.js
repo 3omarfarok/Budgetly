@@ -40,10 +40,12 @@ const useAI = () => {
     onSuccess: (data, variables) => {
       // Invalidate the specific chat to get the new message
       if (variables.chatId) {
-        queryClient.invalidateQueries(["aiChat", variables.chatId]);
+        queryClient.invalidateQueries({
+          queryKey: ["aiChat", variables.chatId],
+        });
       }
       // Also invalidate the chats list as the last message/timestamp might have changed
-      queryClient.invalidateQueries(["aiChats"]);
+      queryClient.invalidateQueries({ queryKey: ["aiChats"] });
 
       // If it was a new chat (no chatId), we might want to return the new chat ID
       return data;
@@ -60,7 +62,7 @@ const useAI = () => {
       queryClient.setQueryData(["aiChats"], (old) =>
         old?.filter((c) => c._id !== chatId)
       );
-      queryClient.removeQueries(["aiChat", chatId]);
+      queryClient.removeQueries({ queryKey: ["aiChat", chatId] });
       toast.success("تم حذف المحادثة");
     },
     onError: (error) => {

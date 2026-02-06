@@ -1,5 +1,3 @@
-import { useAuth } from "../context/AuthContext";
-import { useToast } from "../context/ToastContext";
 import {
   TrendingUp,
   TrendingDown,
@@ -12,8 +10,6 @@ import Loader from "../components/Loader";
 import useAnalytics from "../hooks/useAnalytics";
 
 const Analytics = () => {
-  const { user } = useAuth();
-  // useToast not strictly needed if errors handled in component, but kept just in case
   const { analytics, loading, error } = useAnalytics();
 
   if (loading) return <Loader text="بنحمّل التحليلات..." />;

@@ -24,7 +24,7 @@ const useHouse = (houseId) => {
   const updateNameMutation = useMutation({
     mutationFn: (name) => api.patch(`/houses/${houseId}/name`, { name }),
     onSuccess: () => {
-      queryClient.invalidateQueries(["house", houseId]);
+      queryClient.invalidateQueries({ queryKey: ["house", houseId] });
       toast.success("تم تغيير اسم البيت بنجاح");
     },
     onError: (error) => {
@@ -49,7 +49,7 @@ const useHouse = (houseId) => {
     mutationFn: (memberId) =>
       api.delete(`/houses/${houseId}/members/${memberId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries(["house", houseId]);
+      queryClient.invalidateQueries({ queryKey: ["house", houseId] });
       toast.success("تم حذف العضو من البيت");
     },
     onError: (error) => {
@@ -61,7 +61,7 @@ const useHouse = (houseId) => {
   const leaveHouseMutation = useMutation({
     mutationFn: () => api.post(`/houses/${houseId}/leave`),
     onSuccess: () => {
-      queryClient.invalidateQueries(["user"]); // Invalidate user to update their house status
+      queryClient.invalidateQueries({ queryKey: ["user"] });
       toast.success("تم مغادرة البيت بنجاح");
       navigate("/house-selection");
     },
@@ -74,7 +74,7 @@ const useHouse = (houseId) => {
   const deleteHouseMutation = useMutation({
     mutationFn: () => api.delete(`/houses/${houseId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries(["user"]);
+      queryClient.invalidateQueries({ queryKey: ["user"] });
       toast.success("تم حذف البيت بنجاح");
       navigate("/house-selection");
     },
@@ -88,9 +88,9 @@ const useHouse = (houseId) => {
   const clearAllDataMutation = useMutation({
     mutationFn: () => api.delete(`/houses/${houseId}/clear-data`),
     onSuccess: (response) => {
-      queryClient.invalidateQueries(["expenses"]);
-      queryClient.invalidateQueries(["allInvoices"]);
-      queryClient.invalidateQueries(["myInvoices"]);
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["allInvoices"] });
+      queryClient.invalidateQueries({ queryKey: ["myInvoices"] });
       const { deleted } = response.data;
       toast.success(
         `تم حذف ${deleted.expenses} مصروف و ${deleted.invoices} فاتورة و ${deleted.payments} عملية دفع`,

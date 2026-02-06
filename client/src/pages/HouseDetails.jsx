@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   Users,
@@ -26,6 +26,7 @@ import DishwashingSettings from "../components/dishwashing/DishwashingSettings";
 const HouseDetails = () => {
   const { id } = useParams();
   const { user } = useAuth();
+  const userId = user?.id || user?._id;
 
   const houseId =
     id || (typeof user?.house === "object" ? user?.house?._id : user?.house);
@@ -72,7 +73,7 @@ const HouseDetails = () => {
     }
   }, [house]);
 
-  const isAdmin = house?.admin?._id === user?.id;
+  const isAdmin = house?.admin?._id === userId;
 
   const handleCopyId = () => {
     navigator.clipboard.writeText(house._id);
@@ -85,7 +86,7 @@ const HouseDetails = () => {
     try {
       await updateName(newName.trim());
       setEditingName(false);
-    } catch (err) {
+    } catch {
       // Handled in hook
     }
   };
@@ -96,7 +97,7 @@ const HouseDetails = () => {
       await updatePassword(newPassword.trim());
       setEditingPassword(false);
       setNewPassword("");
-    } catch (err) {
+    } catch {
       // Handled in hook
     }
   };
@@ -106,7 +107,7 @@ const HouseDetails = () => {
     try {
       await removeMember(memberToRemove._id);
       setMemberToRemove(null);
-    } catch (err) {
+    } catch {
       // Handled in hook
     }
   };
@@ -114,7 +115,7 @@ const HouseDetails = () => {
   const handleLeaveHouse = async () => {
     try {
       await leaveHouse();
-    } catch (err) {
+    } catch {
       // Handled in hook
     }
   };
@@ -122,7 +123,7 @@ const HouseDetails = () => {
   const handleDeleteHouse = async () => {
     try {
       await deleteHouse();
-    } catch (err) {
+    } catch {
       // Handled in hook
     }
   };
@@ -131,7 +132,7 @@ const HouseDetails = () => {
     try {
       await clearAllData();
       setShowClearDataModal(false);
-    } catch (err) {
+    } catch {
       // Handled in hook
     }
   };
@@ -151,24 +152,24 @@ const HouseDetails = () => {
   }
 
   return (
-    <div className="pb-8 px-4 max-w-4xl mx-auto font-primary">
+    <div className="pb-8 px-3 sm:px-4 max-w-4xl mx-auto font-primary">
       {/* Header */}
-      <div className="bg-(--color-surface) rounded-2xl p-6 shadow-sm border border-(--color-border) mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
+      <div className="bg-(--color-surface) rounded-2xl p-4 sm:p-6 shadow-sm border border-(--color-border) mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+          <div className="flex items-start sm:items-center gap-3 min-w-0">
             <div className="p-3 bg-(--color-primary)/10 rounded-xl">
               <Home className="text-(--color-primary)" size={32} />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-(--color-dark)">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-2xl font-bold text-(--color-dark) break-words">
                 {house.name}
               </h1>
               <div
-                className="flex items-center gap-2 text-sm text-(--color-muted) cursor-pointer hover:text-(--color-primary) transition-colors"
+                className="flex items-start sm:items-center gap-2 text-xs sm:text-sm text-(--color-muted) cursor-pointer hover:text-(--color-primary) transition-colors break-all"
                 onClick={handleCopyId}
                 title="نسخ كود البيت"
               >
-                <span>ID: {house._id}</span>
+                <span className="leading-relaxed">ID: {house._id}</span>
                 {copiedId ? <CheckCheck size={14} /> : <Copy size={14} />}
               </div>
             </div>
@@ -193,7 +194,7 @@ const HouseDetails = () => {
         {editingName && (
           <div className="mb-4 p-4 bg-(--color-bg) rounded-xl border border-(--color-border)">
             <h3 className="font-bold mb-3 text-sm">تغيير اسم البيت</h3>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
@@ -203,13 +204,13 @@ const HouseDetails = () => {
               <button
                 onClick={handleUpdateName}
                 disabled={isUpdatingName}
-                className="px-4 bg-(--color-primary) text-white rounded-xl font-bold disabled:opacity-50"
+                className="px-4 py-2 bg-(--color-primary) text-white rounded-xl font-bold disabled:opacity-50"
               >
                 {isUpdatingName ? "حفظ..." : "حفظ"}
               </button>
               <button
                 onClick={() => setEditingName(false)}
-                className="px-4 bg-(--color-surface) border border-(--color-border) rounded-xl font-bold"
+                className="px-4 py-2 bg-(--color-surface) border border-(--color-border) rounded-xl font-bold"
               >
                 إلغاء
               </button>
@@ -235,10 +236,11 @@ const HouseDetails = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 p-1 bg-(--color-surface) rounded-xl border border-(--color-border)">
+      <div className="mb-6 p-1 bg-(--color-surface) rounded-xl border border-(--color-border) overflow-x-auto">
+        <div className="flex gap-2 min-w-full">
         <button
           onClick={() => setActiveTab("members")}
-          className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
+          className={`min-w-[120px] sm:min-w-0 sm:flex-1 py-2 px-4 rounded-lg font-bold whitespace-nowrap transition-all ${
             activeTab === "members"
               ? "bg-(--color-primary) text-white shadow-md"
               : "text-(--color-muted) hover:bg-(--color-bg)"
@@ -252,7 +254,7 @@ const HouseDetails = () => {
         {isAdmin && (
           <button
             onClick={() => setActiveTab("settings")}
-            className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
+            className={`min-w-[120px] sm:min-w-0 sm:flex-1 py-2 px-4 rounded-lg font-bold whitespace-nowrap transition-all ${
               activeTab === "settings"
                 ? "bg-(--color-primary) text-white shadow-md"
                 : "text-(--color-muted) hover:bg-(--color-bg)"
@@ -267,7 +269,7 @@ const HouseDetails = () => {
         {isAdmin && (
           <button
             onClick={() => setActiveTab("dishwashing")}
-            className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
+            className={`min-w-[120px] sm:min-w-0 sm:flex-1 py-2 px-4 rounded-lg font-bold whitespace-nowrap transition-all ${
               activeTab === "dishwashing"
                 ? "bg-(--color-primary) text-white shadow-md"
                 : "text-(--color-muted) hover:bg-(--color-bg)"
@@ -279,6 +281,7 @@ const HouseDetails = () => {
             </div>
           </button>
         )}
+        </div>
       </div>
 
       {/* Tab Content */}
@@ -288,9 +291,9 @@ const HouseDetails = () => {
             {house.members.map((member) => (
               <div
                 key={member._id}
-                className="flex items-center justify-between p-4 bg-(--color-surface) rounded-xl border border-(--color-border) shadow-sm"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-(--color-surface) rounded-xl border border-(--color-border) shadow-sm"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   <div className="relative">
                     {member.profilePicture ? (
                       <img
@@ -309,25 +312,25 @@ const HouseDetails = () => {
                       </div>
                     )}
                   </div>
-                  <div>
-                    <p className="font-bold text-(--color-dark)">
+                  <div className="min-w-0">
+                    <p className="font-bold text-(--color-dark) break-words">
                       {member.name}
-                      {user.id === member._id && (
+                      {userId === member._id && (
                         <span className="text-xs text-(--color-muted) mr-2">
                           (أنت)
                         </span>
                       )}
                     </p>
-                    <p className="text-xs text-(--color-muted)">
+                    <p className="text-xs text-(--color-muted) break-all">
                       @{member.username}
                     </p>
                   </div>
                 </div>
 
-                {isAdmin && member._id !== user.id && (
+                {isAdmin && member._id !== userId && (
                   <button
                     onClick={() => setMemberToRemove(member)}
-                    className="p-2 text-(--color-error) hover:bg-(--color-error)/10 cursor-pointer rounded-lg transition-colors"
+                    className="self-end sm:self-auto p-2 text-(--color-error) hover:bg-(--color-error)/10 cursor-pointer rounded-lg transition-colors"
                     title="حذف العضو"
                   >
                     <UserX size={20} />
@@ -341,7 +344,7 @@ const HouseDetails = () => {
         {activeTab === "settings" && isAdmin && (
           <div className="space-y-6">
             {/* Change Password */}
-            <div className="bg-(--color-surface) p-6 rounded-2xl border border-(--color-border) shadow-sm">
+            <div className="bg-(--color-surface) p-4 sm:p-6 rounded-2xl border border-(--color-border) shadow-sm">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-(--color-primary)/10 text-(--color-primary) rounded-lg">
                   <Key size={24} />
@@ -364,7 +367,7 @@ const HouseDetails = () => {
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="الباسوورد الجديد"
                   />
-                  <div className="flex gap-2 justify-end">
+                  <div className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
                     <button
                       onClick={() => setEditingPassword(false)}
                       className="px-4 py-2 text-sm font-bold  cursor-pointer text-(--color-muted) hover:bg-(--color-bg) rounded-xl"
@@ -393,7 +396,7 @@ const HouseDetails = () => {
             </div>
 
             {/* Data Export Section */}
-            <div className="bg-(--color-surface) p-6 rounded-2xl border border-(--color-border) shadow-sm">
+            <div className="bg-(--color-surface) p-4 sm:p-6 rounded-2xl border border-(--color-border) shadow-sm">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-(--color-success)/10 text-(--color-success) rounded-lg">
                   <Download size={24} />
@@ -407,7 +410,7 @@ const HouseDetails = () => {
                   </p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   onClick={() => handleExport("expenses")}
                   className="flex items-center justify-center gap-2 py-3 border-2 border-dashed border-(--color-border) rounded-xl text-(--color-secondary) font-bold hover:border-(--color-success) hover:text-(--color-success) transition-all"
@@ -426,7 +429,7 @@ const HouseDetails = () => {
             </div>
 
             {/* Danger Zone */}
-            <div className="bg-(--color-surface) p-6 rounded-2xl border border-(--color-error)/30 shadow-sm">
+            <div className="bg-(--color-surface) p-4 sm:p-6 rounded-2xl border border-(--color-error)/30 shadow-sm">
               <h3 className="font-bold text-(--color-error) mb-4 flex items-center gap-2">
                 <div className="p-2 bg-(--color-error)/10 text-(--color-error) rounded-lg">
                   <AlertTriangle size={20} />

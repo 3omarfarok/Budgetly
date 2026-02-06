@@ -4,13 +4,14 @@ import api from "../utils/api";
 
 export function useDashboardStats() {
   const { user } = useAuth();
+  const userId = user?.id || user?._id;
 
   const fetchStats = async () => {
     if (!user) return null;
     const endpoint =
       user.role === "admin"
         ? "/stats/admin/dashboard"
-        : `/stats/user/${user.id}`;
+        : `/stats/user/${userId}`;
     const { data } = await api.get(endpoint);
     return data;
   };
@@ -20,9 +21,9 @@ export function useDashboardStats() {
     isLoading: loading,
     error,
   } = useQuery({
-    queryKey: ["dashboardStats", user?.id, user?.role],
+    queryKey: ["dashboardStats", userId, user?.role],
     queryFn: fetchStats,
-    enabled: !!user,
+    enabled: !!user && !!userId,
   });
 
   return { stats, loading, error };

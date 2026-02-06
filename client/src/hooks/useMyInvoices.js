@@ -8,6 +8,7 @@ export function useMyInvoices() {
   const { user } = useAuth();
   const toast = useToast();
   const queryClient = useQueryClient();
+  const userId = user?.id || user?._id;
   const [activeTab, setActiveTab] = useState("invoices"); // "invoices" | "requests"
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -17,22 +18,21 @@ export function useMyInvoices() {
 
   // Queries
   const { data: invoices = [], isLoading: loadingInvoices } = useQuery({
-    queryKey: ["myInvoices", user?.id],
+    queryKey: ["myInvoices", userId],
     queryFn: async () => {
       const { data } = await api.get("/invoices/my-invoices");
       return data;
     },
-    enabled: !!user,
+    enabled: !!userId,
   });
 
   const { data: myRequests = [], isLoading: loadingRequests } = useQuery({
-    queryKey: ["myRequests", user?.id],
+    queryKey: ["myRequests", userId],
     queryFn: async () => {
-      const userId = user.id || user._id;
       const { data } = await api.get(`/expenses?createdBy=${userId}`);
       return data.expenses || [];
     },
-    enabled: !!user,
+    enabled: !!userId,
   });
 
   // Bulk payment state
@@ -45,8 +45,8 @@ export function useMyInvoices() {
   const payInvoiceMutation = useMutation({
     mutationFn: (invoiceId) => api.post(`/invoices/${invoiceId}/pay`),
     onSuccess: () => {
-      queryClient.invalidateQueries(["myInvoices"]);
-      queryClient.invalidateQueries(["profileStats"]); // Update stats
+      queryClient.invalidateQueries({ queryKey: ["myInvoices"] });
+      queryClient.invalidateQueries({ queryKey: ["profileStats"] });
       toast.success("تم إرسال طلب الدفع بنجاح!");
       setIsConfirmModalOpen(false);
       setSelectedInvoiceId(null);
@@ -62,8 +62,8 @@ export function useMyInvoices() {
   const payAllInvoicesMutation = useMutation({
     mutationFn: () => api.post("/invoices/bulk-pay"),
     onSuccess: (data) => {
-      queryClient.invalidateQueries(["myInvoices"]);
-      queryClient.invalidateQueries(["profileStats"]);
+      queryClient.invalidateQueries({ queryKey: ["myInvoices"] });
+      queryClient.invalidateQueries({ queryKey: ["profileStats"] });
       toast.success(`تم إرسال طلبات الدفع لـ ${data.data.count} فاتورة بنجاح!`);
       setIsBulkPayModalOpen(false);
     },
@@ -82,7 +82,7 @@ export function useMyInvoices() {
   const deleteRequestMutation = useMutation({
     mutationFn: (requestId) => api.delete(`/expenses/${requestId}/my-request`),
     onSuccess: () => {
-      queryClient.invalidateQueries(["myRequests"]);
+      queryClient.invalidateQueries({ queryKey: ["myRequests"] });
       toast.success("تم حذف الطلب بنجاح!");
       setIsDeleteModalOpen(false);
       setSelectedRequestId(null);

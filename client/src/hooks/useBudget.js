@@ -1,45 +1,57 @@
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../utils/api";
 
+const initialFormData = {
+  category: "",
+  limit: "",
+  period: "monthly",
+};
+
 export function useBudget() {
-  const { user: _user } = useAuth(); // keep user import or remove if completely unused. The lint said 'user' is unused.
-  // Wait, line 8:11 error 'user' is assigned but never used.
-  // I will just remove it.
   const toast = useToast();
   const queryClient = useQueryClient();
-  const [showAddModal, setShowAddModal] = useState(false);
 
-  // Form state
-  // ...
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [formData, setFormData] = useState(initialFormData);
 
   const {
     data: budgets = [],
     isLoading: loading,
     error,
   } = useQuery({
-    // ...
-    onError: (error) => {
-      // ...
+    queryKey: ["budgets"],
+    queryFn: async () => {
+      const { data } = await api.get("/budgets");
+      return Array.isArray(data) ? data : data?.budgets || [];
     },
   });
 
   const addMutation = useMutation({
-    mutationFn: (data) => api.post("/budgets", data),
+    mutationFn: (payload) =>
+      api.post("/budgets", {
+        ...payload,
+        limit: Number(payload.limit),
+      }),
     onSuccess: () => {
-      // ...
+      queryClient.invalidateQueries({ queryKey: ["budgets"] });
+      toast.success("تم إضافة الميزانية بنجاح");
+      setShowAddModal(false);
+      setFormData(initialFormData);
     },
-    onError: (error) => {
-      // ...
+    onError: (mutationError) => {
+      const message =
+        mutationError.response?.data?.message || "فشل إضافة الميزانية";
+      toast.error(message);
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => api.delete(`/budgets/${id}`),
     onSuccess: () => {
-      // ...
+      queryClient.invalidateQueries({ queryKey: ["budgets"] });
+      toast.success("تم حذف الميزانية");
     },
     onError: () => {
       toast.error("فشل الحذف");

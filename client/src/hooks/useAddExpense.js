@@ -7,6 +7,7 @@ import api from "../utils/api";
 
 export function useAddExpense() {
   const { user } = useAuth();
+  const userId = user?.id || user?._id;
   const toast = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -16,29 +17,36 @@ export function useAddExpense() {
     category: "General",
     totalAmount: "",
     splitType: "equal",
-    payer: user?._id || "",
+    payer: userId || "",
   });
   const [error, setError] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
 
   // Fetch Users
-  const { data: users = [], isLoading: loading } = useQuery({
+  const {
+    data: users = [],
+    isLoading: loading,
+    error: usersError,
+  } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
       const { data } = await api.get("/users");
       return data;
     },
-    onError: (error) => {
-      console.error("خطأ في تحميل المستخدمين:", error);
-      toast.error("فيه مشكلة في تحميل المستخدمين");
-    },
   });
 
   useEffect(() => {
-    if (user && !formData.payer) {
-      setFormData((prev) => ({ ...prev, payer: user._id }));
+    if (usersError) {
+      console.error("خطأ في تحميل المستخدمين:", usersError);
+      toast.error("فيه مشكلة في تحميل المستخدمين");
     }
-  }, [user, formData.payer]);
+  }, [usersError, toast]);
+
+  useEffect(() => {
+    if (user && !formData.payer) {
+      setFormData((prev) => ({ ...prev, payer: userId }));
+    }
+  }, [user, userId, formData.payer]);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -64,9 +72,9 @@ export function useAddExpense() {
   const addExpenseMutation = useMutation({
     mutationFn: (expenseData) => api.post("/expenses", expenseData),
     onSuccess: () => {
-      queryClient.invalidateQueries(["expenses"]);
-      queryClient.invalidateQueries(["myPayments"]); // If it affects payments/stats
-      queryClient.invalidateQueries(["dashboardStats"]);
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["myPayments"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
 
       if (user.role === "admin") {
         toast.success("تم تسجيل المصروف بنجاح!");

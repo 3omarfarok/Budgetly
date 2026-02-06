@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import api from "../utils/api";
 import { useToast } from "../context/ToastContext";
 import { useAuth } from "../context/AuthContext";
@@ -25,9 +25,11 @@ const useHouseSelection = () => {
   // Create House
   const createHouseMutation = useMutation({
     mutationFn: (houseData) => api.post("/houses", houseData),
-    onSuccess: () => {
-      // Assuming response contains the created house or user data
-      // We need to update user context with new house
+    onSuccess: (response) => {
+      const token = response?.data?.token;
+      if (token) {
+        localStorage.setItem("token", token);
+      }
       refreshUserAndNavigate();
       toast.success("تم إنشاء البيت بنجاح!");
     },
@@ -53,15 +55,11 @@ const useHouseSelection = () => {
 
   const refreshUserAndNavigate = async () => {
     try {
-      const { data: userData } = await api.get("/users/me/profile"); // Or /auth/me depending on API
-      // Actually common practice is just to refetch user from AuthContext if possible,
-      // but here we might need to manually trigger it.
-      // Assuming updateUser handles local storage update
-      updateUser(userData.user);
+      const { data: userData } = await api.get("/auth/me");
+      updateUser(userData);
       navigate("/");
     } catch (err) {
       console.error("Error refreshing user data:", err);
-      // Fallback navigation
       navigate("/");
     }
   };

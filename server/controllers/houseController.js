@@ -223,7 +223,7 @@ export const updateHouseName = async (req, res) => {
     }
 
     // Check if user is admin of this house
-    if (house.admin.toString() !== req.user.id) {
+    if (house.admin.toString() !== req.user.id.toString()) {
       return res
         .status(403)
         .json({ message: "Only the house admin can change the name" });
@@ -269,7 +269,7 @@ export const updateHousePassword = async (req, res) => {
     }
 
     // Check if user is admin of this house
-    if (house.admin.toString() !== req.user.id) {
+    if (house.admin.toString() !== req.user.id.toString()) {
       return res
         .status(403)
         .json({ message: "Only the house admin can change the password" });
@@ -302,7 +302,7 @@ export const updateHouseId = async (req, res) => {
     }
 
     // Check if user is admin of this house
-    if (house.admin.toString() !== req.user.id) {
+    if (house.admin.toString() !== req.user.id.toString()) {
       return res
         .status(403)
         .json({ message: "Only the house admin can change the house ID" });
@@ -381,7 +381,7 @@ export const removeMember = async (req, res) => {
     }
 
     // Check if user is admin of this house
-    if (house.admin.toString() !== req.user.id) {
+    if (house.admin.toString() !== req.user.id.toString()) {
       return res
         .status(403)
         .json({ message: "Only the house admin can remove members" });
@@ -429,7 +429,7 @@ export const deleteHouse = async (req, res) => {
     }
 
     // Check if user is admin of this house
-    if (house.admin.toString() !== req.user.id) {
+    if (house.admin.toString() !== req.user.id.toString()) {
       return res
         .status(403)
         .json({ message: "Only the house admin can delete the house" });

@@ -11,8 +11,9 @@ import {
   Trash2,
 } from "lucide-react";
 import api from "../utils/api";
-import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+
+const _motion = motion;
 
 const AIAssistant = ({ isOpen, onClose }) => {
   const [messages, setMessages] = useState([
@@ -29,7 +30,6 @@ const AIAssistant = ({ isOpen, onClose }) => {
   const [currentChatId, setCurrentChatId] = useState(null);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const messagesEndRef = useRef(null);
-  const { user } = useAuth();
   const toast = useToast();
 
   const scrollToBottom = () => {

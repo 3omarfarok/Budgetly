@@ -3,9 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Bot, Sparkles } from "lucide-react";
 import AIAssistant from "./AIAssistant";
 
+const _motion = motion;
+
 const AIButton = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <>
@@ -15,8 +16,6 @@ const AIButton = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsOpen(!isOpen)}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
           className={`relative group flex items-center cursor-pointer justify-center w-14 h-14 rounded-full shadow-lg shadow-ios-primary/30 transition-all duration-300 ${
             isOpen
               ? "bg-ios-surface text-white rotate-90"

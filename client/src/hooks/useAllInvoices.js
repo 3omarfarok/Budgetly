@@ -15,7 +15,6 @@ export function useAllInvoices() {
       const { data } = await api.get("/users");
       return data;
     },
-    onError: (err) => console.error("Error fetching users", err),
   });
 
   const { data: invoices = [], isLoading: loadingInvoices } = useQuery({
@@ -24,7 +23,6 @@ export function useAllInvoices() {
       const { data } = await api.get("/invoices/all");
       return data;
     },
-    onError: (err) => console.error("Error fetching invoices", err),
   });
 
   const { data: pendingRequests = [], isLoading: loadingRequests } = useQuery({
@@ -33,15 +31,14 @@ export function useAllInvoices() {
       const { data } = await api.get("/expenses?status=pending");
       return data.expenses || [];
     },
-    onError: (err) => console.error("Error fetching pending requests", err),
   });
 
   const loading = loadingUsers || loadingInvoices || loadingRequests;
 
   const refreshData = () => {
-    queryClient.invalidateQueries(["users"]);
-    queryClient.invalidateQueries(["allInvoices"]);
-    queryClient.invalidateQueries(["pendingRequests"]);
+    queryClient.invalidateQueries({ queryKey: ["users"] });
+    queryClient.invalidateQueries({ queryKey: ["allInvoices"] });
+    queryClient.invalidateQueries({ queryKey: ["pendingRequests"] });
   };
 
   // Mutations
@@ -49,8 +46,8 @@ export function useAllInvoices() {
     mutationFn: (id) => api.put(`/invoices/${id}/approve`),
     onSuccess: () => {
       toast.success("تم الموافقة على الدفع");
-      queryClient.invalidateQueries(["allInvoices"]);
-      queryClient.invalidateQueries(["users"]); // Updates user stats
+      queryClient.invalidateQueries({ queryKey: ["allInvoices"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
     onError: (err) => {
       console.error("Approval error:", err);
@@ -63,7 +60,7 @@ export function useAllInvoices() {
       api.put(`/invoices/${id}/reject`, { reason }),
     onSuccess: () => {
       toast.info("تم رفض الدفع");
-      queryClient.invalidateQueries(["allInvoices"]);
+      queryClient.invalidateQueries({ queryKey: ["allInvoices"] });
     },
     onError: (err) => {
       console.error("Rejection error:", err);
@@ -75,8 +72,8 @@ export function useAllInvoices() {
     mutationFn: (id) => api.put(`/expenses/${id}/approve`),
     onSuccess: () => {
       toast.success("تم الموافقة على الطلب وإنشاء الفواتير");
-      queryClient.invalidateQueries(["pendingRequests"]);
-      queryClient.invalidateQueries(["allInvoices"]); // New invoices created
+      queryClient.invalidateQueries({ queryKey: ["pendingRequests"] });
+      queryClient.invalidateQueries({ queryKey: ["allInvoices"] });
     },
     onError: (err) => {
       console.error("Approval error:", err);
@@ -89,7 +86,7 @@ export function useAllInvoices() {
       api.put(`/expenses/${id}/reject`, { reason }),
     onSuccess: () => {
       toast.info("تم رفض الطلب");
-      queryClient.invalidateQueries(["pendingRequests"]);
+      queryClient.invalidateQueries({ queryKey: ["pendingRequests"] });
     },
     onError: (err) => {
       console.error("Rejection error:", err);
