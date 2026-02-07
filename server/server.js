@@ -74,7 +74,6 @@ app.use("/api/stats", statsRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/notes", noteRoutes);
 app.use("/api/ai", aiRoutes);
-console.log("Mounting Invoice Routes...");
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/houses", dishwashingRoutes); // Dishwashing routes under houses
 
