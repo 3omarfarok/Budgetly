@@ -352,11 +352,11 @@ const Navbar = () => {
             borderColor: "var(--color-border)",
           }}
         >
-          <div className="flex justify-around items-end px-2 mb-2">
+          <div className="grid grid-cols-5 items-center px-2 mb-2">
             <Link
               to="/"
               onClick={handleLockedLinkClick}
-              className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              className={`justify-self-center flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                 isLocked ? "opacity-50 cursor-not-allowed" : ""
               }`}
               style={{
@@ -377,7 +377,7 @@ const Navbar = () => {
             <Link
               to="/expenses"
               onClick={handleLockedLinkClick}
-              className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              className={`justify-self-center flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                 isLocked ? "opacity-50 cursor-not-allowed" : ""
               }`}
               style={{
@@ -399,31 +399,31 @@ const Navbar = () => {
             <Link
               to="/add-expense"
               onClick={handleLockedLinkClick}
-              className={`flex flex-col items-center justify-center gap-1 px-4 py-3 rounded-3xl transition-all ${
+              className={`justify-self-center flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all ${
                 isLocked ? "opacity-50 cursor-not-allowed" : ""
               }`}
               style={{
                 color: "#ffffff",
                 backgroundColor: "var(--color-primary)",
                 boxShadow: isActive("/add-expense")
-                  ? "0 10px 24px rgba(0, 0, 0, 0.24)"
-                  : "0 6px 16px rgba(0, 0, 0, 0.18)",
+                  ? "0 8px 20px rgba(0, 0, 0, 0.2)"
+                  : "0 4px 12px rgba(0, 0, 0, 0.16)",
                 transform: isActive("/add-expense")
-                  ? "translateY(-4px) scale(1.03)"
-                  : "translateY(-2px)",
+                  ? "translateY(-1px)"
+                  : "none",
               }}
               aria-label="إضافة مصروف"
               aria-current={isActive("/add-expense") ? "page" : undefined}
               role="menuitem"
             >
-              <PlusCircle size={24} aria-hidden="true" />
+              <PlusCircle size={20} aria-hidden="true" />
               <span className="text-xs font-medium">إضافة</span>
             </Link>
 
             <Link
               to={user.role === "admin" ? "/all-invoices" : "/my-invoices"}
               onClick={handleLockedLinkClick}
-              className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              className={`justify-self-center flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                 isLocked ? "opacity-50 cursor-not-allowed" : ""
               }`}
               style={{
@@ -450,7 +450,7 @@ const Navbar = () => {
             <Link
               to="/house-details"
               onClick={handleLockedLinkClick}
-              className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              className={`justify-self-center flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                 isLocked ? "opacity-50 cursor-not-allowed" : ""
               }`}
               style={{
