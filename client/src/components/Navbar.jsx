@@ -352,20 +352,18 @@ const Navbar = () => {
             borderColor: "var(--color-border)",
           }}
         >
-          <div className="grid grid-cols-5 items-center px-2 mb-2">
+          <div className="grid grid-cols-5 items-center gap-1 px-2 mb-2">
             <Link
               to="/"
               onClick={handleLockedLinkClick}
-              className={`justify-self-center flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              className={`w-full flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                 isLocked ? "opacity-50 cursor-not-allowed" : ""
               }`}
               style={{
                 color: isActive("/")
                   ? "var(--color-primary)"
                   : "var(--color-secondary)",
-                backgroundColor: isActive("/")
-                  ? "var(--color-hover)"
-                  : "transparent",
+                backgroundColor: "transparent",
               }}
               aria-label="الصفحة الرئيسية"
               aria-current={isActive("/") ? "page" : undefined}
@@ -377,16 +375,14 @@ const Navbar = () => {
             <Link
               to="/expenses"
               onClick={handleLockedLinkClick}
-              className={`justify-self-center flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              className={`w-full flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                 isLocked ? "opacity-50 cursor-not-allowed" : ""
               }`}
               style={{
                 color: isActive("/expenses")
                   ? "var(--color-primary)"
                   : "var(--color-secondary)",
-                backgroundColor: isActive("/expenses")
-                  ? "var(--color-hover)"
-                  : "transparent",
+                backgroundColor: "transparent",
               }}
               aria-label="المصاريف"
               aria-current={isActive("/expenses") ? "page" : undefined}
@@ -399,7 +395,7 @@ const Navbar = () => {
             <Link
               to="/add-expense"
               onClick={handleLockedLinkClick}
-              className={`justify-self-center flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all ${
+              className={`w-full flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all ${
                 isLocked ? "opacity-50 cursor-not-allowed" : ""
               }`}
               style={{
@@ -423,7 +419,7 @@ const Navbar = () => {
             <Link
               to={user.role === "admin" ? "/all-invoices" : "/my-invoices"}
               onClick={handleLockedLinkClick}
-              className={`justify-self-center flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              className={`w-full flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                 isLocked ? "opacity-50 cursor-not-allowed" : ""
               }`}
               style={{
@@ -431,10 +427,7 @@ const Navbar = () => {
                   isActive("/all-invoices") || isActive("/my-invoices")
                     ? "var(--color-primary)"
                     : "var(--color-secondary)",
-                backgroundColor:
-                  isActive("/all-invoices") || isActive("/my-invoices")
-                    ? "var(--color-hover)"
-                    : "transparent",
+                backgroundColor: "transparent",
               }}
               aria-label="الفواتير"
               aria-current={
@@ -450,16 +443,14 @@ const Navbar = () => {
             <Link
               to="/house-details"
               onClick={handleLockedLinkClick}
-              className={`justify-self-center flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              className={`w-full flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                 isLocked ? "opacity-50 cursor-not-allowed" : ""
               }`}
               style={{
                 color: isActive("/house-details")
                   ? "var(--color-primary)"
                   : "var(--color-secondary)",
-                backgroundColor: isActive("/house-details")
-                  ? "var(--color-hover)"
-                  : "transparent",
+                backgroundColor: "transparent",
               }}
               aria-label="البيت"
               aria-current={isActive("/house-details") ? "page" : undefined}
