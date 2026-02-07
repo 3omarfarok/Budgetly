@@ -313,6 +313,26 @@ const Navbar = () => {
               )}
             </div>
 
+            <Link
+              to="/profile"
+              onClick={handleLockedLinkClick}
+              className={`p-2.5 rounded-full transition-all ${
+                isLocked ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              style={{
+                color: isActive("/profile")
+                  ? "var(--color-primary)"
+                  : "var(--color-secondary)",
+                backgroundColor: isActive("/profile")
+                  ? "var(--color-hover)"
+                  : "transparent",
+              }}
+              aria-label="الملف الشخصي"
+              aria-current={isActive("/profile") ? "page" : undefined}
+            >
+              <User size={20} aria-hidden="true" />
+            </Link>
+
             <button
               onClick={() => setShowLogoutModal(true)}
               className="p-2.5 rounded-full transition-all"
@@ -332,7 +352,7 @@ const Navbar = () => {
             borderColor: "var(--color-border)",
           }}
         >
-          <div className="flex justify-around items-center px-2">
+          <div className="flex justify-around items-end px-2 mb-2">
             <Link
               to="/"
               onClick={handleLockedLinkClick}
@@ -361,25 +381,43 @@ const Navbar = () => {
                 isLocked ? "opacity-50 cursor-not-allowed" : ""
               }`}
               style={{
-                color:
-                  isActive("/expenses") || isActive("/add-expense")
-                    ? "var(--color-primary)"
-                    : "var(--color-secondary)",
-                backgroundColor:
-                  isActive("/expenses") || isActive("/add-expense")
-                    ? "var(--color-hover)"
-                    : "transparent",
+                color: isActive("/expenses")
+                  ? "var(--color-primary)"
+                  : "var(--color-secondary)",
+                backgroundColor: isActive("/expenses")
+                  ? "var(--color-hover)"
+                  : "transparent",
               }}
               aria-label="المصاريف"
-              aria-current={
-                isActive("/expenses") || isActive("/add-expense")
-                  ? "page"
-                  : undefined
-              }
+              aria-current={isActive("/expenses") ? "page" : undefined}
               role="menuitem"
             >
               <Receipt size={22} aria-hidden="true" />
               <span className="text-xs font-medium">المصاريف</span>
+            </Link>
+
+            <Link
+              to="/add-expense"
+              onClick={handleLockedLinkClick}
+              className={`flex flex-col items-center justify-center gap-1 px-4 py-3 rounded-3xl transition-all ${
+                isLocked ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              style={{
+                color: "#ffffff",
+                backgroundColor: "var(--color-primary)",
+                boxShadow: isActive("/add-expense")
+                  ? "0 10px 24px rgba(0, 0, 0, 0.24)"
+                  : "0 6px 16px rgba(0, 0, 0, 0.18)",
+                transform: isActive("/add-expense")
+                  ? "translateY(-4px) scale(1.03)"
+                  : "translateY(-2px)",
+              }}
+              aria-label="إضافة مصروف"
+              aria-current={isActive("/add-expense") ? "page" : undefined}
+              role="menuitem"
+            >
+              <PlusCircle size={24} aria-hidden="true" />
+              <span className="text-xs font-medium">إضافة</span>
             </Link>
 
             <Link
@@ -408,27 +446,6 @@ const Navbar = () => {
             >
               <Banknote size={22} aria-hidden="true" />
               <span className="text-xs font-medium">الفواتير</span>
-            </Link>
-            <Link
-              to="/profile"
-              onClick={handleLockedLinkClick}
-              className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
-                isLocked ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              style={{
-                color: isActive("/profile")
-                  ? "var(--color-primary)"
-                  : "var(--color-secondary)",
-                backgroundColor: isActive("/profile")
-                  ? "var(--color-hover)"
-                  : "transparent",
-              }}
-              aria-label="الملف الشخصي"
-              aria-current={isActive("/profile") ? "page" : undefined}
-              role="menuitem"
-            >
-              <User size={22} aria-hidden="true" />
-              <span className="text-xs font-medium">الملف</span>
             </Link>
             <Link
               to="/house-details"
