@@ -1,5 +1,4 @@
 import express from "express";
-import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 
@@ -15,6 +14,7 @@ import housesRoutes from "./routes/houses.js";
 import aiRoutes from "./routes/ai.js";
 import invoiceRoutes from "./routes/invoices.js";
 import dishwashingRoutes from "./routes/dishwashing.js";
+import { connectToDatabase, getDatabaseStatus } from "./config/db.js";
 
 import { rateLimiter } from "./middleware/rateLimiter.js";
 
@@ -39,15 +39,30 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(rateLimiter);
 
-// MongoDB Connection
-mongoose
-  .connect(
-    process.env.MONGODB_URI || "mongodb://localhost:27017/expense-tracker",
-  )
-  .then(() => {
-    console.log("✅ MongoDB Connected");
-  })
-  .catch((err) => console.error("❌ MongoDB connection error:", err));
+// API health check (does not require an active DB connection)
+app.get("/api/health", (req, res) => {
+  const db = getDatabaseStatus();
+  res.status(db.state === "connected" ? 200 : 503).json({
+    ok: db.state === "connected",
+    service: "budgetly-api",
+    db,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Ensure database connection before handling API requests
+app.use(async (req, res, next) => {
+  try {
+    await connectToDatabase();
+    next();
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error);
+    res.status(503).json({
+      message: "Database connection is unavailable",
+      hint: "Check MONGODB_URI and MongoDB Atlas network access settings",
+    });
+  }
+});
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -68,9 +83,13 @@ app.get("/", (req, res) => {
   res.json({ message: "Expense Tracker API is running! 🚀" });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+// Start local server only (Vercel uses the exported app)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
+}
+
+export default app;
 
 // End of server.js
