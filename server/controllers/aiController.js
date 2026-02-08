@@ -1,6 +1,51 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from "dotenv";
 import ChatHistory from "../models/ChatHistory.js";
+
+const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+
+const callGroq = async ({ apiKey, userMessage, systemContext }) => {
+  const response = await fetch(GROQ_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "llama-3.1-8b-instant",
+      messages: [
+        { role: "system", content: systemContext },
+        { role: "user", content: userMessage },
+      ],
+      temperature: 0.4,
+    }),
+  });
+
+  const raw = await response.text();
+  let data = null;
+
+  try {
+    data = raw ? JSON.parse(raw) : null;
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
+    const error = new Error(
+      data?.error?.message || `Groq API request failed with ${response.status}`
+    );
+    error.status = response.status;
+    throw error;
+  }
+
+  const text = data?.choices?.[0]?.message?.content?.trim();
+  if (!text) {
+    const error = new Error("Groq returned an empty response");
+    error.status = 502;
+    throw error;
+  }
+
+  return text;
+};
 
 // Send message to AI assistant
 export const handleChat = async (req, res) => {
@@ -15,19 +60,15 @@ export const handleChat = async (req, res) => {
       return res.status(400).json({ error: "Message is required" });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey =
+      process.env.GROQ_API_KEY || process.env.GROQ_API || process.env.GROQ_KEY;
 
     if (!apiKey) {
-      console.error("❌ GEMINI_API_KEY is missing from environment variables");
+      console.error("GROQ_API_KEY is missing from environment variables");
       return res
         .status(500)
-        .json({ error: "Server configuration error: API key missing" });
+        .json({ error: "Server configuration error: GROQ_API_KEY is missing" });
     }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-
-    // Get the generative model
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     // Create a context-aware prompt for budget and calculation assistance
     const systemContext = `
@@ -56,12 +97,11 @@ export const handleChat = async (req, res) => {
 
     `;
 
-    const fullPrompt = `${systemContext}\n\nسؤال المستخدم: ${message}`;
-
-    // Generate response
-    const result = await model.generateContent(fullPrompt);
-    const response = await result.response;
-    const text = response.text();
+    const text = await callGroq({
+      apiKey,
+      userMessage: message,
+      systemContext,
+    });
 
     // Save to chat history
     let chat = chatId
@@ -98,8 +138,12 @@ export const handleChat = async (req, res) => {
     });
   } catch (error) {
     console.error("AI Chat Error:", error);
-    res.status(500).json({
-      error: "Failed to process your request. Please try again.",
+    const status = error.status && Number.isInteger(error.status) ? error.status : 500;
+    res.status(status).json({
+      error:
+        status === 401
+          ? "Groq authentication failed. Check GROQ_API_KEY."
+          : "Failed to process your request. Please try again.",
       details: error.message,
     });
   }
