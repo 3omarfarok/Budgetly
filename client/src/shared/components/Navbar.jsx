@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-import { useTheme } from "../../context/ThemeContext";
-import { useToast } from "../../context/ToastContext";
+import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
+import { useToast } from "../context/ToastContext";
 import {
   LayoutDashboard,
   Receipt,

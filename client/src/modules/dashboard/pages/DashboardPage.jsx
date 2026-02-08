@@ -1,5 +1,5 @@
 import { Wallet } from "lucide-react";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "../../../shared/context/AuthContext";
 import { Loader } from "../../../shared/components";
 import { DishwashingWidget } from "../../house/components";
 import { useDashboardStats } from "../hooks";

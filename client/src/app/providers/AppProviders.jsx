@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "../../context/AuthContext";
-import { ThemeProvider } from "../../context/ThemeContext";
-import { ToastProvider } from "../../context/ToastContext";
+import { AuthProvider } from "../../shared/context/AuthContext";
+import { ThemeProvider } from "../../shared/context/ThemeContext";
+import { ToastProvider } from "../../shared/context/ToastContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -1,5 +1,5 @@
 import { StickyNote } from "lucide-react";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "../../../shared/context/AuthContext";
 import { useNoteFilters, useNotes } from "../hooks";
 import { CreateNoteForm, NoteFilters, NoteList } from "../components";
 

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { palettes } from "../constants/themes";
+import { palettes } from "../../constants/themes";
 
 const ThemeContext = createContext();
 

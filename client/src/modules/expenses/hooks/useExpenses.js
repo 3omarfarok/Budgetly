@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "../../../context/ToastContext";
+import { useToast } from "../../../shared/context/ToastContext";
 import { queryKeys } from "../../../shared/api/queryKeys";
 import { expensesApi } from "../api";
 

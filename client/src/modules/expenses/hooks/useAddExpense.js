@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../context/AuthContext";
-import { useToast } from "../../../context/ToastContext";
+import { useAuth } from "../../../shared/context/AuthContext";
+import { useToast } from "../../../shared/context/ToastContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../../../shared/api/queryKeys";
 import { expensesApi } from "../api";

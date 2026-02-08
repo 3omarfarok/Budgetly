@@ -1,4 +1,4 @@
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "../../../shared/context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../../../shared/api/queryKeys";
 import { dashboardApi } from "../api";

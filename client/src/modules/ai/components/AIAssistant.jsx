@@ -11,7 +11,7 @@ import {
   Trash2,
 } from "lucide-react";
 import api from "../../../utils/api";
-import { useToast } from "../../../context/ToastContext";
+import { useToast } from "../../../shared/context/ToastContext";
 
 const _motion = motion;
 

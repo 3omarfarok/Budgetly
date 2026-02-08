@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../../../utils/api";
-import { useToast } from "../../../context/ToastContext";
+import { useToast } from "../../../shared/context/ToastContext";
 import { queryKeys } from "../../../shared/api/queryKeys";
 
 const useDishwashing = (houseId) => {

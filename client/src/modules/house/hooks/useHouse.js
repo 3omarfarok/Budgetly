@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "../../../context/ToastContext";
+import { useToast } from "../../../shared/context/ToastContext";
 import { useNavigate } from "react-router-dom";
 import { queryKeys } from "../../../shared/api/queryKeys";
 import { houseApi } from "../api";

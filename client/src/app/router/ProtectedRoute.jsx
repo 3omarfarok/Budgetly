@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../shared/context/AuthContext";
 import { AIButton } from "../../modules/ai/components";
 
 export default function ProtectedRoute({ children, requireHouse = true }) {

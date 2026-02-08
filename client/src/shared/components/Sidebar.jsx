@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import ConfirmModal from "./ConfirmModal";
 import {
   LayoutDashboard,

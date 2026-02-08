@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useToast } from "../../../context/ToastContext";
+import { useToast } from "../../../shared/context/ToastContext";
 import { authApi } from "../api";
 
 export function useForgotPassword() {

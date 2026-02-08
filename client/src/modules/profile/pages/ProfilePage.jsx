@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useAuth } from "../../../context/AuthContext";
-import { useToast } from "../../../context/ToastContext";
+import { useAuth } from "../../../shared/context/AuthContext";
+import { useToast } from "../../../shared/context/ToastContext";
 import {
   User,
   Mail,
