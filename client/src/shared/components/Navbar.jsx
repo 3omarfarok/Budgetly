@@ -19,6 +19,7 @@ import {
   Sun,
   Moon,
   StickyNote,
+  Package,
 } from "lucide-react";
 
 import { useState } from "react";
@@ -342,6 +343,38 @@ const Navbar = () => {
               <LogOut size={20} aria-hidden="true" />
             </button>
           </div>
+        </div>
+
+        <div className="mt-3 flex items-center gap-2 md:hidden" role="group" aria-label="أدوات إضافية">
+          {[
+            { path: "/inventory", label: "المخزون", icon: Package },
+            { path: "/notes", label: "الملاحظات", icon: StickyNote },
+          ].map((item) => {
+            const active = isActive(item.path);
+
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={handleLockedLinkClick}
+                className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold transition-all ${
+                  isLocked ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                style={{
+                  color: active ? "var(--color-primary)" : "var(--color-secondary)",
+                  backgroundColor: active ? "var(--color-hover)" : "transparent",
+                  borderColor: active
+                    ? "var(--color-primary)"
+                    : "var(--color-border)",
+                }}
+                aria-label={item.label}
+                aria-current={active ? "page" : undefined}
+              >
+                <item.icon size={18} aria-hidden="true" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
         </div>
 
         {/* القائمة السفلية للجوال - Bottom Navigation */}

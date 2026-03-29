@@ -13,6 +13,7 @@ import { MyInvoicesPage as MyInvoices, AllInvoicesPage as AllInvoices } from "..
 import { NotesPage } from "../../modules/notes/pages";
 import { AIPage } from "../../modules/ai/pages";
 import { AnalyticsPage } from "../../modules/analytics/pages";
+import { InventoryPage } from "../../modules/inventory/pages";
 import { ProfilePage } from "../../modules/profile/pages";
 import { AboutPage, ContactDeveloperPage, GuidePage } from "../../modules/info/pages";
 import { NotFoundPage } from "../pages";
@@ -77,6 +78,14 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute>
             <AnalyticsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/inventory"
+        element={
+          <ProtectedRoute>
+            <InventoryPage />
           </ProtectedRoute>
         }
       />

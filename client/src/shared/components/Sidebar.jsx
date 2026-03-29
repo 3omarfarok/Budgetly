@@ -19,6 +19,7 @@ import {
   Mail,
   Sun,
   Moon,
+  Package,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -78,6 +79,12 @@ const Sidebar = () => {
     {
       title: "الأدوات",
       items: [
+        {
+          path: "/inventory",
+          label: "المخزون",
+          icon: Package,
+          roles: ["admin", "user"],
+        },
         {
           path: "/notes",
           label: "الملاحظات",

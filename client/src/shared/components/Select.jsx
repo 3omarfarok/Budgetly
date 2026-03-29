@@ -209,7 +209,7 @@ const Select = forwardRef(
 
             {/* Error Message */}
             {error && (
-              <p className="text-ios-error text-xs flex items-center gap-1">
+              <p id={errorId} className="text-ios-error text-xs flex items-center gap-1" role="alert">
                 <AlertCircle size={12} />
                 {error}
               </p>
