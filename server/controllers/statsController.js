@@ -2,109 +2,39 @@ import Expense from "../models/Expense.js";
 import Payment from "../models/Payment.js";
 import Invoice from "../models/Invoice.js";
 import User from "../models/User.js";
+import { getHouseStatsSnapshot } from "../services/statsService.js";
 
-// Helper to calculate balance for a user
-const calculateUserBalance = async (userId, houseId) => {
-  // 1. External Paid (Credit): Expenses paid by user (only approved)
-  const payerExpenses = await Expense.find({
-    house: houseId,
-    status: "approved",
-    $or: [
-      { paidBy: userId },
-      { paidBy: { $exists: false }, createdBy: userId },
-      { paidBy: null, createdBy: userId },
-    ],
-  });
-  const externalPaid = payerExpenses.reduce(
-    (sum, e) => sum + e.totalAmount,
-    0
-  );
-
-  // 2. Internal Sent (Credit): Approved payments made by user
-  const paymentsSent = await Payment.find({
-    house: houseId,
-    user: userId,
-    status: "approved",
-    transactionType: "payment",
-  });
-  const internalSent = paymentsSent.reduce((sum, p) => sum + p.amount, 0);
-
-  // 3. Invoices Assigned (Debit): Unpaid invoices for user
-  const unpaidInvoices = await Invoice.find({
-    house: houseId,
-    user: userId,
-    status: { $ne: "paid" },
-  });
-  const invoicesAssigned = unpaidInvoices.reduce(
-    (sum, i) => sum + i.amount,
-    0
-  );
-
-  // 4. Internal Received (Debit): Approved payments received for expenses paid by user
-  // (User paid external -> Expenses -> Invoices -> Payments(Approved) -> Money back to User)
-  const payerExpenseIds = payerExpenses.map((e) => e._id);
-  let internalReceived = 0;
-
-  if (payerExpenseIds.length > 0) {
-    const invoicesOwedToUser = await Invoice.find({
-      expense: { $in: payerExpenseIds },
-      house: houseId,
-      paymentRequest: { $ne: null },
-    });
-
-    const paymentIds = invoicesOwedToUser
-      .map((i) => i.paymentRequest)
-      .filter(Boolean);
-
-    if (paymentIds.length > 0) {
-      const paymentsReceived = await Payment.find({
-        _id: { $in: paymentIds },
-        status: "approved",
-        transactionType: "payment",
-        house: houseId,
-      });
-      internalReceived = paymentsReceived.reduce(
-        (sum, p) => sum + p.amount,
-        0
-      );
-    }
-  }
-
-  const balance =
-    externalPaid + internalSent - (invoicesAssigned + internalReceived);
-
-  return {
-    externalPaid,
-    internalSent,
-    invoicesAssigned,
-    internalReceived,
-    balance,
+const getBalanceForUser = (balancesByUserId, userId) =>
+  balancesByUserId[userId?.toString()] || {
+    externalPaid: 0,
+    internalSent: 0,
+    invoicesAssigned: 0,
+    internalReceived: 0,
+    balance: 0,
   };
-};
 
 // Get balance summary for all users
 export const getBalances = async (req, res) => {
   try {
-    const currentUser = await User.findById(req.user.id);
+    const currentUser = await User.findById(req.user.id).select("house").lean();
     if (!currentUser || !currentUser.house) {
       return res.status(400).json({ message: "User not in a house" });
     }
 
-    const users = await User.find({ isActive: true, house: currentUser.house });
+    const { users, balancesByUserId } = await getHouseStatsSnapshot(currentUser.house);
 
-    const balances = await Promise.all(
-      users.map(async (user) => {
-        const stats = await calculateUserBalance(user._id, currentUser.house);
-        return {
-          userId: user._id,
-          username: user.username,
-          name: user.name,
-          balance: stats.balance,
-          totalPaid: stats.externalPaid + stats.internalSent, // Combined Paid
-          totalOwed: stats.invoicesAssigned, // Total Liability
-        };
-      })
-    );
+    const balances = users.map((user) => {
+      const stats = getBalanceForUser(balancesByUserId, user._id);
+
+      return {
+        userId: user._id,
+        username: user.username,
+        name: user.name,
+        balance: stats.balance,
+        totalPaid: stats.externalPaid + stats.internalSent,
+        totalOwed: stats.invoicesAssigned,
+      };
+    });
 
     res.json(balances);
   } catch (error) {
@@ -117,36 +47,45 @@ export const getBalances = async (req, res) => {
 export const getUserStats = async (req, res) => {
   try {
     const userId = req.params.userId;
-    const currentUser = await User.findById(req.user.id);
+    const currentUser = await User.findById(req.user.id).select("house").lean();
 
     if (!currentUser || !currentUser.house) {
       return res.status(400).json({ message: "User not in a house" });
     }
 
-    const stats = await calculateUserBalance(userId, currentUser.house);
+    const { balancesByUserId, invoices, expenses } = await getHouseStatsSnapshot(
+      currentUser.house
+    );
+    const stats = getBalanceForUser(balancesByUserId, userId);
+    const expenseCategoryById = new Map(
+      expenses.map((expense) => [expense._id.toString(), expense.category || "General"])
+    );
+    const userInvoices = invoices.filter(
+      (invoice) => invoice.user.toString() === userId.toString()
+    );
 
-    // Get Recent Invoices
-    const invoices = await Invoice.find({
+    const categoryBreakdown = userInvoices.reduce((acc, inv) => {
+      const cat = expenseCategoryById.get(inv.expense?.toString()) || "General";
+      acc[cat] = (acc[cat] || 0) + inv.amount;
+      return acc;
+    }, {});
+
+    const recentInvoices = await Invoice.find({
       house: currentUser.house,
       user: userId,
     })
       .sort({ createdAt: -1 })
-      .populate("expense", "description category");
-
-    // Category Breakdown (based on Invoices)
-    const categoryBreakdown = invoices.reduce((acc, inv) => {
-      const cat = inv.expense?.category || "General";
-      acc[cat] = (acc[cat] || 0) + inv.amount;
-      return acc;
-    }, {});
+      .limit(5)
+      .populate("expense", "description category")
+      .lean();
 
     res.json({
       balance: stats.balance,
       totalPaid: stats.externalPaid + stats.internalSent,
       totalOwed: stats.invoicesAssigned,
-      invoiceCount: invoices.length,
+      invoiceCount: userInvoices.length,
       categoryBreakdown,
-      recentInvoices: invoices.slice(0, 5),
+      recentInvoices,
     });
   } catch (error) {
     console.error("Get user stats error:", error);
@@ -157,31 +96,22 @@ export const getUserStats = async (req, res) => {
 // Get admin dashboard stats
 export const getAdminDashboard = async (req, res) => {
   try {
-    const currentUser = await User.findById(req.user.id);
+    const currentUser = await User.findById(req.user.id).select("house").lean();
     if (!currentUser || !currentUser.house) {
       return res.status(400).json({ message: "User not in a house" });
     }
 
-    const users = await User.find({ isActive: true, house: currentUser.house });
-    const expenses = await Expense.find({
-      house: currentUser.house,
-      status: "approved",
-    });
-    const invoices = await Invoice.find({ house: currentUser.house });
-    const payments = await Payment.find({ house: currentUser.house });
+    const { users, expenses, invoices, payments, balancesByUserId } =
+      await getHouseStatsSnapshot(currentUser.house);
 
-    // Calculate balances for visual
-    const balances = await Promise.all(
-      users.map(async (user) => {
-        const stats = await calculateUserBalance(user._id, currentUser.house);
-        return {
-          userId: user._id,
-          username: user.username,
-          name: user.name,
-          balance: stats.balance,
-        };
-      })
-    );
+    const approvedExpenses = expenses.filter((expense) => expense.status === "approved");
+
+    const balances = users.map((user) => ({
+      userId: user._id,
+      username: user.username,
+      name: user.name,
+      balance: getBalanceForUser(balancesByUserId, user._id).balance,
+    }));
 
     const usersOwing = balances
       .filter((b) => b.balance < 0)
@@ -190,7 +120,7 @@ export const getAdminDashboard = async (req, res) => {
       .filter((b) => b.balance > 0)
       .map((u) => ({ ...u, extra: u.balance }));
 
-    const totalExpenseAmount = expenses.reduce(
+    const totalExpenseAmount = approvedExpenses.reduce(
       (sum, e) => sum + e.totalAmount,
       0
     );
@@ -205,15 +135,19 @@ export const getAdminDashboard = async (req, res) => {
       .filter((p) => p.status === "approved")
       .reduce((sum, p) => sum + p.amount, 0);
 
-    // Category Breakdown via Invoices (representing consumption)
-    const populatedInvoices = await Invoice.find({
-      house: currentUser.house,
-    }).populate("expense", "category");
-    const categoryBreakdown = populatedInvoices.reduce((acc, inv) => {
-      const cat = inv.expense?.category || "General";
+    const expenseCategoryById = new Map(
+      expenses.map((expense) => [expense._id.toString(), expense.category || "General"])
+    );
+    const categoryBreakdown = invoices.reduce((acc, inv) => {
+      const cat = expenseCategoryById.get(inv.expense?.toString()) || "General";
       acc[cat] = (acc[cat] || 0) + inv.amount;
       return acc;
     }, {});
+
+    const [recentInvoices, recentPayments] = await Promise.all([
+      Invoice.find({ house: currentUser.house }).sort({ createdAt: -1 }).limit(10).lean(),
+      Payment.find({ house: currentUser.house }).sort({ createdAt: -1 }).limit(10).lean(),
+    ]);
 
     res.json({
       overview: {
@@ -228,8 +162,8 @@ export const getAdminDashboard = async (req, res) => {
       categoryBreakdown,
       usersOwing,
       usersPaidExtra,
-      recentInvoices: invoices.slice(0, 10),
-      recentPayments: payments.slice(0, 10),
+      recentInvoices,
+      recentPayments,
     });
   } catch (error) {
     console.error("Get admin stats error:", error);

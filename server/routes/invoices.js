@@ -5,6 +5,7 @@ import {
   getAllInvoices,
   payInvoice,
   payBulkInvoices,
+  approveAllUserInvoices,
   approveInvoicePayment,
   rejectInvoicePayment,
 } from "../controllers/invoiceController.js";
@@ -15,6 +16,7 @@ router.get("/my-invoices", authenticate, getMyInvoices);
 router.get("/all", authenticate, isAdmin, getAllInvoices);
 router.post("/:id/pay", authenticate, payInvoice);
 router.post("/bulk-pay", authenticate, payBulkInvoices);
+router.put("/users/:userId/approve-all", authenticate, isAdmin, approveAllUserInvoices);
 router.put("/:id/approve", authenticate, isAdmin, approveInvoicePayment);
 router.put("/:id/reject", authenticate, isAdmin, rejectInvoicePayment);
 

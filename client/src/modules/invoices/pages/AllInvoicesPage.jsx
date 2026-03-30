@@ -30,15 +30,21 @@ export default function AllInvoices() {
     selectedUser,
     selectedUserInvoices,
     handleApprove,
+    handleApproveAllUserInvoices,
     handleReject,
     handleApproveRequest,
     handleRejectRequest,
+    isApprovingAllUserInvoices,
   } = useAllInvoices();
 
   const openRequestDetails = (request) => {
     setSelectedRequest(request);
     setIsDetailsModalOpen(true);
   };
+
+  const selectedUserEligibleInvoicesCount = selectedUserInvoices.filter(
+    (invoice) => invoice.status === "awaiting_approval" && invoice.paymentRequest
+  ).length;
 
   return (
     <div className="space-y-8 pb-20 md:pb-0" dir="rtl">
@@ -226,17 +232,36 @@ export default function AllInvoices() {
 
       {selectedUser && (
         <div className="bg-(--color-surface) border border-(--color-border) rounded-2xl p-4 sm:p-6 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold flex items-center gap-2 text-(--color-dark)">
-              <UserIcon className="text-(--color-primary)" />
-              فواتير {selectedUser.name}
-            </h2>
-            <button
-              onClick={() => setSelectedUserId(null)}
-              className="text-sm text-(--color-secondary) hover:text-(--color-primary) underline"
-            >
-              إغلاق
-            </button>
+          <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:justify-between sm:items-center">
+            <div className="flex items-center gap-2 text-(--color-dark)">
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <UserIcon className="text-(--color-primary)" />
+                فواتير {selectedUser.name}
+              </h2>
+              <button
+                onClick={() => setSelectedUserId(null)}
+                className="text-sm text-(--color-secondary) hover:text-(--color-primary) underline"
+              >
+                إغلاق
+              </button>
+            </div>
+
+            {selectedUserEligibleInvoicesCount > 0 && (
+              <button
+                onClick={() =>
+                  handleApproveAllUserInvoices(
+                    selectedUser._id,
+                    selectedUserEligibleInvoicesCount
+                  )
+                }
+                disabled={isApprovingAllUserInvoices}
+                className="self-start sm:self-auto px-4 py-2 rounded-xl bg-(--color-status-approved-bg) text-(--color-status-approved) font-bold hover:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+              >
+                {isApprovingAllUserInvoices
+                  ? "جاري الموافقة..."
+                  : `موافقة على الكل (${selectedUserEligibleInvoicesCount})`}
+              </button>
+            )}
           </div>
 
           <InvoicesTable

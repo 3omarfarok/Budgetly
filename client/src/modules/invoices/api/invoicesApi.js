@@ -17,6 +17,10 @@ export const invoicesApi = {
   },
 
   approveInvoice: (id) => api.put(`/invoices/${id}/approve`),
+  approveAllUserInvoices: async (userId) => {
+    const { data } = await api.put(`/invoices/users/${userId}/approve-all`);
+    return data;
+  },
   rejectInvoice: ({ id, reason }) => api.put(`/invoices/${id}/reject`, { reason }),
   approveRequest: (id) => api.put(`/expenses/${id}/approve`),
   rejectRequest: ({ id, reason }) => api.put(`/expenses/${id}/reject`, { reason }),

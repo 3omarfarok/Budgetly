@@ -45,6 +45,19 @@ export function useAllInvoices() {
     },
   });
 
+  const approveAllUserInvoicesMutation = useMutation({
+    mutationFn: invoicesApi.approveAllUserInvoices,
+    onSuccess: (data) => {
+      toast.success(data?.message || "تمت الموافقة على جميع الفواتير");
+      queryClient.invalidateQueries({ queryKey: queryKeys.allInvoices.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+    },
+    onError: (err) => {
+      console.error("Bulk approval error:", err);
+      toast.error(err.response?.data?.message || "فشل الموافقة على جميع الفواتير");
+    },
+  });
+
   const rejectPaymentMutation = useMutation({
     mutationFn: invoicesApi.rejectInvoice,
     onSuccess: () => {
@@ -91,6 +104,14 @@ export function useAllInvoices() {
     const reason = window.prompt("سبب الرفض:");
     if (!reason) return;
     rejectPaymentMutation.mutate({ id, reason });
+  };
+
+  const handleApproveAllUserInvoices = (userId, count) => {
+    if (!window.confirm(`هل أنت متأكد من الموافقة على ${count} فواتير دفعة واحدة؟`)) {
+      return;
+    }
+
+    approveAllUserInvoicesMutation.mutate(userId);
   };
 
   const handleApproveRequest = (id) => {
@@ -143,8 +164,10 @@ export function useAllInvoices() {
     selectedUser,
     selectedUserInvoices,
     handleApprove,
+    handleApproveAllUserInvoices,
     handleReject,
     handleApproveRequest,
     handleRejectRequest,
+    isApprovingAllUserInvoices: approveAllUserInvoicesMutation.isPending,
   };
 }

@@ -51,6 +51,8 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+userSchema.index({ house: 1, isActive: 1 });
+
 // Method to generate reset token
 userSchema.methods.getResetPasswordToken = function () {
   // Generate token

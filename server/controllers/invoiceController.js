@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Invoice from "../models/Invoice.js";
 import Payment from "../models/Payment.js";
 import User from "../models/User.js";
@@ -152,6 +153,67 @@ export const approveInvoicePayment = async (req, res) => {
     res.json(invoice);
   } catch (error) {
     console.error("Approve invoice error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Admin approves all waiting invoices for a selected user
+export const approveAllUserInvoices = async (req, res) => {
+  try {
+    if (!req.user.house) {
+      return res.status(400).json({ message: "User not in a house" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.userId)) {
+      return res.status(400).json({ message: "Invalid user id" });
+    }
+
+    const targetUser = await User.findById(req.params.userId);
+    if (!targetUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!targetUser.house || targetUser.house.toString() !== req.user.house.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to approve invoices for this user" });
+    }
+
+    const invoices = await Invoice.find({
+      user: req.params.userId,
+      house: req.user.house,
+      status: "awaiting_approval",
+      paymentRequest: { $ne: null },
+    });
+
+    if (invoices.length === 0) {
+      return res.status(400).json({ message: "No eligible invoices found" });
+    }
+
+    const payments = await Promise.all(
+      invoices.map((invoice) => Payment.findById(invoice.paymentRequest))
+    );
+
+    if (payments.some((payment) => !payment)) {
+      return res.status(404).json({ message: "Payment not found" });
+    }
+
+    for (const [index, invoice] of invoices.entries()) {
+      const payment = payments[index];
+      payment.status = "approved";
+      payment.approvedBy = req.user.id;
+      await payment.save();
+
+      invoice.status = "paid";
+      await invoice.save();
+    }
+
+    res.json({
+      message: `Approved ${invoices.length} invoices successfully`,
+      count: invoices.length,
+    });
+  } catch (error) {
+    console.error("Approve all user invoices error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

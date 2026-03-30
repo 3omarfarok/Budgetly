@@ -52,4 +52,7 @@ const paymentSchema = new mongoose.Schema(
   }
 );
 
+paymentSchema.index({ house: 1, user: 1, status: 1, transactionType: 1 });
+paymentSchema.index({ house: 1, createdAt: -1 });
+
 export default mongoose.model("Payment", paymentSchema);
